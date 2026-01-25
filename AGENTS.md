@@ -152,6 +152,18 @@ onlyquat-esport/
 
 ---
 
+## Cursor Commands
+
+Commands chi tiết cho các tác vụ thường gặp nằm trong `.cursor/commands/`:
+
+- **[create-service](.cursor/commands/create-service.md)** — Tạo microservice mới (NATS-only), tích hợp api-gateway và nest-cli/package.json.
+- **[add-feature](.cursor/commands/add-feature.md)** — Thêm tính năng mới (endpoint, message pattern, schema/DTO) vào service có sẵn.
+- **[update-agents](.cursor/commands/update-agents.md)** — Tự động cập nhật AGENTS.md theo cấu trúc hệ thống hiện tại.
+
+**Lưu ý:** Sau khi thêm service mới hoặc thay đổi cấu trúc (schemas, DTOs, scripts), chạy `update-agents` để đồng bộ AGENTS.md.
+
+---
+
 ## Notes for AI Agents
 
 - Always read `README.md` and `AGENTS.md` before modifying code.
