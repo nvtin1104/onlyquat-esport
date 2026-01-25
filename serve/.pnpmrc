@@ -1,0 +1,9 @@
+# pnpm configuration for monorepo
+# Enable strict peer dependencies
+strict-peer-dependencies=false
+
+# Use workspace protocol for internal packages
+link-workspace-packages=true
+
+# Hoist dependencies to root (better for monorepo)
+shamefully-hoist=false

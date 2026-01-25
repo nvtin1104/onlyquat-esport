@@ -1,0 +1,42 @@
+{
+  "name": "onlyquat-esport",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "build:api-gateway": "nest build api-gateway",
+    "build:identity-service": "nest build identity-service",
+    "build:esports-service": "nest build esports-service",
+    "start": "nest start",
+    "start:api-gateway": "nest start api-gateway",
+    "start:identity-service": "nest start identity-service",
+    "start:esports-service": "nest start esports-service",
+    "start:dev": "nest start --watch",
+    "start:dev:api-gateway": "nest start api-gateway --watch",
+    "start:dev:identity-service": "nest start identity-service --watch",
+    "start:dev:esports-service": "nest start esports-service --watch",
+    "start:all": "concurrently -n \"gw,id,esp\" -c \"blue,magenta,green\" \"pnpm run start:dev:api-gateway\" \"pnpm run start:dev:identity-service\" \"pnpm run start:dev:esports-service\""
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/microservices": "^10.0.0",
+    "@nestjs/mongoose": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-fastify": "^10.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "mongoose": "^8.0.0",
+    "nats": "^2.19.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@nestjs/schematics": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "concurrently": "^8.2.0",
+    "typescript": "^5.0.0"
+  }
+}

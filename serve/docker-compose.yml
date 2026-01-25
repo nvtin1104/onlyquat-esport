@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: esports_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: esports_platform_db
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - esports_network
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: esports_nats
+    restart: unless-stopped
+    ports:
+      - "4223:4222"  # NATS client port (host:container)
+      - "8223:8222"  # HTTP monitoring port (host:container)
+    command: ["-js", "-m", "8222"]  # Enable JetStream and monitoring
+    networks:
+      - esports_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: esports_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Redis port (host:container)
+    volumes:
+      - redis_data:/data
+    networks:
+      - esports_network
+    command: redis-server --appendonly yes
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  esports_network:
+    driver: bridge
