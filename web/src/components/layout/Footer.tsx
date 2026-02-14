@@ -15,13 +15,13 @@ export async function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/10 bg-bg-surface mt-16">
+    <footer className="border-t border-border bg-bg-secondary mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <span className="font-heading font-bold text-lg text-white">
-              ONLY<span className="text-accent-cyan">QUAT</span>
+            <span className="font-heading font-bold text-lg text-text-primary">
+              ONLY<span className="text-accent-blue">QUAT</span>
             </span>
             <p className="text-text-muted text-sm mt-2">
               The premier eSport tournament platform.
@@ -29,14 +29,14 @@ export async function Footer() {
           </div>
           {/* Platform links */}
           <div>
-            <h4 className="font-heading font-semibold text-white text-sm mb-3 uppercase tracking-wider">
+            <h4 className="font-heading font-semibold text-text-primary text-sm mb-3 uppercase tracking-wider">
               Platform
             </h4>
             <ul className="space-y-2 text-sm text-text-secondary">
               <li>
                 <Link
                   href="/tournaments"
-                  className="hover:text-accent-cyan transition-colors"
+                  className="hover:text-accent-blue transition-colors"
                 >
                   {tNav("tournaments")}
                 </Link>
@@ -44,7 +44,7 @@ export async function Footer() {
               <li>
                 <Link
                   href="/teams"
-                  className="hover:text-accent-cyan transition-colors"
+                  className="hover:text-accent-blue transition-colors"
                 >
                   {tNav("teams")}
                 </Link>
@@ -53,14 +53,14 @@ export async function Footer() {
           </div>
           {/* Community links */}
           <div>
-            <h4 className="font-heading font-semibold text-white text-sm mb-3 uppercase tracking-wider">
+            <h4 className="font-heading font-semibold text-text-primary text-sm mb-3 uppercase tracking-wider">
               Community
             </h4>
             <ul className="space-y-2 text-sm text-text-secondary">
               <li>
                 <Link
                   href="/news"
-                  className="hover:text-accent-cyan transition-colors"
+                  className="hover:text-accent-blue transition-colors"
                 >
                   {tNav("news")}
                 </Link>
@@ -68,7 +68,7 @@ export async function Footer() {
               <li>
                 <Link
                   href="/minigames"
-                  className="hover:text-accent-cyan transition-colors"
+                  className="hover:text-accent-blue transition-colors"
                 >
                   {tNav("minigames")}
                 </Link>
@@ -77,7 +77,7 @@ export async function Footer() {
           </div>
         </div>
         {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-white/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
           <p className="text-text-muted text-sm">
             &copy; {year} OnlyQuat. {t("rights")}.
           </p>
@@ -88,7 +88,7 @@ export async function Footer() {
                 key={label}
                 href={href}
                 aria-label={label}
-                className="text-text-muted hover:text-accent-cyan transition-colors"
+                className="text-text-muted hover:text-accent-blue transition-colors"
               >
                 <Icon size={18} />
               </a>

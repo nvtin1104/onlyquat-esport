@@ -48,7 +48,7 @@ export default async function TournamentDetailPage({
             {tournament.game}
           </span>
         </div>
-        <h1 className="font-heading font-bold text-4xl lg:text-5xl text-white mb-3">
+        <h1 className="font-heading font-bold text-4xl lg:text-5xl text-text-primary mb-3">
           {tournament.name}
         </h1>
         <p className="text-text-secondary max-w-2xl">
@@ -62,18 +62,18 @@ export default async function TournamentDetailPage({
               <p className="text-text-muted text-xs uppercase tracking-wider">
                 Prize Pool
               </p>
-              <p className="font-mono font-bold text-white">
+              <p className="font-mono font-bold text-text-primary">
                 {formatPrizePool(tournament.prizePool, tournament.prizeCurrency)}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Users size={20} className="text-accent-cyan" />
+            <Users size={20} className="text-accent-blue" />
             <div>
               <p className="text-text-muted text-xs uppercase tracking-wider">
                 Teams
               </p>
-              <p className="font-mono font-bold text-white">
+              <p className="font-mono font-bold text-text-primary">
                 {tournament.teams}
               </p>
             </div>
@@ -84,7 +84,7 @@ export default async function TournamentDetailPage({
               <p className="text-text-muted text-xs uppercase tracking-wider">
                 Dates
               </p>
-              <p className="font-mono text-white text-sm">
+              <p className="font-mono text-text-primary text-sm">
                 {new Date(tournament.startDate).toLocaleDateString()} –{" "}
                 {new Date(tournament.endDate).toLocaleDateString()}
               </p>
@@ -96,7 +96,7 @@ export default async function TournamentDetailPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Matches */}
         <div className="lg:col-span-2">
-          <h2 className="font-heading font-bold text-xl text-white mb-4">
+          <h2 className="font-heading font-bold text-xl text-text-primary mb-4">
             Matches
           </h2>
           {tournamentMatches.length === 0 ? (
@@ -111,18 +111,18 @@ export default async function TournamentDetailPage({
         </div>
         {/* Teams */}
         <div>
-          <h2 className="font-heading font-bold text-xl text-white mb-4">
+          <h2 className="font-heading font-bold text-xl text-text-primary mb-4">
             Participating Teams
           </h2>
           <div className="flex flex-col gap-2">
             {tournamentTeams.map((team) => (
               <div
                 key={team.id}
-                className="flex items-center gap-3 p-3 bg-bg-card border border-white/10 rounded-xl"
+                className="flex items-center gap-3 p-3 bg-bg-card border border-border rounded-xl"
               >
                 <TeamLogo logo={team.logo} name={team.name} size="sm" />
                 <div>
-                  <p className="font-heading font-semibold text-white text-sm">
+                  <p className="font-heading font-semibold text-text-primary text-sm">
                     {team.name}
                   </p>
                   <p className="text-text-muted text-xs">{team.region}</p>

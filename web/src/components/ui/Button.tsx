@@ -19,14 +19,14 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center gap-2 font-heading font-semibold rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan disabled:opacity-50";
+    "inline-flex items-center justify-center gap-2 font-heading font-semibold rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-blue disabled:opacity-50";
   const variants = {
     primary:
-      "bg-accent-cyan/20 border border-accent-cyan/50 text-accent-cyan hover:bg-accent-cyan/30",
+      "bg-accent-blue/20 border border-accent-blue/50 text-accent-blue hover:bg-accent-blue/30",
     secondary:
       "bg-accent-purple/20 border border-accent-purple/50 text-accent-purple hover:bg-accent-purple/30",
     ghost:
-      "border border-white/10 text-text-secondary hover:border-white/30 hover:text-white",
+      "border border-border text-text-secondary hover:border-border hover:text-text-primary",
   };
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
@@ -40,7 +40,7 @@ export function Button({
         variants[variant],
         sizes[size],
         glow &&
-          "shadow-[0_0_15px_rgba(0,212,255,0.3)] hover:shadow-[0_0_25px_rgba(0,212,255,0.5)]",
+          "shadow-[0_0_15px_rgba(14,165,233,0.3)] hover:shadow-[0_0_25px_rgba(14,165,233,0.5)]",
         className
       )}
       {...props}

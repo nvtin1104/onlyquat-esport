@@ -19,9 +19,9 @@ export function HeroSection({ liveMatch }: HeroSectionProps) {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0e17] via-[#0d1520] to-[#0a0e17] bg-[length:200%_200%] animate-gradient-shift" />
+      <div className="absolute inset-0 bg-gradient-to-br from-bg-primary via-bg-secondary to-bg-primary bg-[length:200%_200%] animate-gradient-shift" />
       {/* Neon orb decorations */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-cyan/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent-blue/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent-purple/[0.08] rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20">
@@ -36,7 +36,7 @@ export function HeroSection({ liveMatch }: HeroSectionProps) {
             <Badge status="live" pulse />
             <span className="flex items-center gap-1.5 text-text-secondary text-sm">
               <Users size={14} />
-              <span className="font-mono text-accent-cyan">{viewers}</span>{" "}
+              <span className="font-mono text-accent-blue">{viewers}</span>{" "}
               {t("viewers")}
             </span>
           </motion.div>
@@ -46,10 +46,10 @@ export function HeroSection({ liveMatch }: HeroSectionProps) {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-none mb-4"
+            className="font-heading font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-text-primary leading-none mb-4"
           >
             VCT CHAMPIONS
-            <span className="block text-accent-cyan neon-cyan">2026</span>
+            <span className="block text-accent-blue neon-blue">2026</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -108,12 +108,12 @@ export function HeroSection({ liveMatch }: HeroSectionProps) {
                   size="md"
                   priority
                 />
-                <span className="font-heading font-bold text-white">
+                <span className="font-heading font-bold text-text-primary">
                   {liveMatch.team1.name}
                 </span>
               </div>
               <div className="text-center">
-                <div className="font-mono text-2xl font-bold text-white">
+                <div className="font-mono text-2xl font-bold text-text-primary">
                   {liveMatch.score.team1}
                   <span className="text-text-muted mx-1">:</span>
                   {liveMatch.score.team2}
@@ -123,7 +123,7 @@ export function HeroSection({ liveMatch }: HeroSectionProps) {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-heading font-bold text-white">
+                <span className="font-heading font-bold text-text-primary">
                   {liveMatch.team2.name}
                 </span>
                 <TeamLogo

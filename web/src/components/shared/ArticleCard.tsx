@@ -11,7 +11,7 @@ interface ArticleCardProps {
 }
 
 const categoryColors: Record<string, string> = {
-  news: "text-accent-cyan border-accent-cyan/50",
+  news: "text-accent-blue border-accent-blue/50",
   interview: "text-accent-purple border-accent-purple/50",
   highlight: "text-success border-success/50",
   recap: "text-warning border-warning/50",
@@ -22,11 +22,11 @@ export function ArticleCard({ article, className }: ArticleCardProps) {
     <Link
       href={`/news/${article.id}`}
       className={cn(
-        "group block bg-bg-card border border-white/10 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5",
+        "group block bg-bg-card border border-border rounded-xl overflow-hidden hover:border-border transition-all duration-300 hover:-translate-y-0.5",
         className
       )}
     >
-      <div className="relative aspect-video bg-bg-surface">
+      <div className="relative aspect-video bg-bg-secondary">
         <Image
           src={article.thumbnail}
           alt={article.title}
@@ -44,7 +44,7 @@ export function ArticleCard({ article, className }: ArticleCardProps) {
         </span>
       </div>
       <div className="p-4">
-        <h3 className="font-heading font-semibold text-white line-clamp-2 mb-2 group-hover:text-accent-cyan transition-colors">
+        <h3 className="font-heading font-semibold text-text-primary line-clamp-2 mb-2 group-hover:text-accent-blue transition-colors">
           {article.title}
         </h3>
         <p className="text-text-muted text-sm line-clamp-2 mb-3">

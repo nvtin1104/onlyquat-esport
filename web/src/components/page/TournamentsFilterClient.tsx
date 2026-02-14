@@ -56,8 +56,8 @@ export function TournamentsFilterClient({ tournaments }: Props) {
         {filtered.map((tournament) => (
           <Link key={tournament.id} href={`/tournaments/${tournament.id}`}>
             <Card hover glow="cyan" className="overflow-hidden group">
-              <div className="aspect-video bg-bg-surface relative flex items-center justify-center">
-                <div className="text-5xl font-heading font-black text-white/10 select-none">
+              <div className="aspect-video bg-bg-secondary relative flex items-center justify-center">
+                <div className="text-5xl font-heading font-black text-text-primary/10 select-none">
                   {tournament.game}
                 </div>
                 <div className="absolute top-3 left-3">
@@ -68,7 +68,7 @@ export function TournamentsFilterClient({ tournaments }: Props) {
                 </div>
               </div>
               <div className="p-5">
-                <h3 className="font-heading font-bold text-white mb-1 group-hover:text-accent-cyan transition-colors line-clamp-2">
+                <h3 className="font-heading font-bold text-text-primary mb-1 group-hover:text-accent-blue transition-colors line-clamp-2">
                   {tournament.name}
                 </h3>
                 <p className="text-text-muted text-xs mb-4 line-clamp-2">
@@ -83,7 +83,7 @@ export function TournamentsFilterClient({ tournaments }: Props) {
                     )}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Users size={14} className="text-accent-cyan" />
+                    <Users size={14} className="text-accent-blue" />
                     {tournament.teams} {t("teams")}
                   </span>
                   <span className="flex items-center gap-1.5">

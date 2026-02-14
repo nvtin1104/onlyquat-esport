@@ -28,12 +28,12 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 bg-bg/95 backdrop-blur-md md:hidden"
+          className="fixed inset-0 z-50 bg-bg-primary/95 backdrop-blur-md md:hidden"
         >
           <div className="flex flex-col h-full p-6">
             <button
               onClick={onClose}
-              className="self-end text-text-secondary hover:text-white mb-8"
+              className="self-end text-text-secondary hover:text-text-primary mb-8"
               aria-label="Close menu"
             >
               <X size={24} />
@@ -44,7 +44,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                   key={link.key}
                   href={link.href}
                   onClick={onClose}
-                  className="font-heading font-bold text-2xl text-text-secondary hover:text-accent-cyan transition-colors"
+                  className="font-heading font-bold text-2xl text-text-secondary hover:text-accent-blue transition-colors"
                 >
                   {t(link.key)}
                 </Link>

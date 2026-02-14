@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PageTransitionWrapper } from "@/components/layout/PageTransitionWrapper";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import "@/app/globals.css";
 
 export async function generateMetadata({
@@ -45,14 +46,23 @@ export default async function LocaleLayout({
   if (!routing.locales.includes(locale as "vi" | "en")) notFound();
   const messages = await getMessages();
   return (
-    <html lang={locale} className="dark">
-      <body className="bg-bg text-text-primary font-body min-h-screen antialiased">
+    <html lang={locale} data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className="bg-bg-primary text-text-primary font-body min-h-screen antialiased">
         <NextIntlClientProvider messages={messages}>
-          <Header />
-          <PageTransitionWrapper>
-            <main className="pt-16">{children}</main>
-          </PageTransitionWrapper>
-          <Footer />
+          <ThemeProvider>
+            <Header />
+            <PageTransitionWrapper>
+              <main className="pt-16">{children}</main>
+            </PageTransitionWrapper>
+            <Footer />
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

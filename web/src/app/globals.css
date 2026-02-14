@@ -4,24 +4,62 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+@layer base {
+  :root {
+    /* Backgrounds */
+    --bg-primary: 255 255 255;
+    --bg-secondary: 248 250 252;
+    --bg-tertiary: 241 245 249;
+    --bg-card: 255 255 255;
+
+    /* Text */
+    --text-primary: 15 23 42;
+    --text-secondary: 71 85 105;
+    --text-tertiary: 100 116 139;
+    --text-muted: 148 163 184;
+
+    /* Borders */
+    --border: 226 232 240;
+    --border-secondary: 203 213 225;
+
+    /* Shadow base */
+    --shadow-color: 15 23 42;
+  }
+
+  [data-theme="dark"] {
+    --bg-primary: 15 15 15;
+    --bg-secondary: 26 26 26;
+    --bg-tertiary: 38 38 38;
+    --bg-card: 30 30 30;
+
+    --text-primary: 248 250 252;
+    --text-secondary: 203 213 225;
+    --text-tertiary: 148 163 184;
+    --text-muted: 100 116 139;
+
+    --border: 51 65 85;
+    --border-secondary: 30 41 59;
+
+    --shadow-color: 0 0 0;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: #0a0e17;
-  color: #ffffff;
   font-family: 'Inter', sans-serif;
 }
 
-/* Glassmorphism utility */
+/* Glass utility — theme aware */
 .glass {
-  @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl;
+  @apply bg-bg-card/80 border border-border rounded-xl;
 }
 
 /* Neon text */
-.neon-cyan {
-  text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
+.neon-blue {
+  text-shadow: 0 0 10px #0EA5E9, 0 0 20px #0EA5E9;
 }
 
 .neon-purple {

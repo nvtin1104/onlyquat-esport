@@ -46,12 +46,12 @@ export function TournamentsSection({
     <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h2 className="font-heading font-bold text-3xl text-white">
+        <h2 className="font-heading font-bold text-3xl text-text-primary">
           {t("title")}
         </h2>
         <Link
           href="/tournaments"
-          className="text-accent-cyan text-sm flex items-center gap-1 hover:gap-2 transition-all"
+          className="text-accent-blue text-sm flex items-center gap-1 hover:gap-2 transition-all"
         >
           {t("viewAll")} <ArrowRight size={14} />
         </Link>
@@ -88,9 +88,9 @@ export function TournamentsSection({
             <Link href={`/tournaments/${tournament.id}`}>
               <Card hover glow="cyan" className="overflow-hidden group">
                 {/* Banner */}
-                <div className="aspect-video bg-bg-surface relative">
+                <div className="aspect-video bg-bg-secondary relative">
                   <div className="absolute inset-0 bg-gradient-to-t from-bg-card to-transparent z-10" />
-                  <div className="absolute inset-0 flex items-center justify-center text-4xl font-heading font-black text-white/10 select-none">
+                  <div className="absolute inset-0 flex items-center justify-center text-4xl font-heading font-black text-text-primary/10 select-none">
                     {tournament.game.toUpperCase()}
                   </div>
                   <div className="absolute top-3 left-3 z-20">
@@ -99,13 +99,13 @@ export function TournamentsSection({
                       pulse={tournament.status === "ongoing"}
                     />
                   </div>
-                  <div className="absolute top-3 right-3 z-20 text-xs font-mono text-text-secondary bg-bg/60 backdrop-blur-sm px-2 py-1 rounded">
+                  <div className="absolute top-3 right-3 z-20 text-xs font-mono text-text-secondary bg-bg-primary/60 backdrop-blur-sm px-2 py-1 rounded">
                     {tournament.game}
                   </div>
                 </div>
                 {/* Content */}
                 <div className="p-4">
-                  <h3 className="font-heading font-semibold text-white mb-3 group-hover:text-accent-cyan transition-colors line-clamp-1">
+                  <h3 className="font-heading font-semibold text-text-primary mb-3 group-hover:text-accent-blue transition-colors line-clamp-1">
                     {tournament.name}
                   </h3>
                   <div className="flex items-center gap-4 text-sm text-text-secondary">
@@ -117,7 +117,7 @@ export function TournamentsSection({
                       )}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Users size={14} className="text-accent-cyan" />
+                      <Users size={14} className="text-accent-blue" />
                       {tournament.teams} {t("teams")}
                     </span>
                   </div>

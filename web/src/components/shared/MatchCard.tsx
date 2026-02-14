@@ -16,7 +16,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-4 p-4 bg-bg-card border border-white/10 rounded-xl hover:border-white/20 transition-colors",
+        "flex items-center gap-4 p-4 bg-bg-card border border-border rounded-xl hover:border-border transition-colors",
         className
       )}
     >
@@ -25,7 +25,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
         <span
           className={cn(
             "font-heading font-semibold text-sm truncate",
-            t1Wins ? "text-white" : "text-text-secondary"
+            t1Wins ? "text-text-primary" : "text-text-secondary"
           )}
         >
           {match.team1.name}
@@ -40,7 +40,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
           <span
             className={cn(
               "font-mono text-xl font-bold",
-              t1Wins ? "text-white" : "text-text-secondary"
+              t1Wins ? "text-text-primary" : "text-text-secondary"
             )}
           >
             {match.score.team1}
@@ -49,7 +49,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
           <span
             className={cn(
               "font-mono text-xl font-bold",
-              t2Wins ? "text-white" : "text-text-secondary"
+              t2Wins ? "text-text-primary" : "text-text-secondary"
             )}
           >
             {match.score.team2}
@@ -66,7 +66,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
         <span
           className={cn(
             "font-heading font-semibold text-sm truncate",
-            t2Wins ? "text-white" : "text-text-secondary"
+            t2Wins ? "text-text-primary" : "text-text-secondary"
           )}
         >
           {match.team2.name}

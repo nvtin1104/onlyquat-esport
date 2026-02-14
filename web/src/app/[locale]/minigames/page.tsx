@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   prediction: <Trophy size={48} className="text-warning" />,
-  bracket: <Gamepad2 size={48} className="text-accent-cyan" />,
+  bracket: <Gamepad2 size={48} className="text-accent-blue" />,
   quiz: <Zap size={48} className="text-accent-purple" />,
 };
 
@@ -16,7 +16,7 @@ export default function MinigamesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
       <div className="text-center mb-12">
-        <h1 className="font-heading font-bold text-5xl text-white mb-3">
+        <h1 className="font-heading font-bold text-5xl text-text-primary mb-3">
           {t("title")}
         </h1>
         <p className="text-text-secondary max-w-xl mx-auto">
@@ -33,15 +33,15 @@ export default function MinigamesPage() {
             transition={{ delay: i * 0.15 }}
             whileHover={{
               scale: 1.02,
-              boxShadow: "0 0 40px rgba(0,212,255,0.2)",
+              boxShadow: "0 0 40px rgba(14,165,233,0.2)",
             }}
-            className="flex flex-col gap-6 p-8 bg-bg-card border border-white/10 rounded-2xl"
+            className="flex flex-col gap-6 p-8 bg-bg-card border border-border rounded-2xl"
           >
             <div className="flex justify-center">
               {TYPE_ICONS[game.type]}
             </div>
             <div className="text-center">
-              <h2 className="font-heading font-bold text-2xl text-white mb-2">
+              <h2 className="font-heading font-bold text-2xl text-text-primary mb-2">
                 {game.name}
               </h2>
               <p className="text-text-secondary text-sm">{game.description}</p>

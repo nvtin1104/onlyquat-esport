@@ -17,15 +17,15 @@ export function TeamsSection({ teams }: TeamsSectionProps) {
   const top6 = [...teams].sort((a, b) => a.rank - b.rank).slice(0, 6);
 
   return (
-    <section className="py-16 bg-bg-surface">
+    <section className="py-16 bg-bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="font-heading font-bold text-3xl text-white">
+          <h2 className="font-heading font-bold text-3xl text-text-primary">
             {t("title")}
           </h2>
           <Link
             href="/teams"
-            className="text-accent-cyan text-sm flex items-center gap-1 hover:gap-2 transition-all"
+            className="text-accent-blue text-sm flex items-center gap-1 hover:gap-2 transition-all"
           >
             {t("viewAll")} <ArrowRight size={14} />
           </Link>
@@ -47,7 +47,7 @@ export function TeamsSection({ teams }: TeamsSectionProps) {
               >
                 <Link
                   href={`/teams/${team.id}`}
-                  className="flex flex-col items-center gap-3 p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-cyan/40 hover:shadow-[0_0_20px_rgba(0,212,255,0.15)] transition-all duration-300 group"
+                  className="flex flex-col items-center gap-3 p-4 bg-bg-card border border-border rounded-xl hover:border-accent-blue/40 hover:shadow-[0_0_20px_rgba(14,165,233,0.15)] transition-all duration-300 group"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span className="text-text-muted text-xs font-mono">
@@ -60,14 +60,14 @@ export function TeamsSection({ teams }: TeamsSectionProps) {
                   </div>
                   <TeamLogo logo={team.logo} name={team.name} size="lg" />
                   <div className="text-center">
-                    <p className="font-heading font-bold text-white text-sm group-hover:text-accent-cyan transition-colors">
+                    <p className="font-heading font-bold text-text-primary text-sm group-hover:text-accent-blue transition-colors">
                       {team.tag}
                     </p>
                     <p className="text-text-muted text-xs">
                       {team.wins}W {team.losses}L
                     </p>
                   </div>
-                  <span className="font-mono text-xs text-accent-cyan font-semibold">
+                  <span className="font-mono text-xs text-accent-blue font-semibold">
                     {team.points} pts
                   </span>
                 </Link>

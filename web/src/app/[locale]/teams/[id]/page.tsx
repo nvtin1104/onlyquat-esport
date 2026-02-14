@@ -33,13 +33,13 @@ export default async function TeamDetailPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
       {/* Banner */}
-      <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center mb-10 p-6 bg-bg-card border border-white/10 rounded-2xl">
+      <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center mb-10 p-6 bg-bg-card border border-border rounded-2xl">
         <TeamLogo logo={team.logo} name={team.name} size="lg" />
         <div className="flex-1">
           <p className="text-text-muted text-sm font-mono mb-1">
             {team.tag} · {team.region} · {team.country}
           </p>
-          <h1 className="font-heading font-bold text-4xl text-white">
+          <h1 className="font-heading font-bold text-4xl text-text-primary">
             {team.name}
           </h1>
         </div>
@@ -62,7 +62,7 @@ export default async function TeamDetailPage({
                 label: "Win Rate",
                 value: `${wr}%`,
                 icon: Users,
-                color: "text-accent-cyan",
+                color: "text-accent-blue",
               },
             ] as const
           ).map(({ label, value, icon: Icon, color }) => (
@@ -76,22 +76,22 @@ export default async function TeamDetailPage({
       </div>
 
       {/* Roster */}
-      <h2 className="font-heading font-bold text-2xl text-white mb-5">
+      <h2 className="font-heading font-bold text-2xl text-text-primary mb-5">
         Roster
       </h2>
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {team.players.map((player) => (
           <div
             key={player.id}
-            className="flex flex-col items-center gap-3 p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-cyan/30 transition-colors"
+            className="flex flex-col items-center gap-3 p-4 bg-bg-card border border-border rounded-xl hover:border-accent-blue/30 transition-colors"
           >
-            <div className="w-16 h-16 rounded-full bg-bg-surface border border-white/10 flex items-center justify-center overflow-hidden">
-              <span className="font-heading font-bold text-accent-cyan text-xl">
+            <div className="w-16 h-16 rounded-full bg-bg-secondary border border-border flex items-center justify-center overflow-hidden">
+              <span className="font-heading font-bold text-accent-blue text-xl">
                 {player.ign.slice(0, 1).toUpperCase()}
               </span>
             </div>
             <div className="text-center">
-              <p className="font-heading font-semibold text-white text-sm">
+              <p className="font-heading font-semibold text-text-primary text-sm">
                 {player.ign}
               </p>
               <p className="text-text-muted text-xs">{player.realName}</p>

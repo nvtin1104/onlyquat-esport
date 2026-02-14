@@ -32,11 +32,11 @@ export default async function ArticleDetailPage({
     <article className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       {/* Category */}
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-xs font-mono font-semibold uppercase px-2.5 py-1 rounded border bg-bg-card text-accent-cyan border-accent-cyan/40">
+        <span className="text-xs font-mono font-semibold uppercase px-2.5 py-1 rounded border bg-bg-card text-accent-blue border-accent-blue/40">
           {article.category}
         </span>
       </div>
-      <h1 className="font-heading font-bold text-3xl sm:text-4xl text-white mb-4">
+      <h1 className="font-heading font-bold text-3xl sm:text-4xl text-text-primary mb-4">
         {article.title}
       </h1>
       {/* Meta row */}
@@ -56,7 +56,7 @@ export default async function ArticleDetailPage({
         {article.tags.map((tag) => (
           <span
             key={tag}
-            className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-bg-card border border-white/10 text-text-secondary"
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-bg-card border border-border text-text-secondary"
           >
             <Tag size={10} />
             {tag}
@@ -64,7 +64,7 @@ export default async function ArticleDetailPage({
         ))}
       </div>
       {/* Thumbnail */}
-      <div className="relative aspect-video rounded-xl overflow-hidden mb-8 bg-bg-surface">
+      <div className="relative aspect-video rounded-xl overflow-hidden mb-8 bg-bg-secondary">
         <Image
           src={article.thumbnail}
           alt={article.title}
@@ -76,7 +76,7 @@ export default async function ArticleDetailPage({
       <p className="text-text-secondary leading-relaxed text-base">
         {article.excerpt}
       </p>
-      <div className="mt-6 p-6 bg-bg-card border border-white/10 rounded-xl text-text-muted text-sm">
+      <div className="mt-6 p-6 bg-bg-card border border-border rounded-xl text-text-muted text-sm">
         Full article content will be loaded from the CMS/backend in production.
       </div>
     </article>

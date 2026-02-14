@@ -18,7 +18,7 @@ export function TeamLogo({ logo, name, size = "md", className, priority }: TeamL
   return (
     <div
       className={cn(
-        "relative rounded-lg overflow-hidden bg-bg-surface flex-shrink-0",
+        "relative rounded-lg overflow-hidden bg-bg-secondary flex-shrink-0",
         className
       )}
       style={{ width: px, height: px }}
@@ -36,7 +36,7 @@ export function TeamLogo({ logo, name, size = "md", className, priority }: TeamL
         }}
       />
       <span
-        className="absolute inset-0 flex items-center justify-center text-xs font-heading font-bold text-accent-cyan"
+        className="absolute inset-0 flex items-center justify-center text-xs font-heading font-bold text-accent-blue"
         aria-hidden
       >
         {name.slice(0, 3).toUpperCase()}

@@ -6,9 +6,9 @@ type BadgeStatus = TournamentStatus | MatchStatus | "live";
 const statusConfig: Record<string, { label: string; classes: string }> = {
   live: { label: "LIVE", classes: "bg-red-500/20 border-red-400/50 text-red-400" },
   ongoing: { label: "LIVE", classes: "bg-red-500/20 border-red-400/50 text-red-400" },
-  upcoming: { label: "UPCOMING", classes: "bg-accent-cyan/20 border-accent-cyan/50 text-accent-cyan" },
-  scheduled: { label: "SCHEDULED", classes: "bg-accent-cyan/20 border-accent-cyan/50 text-accent-cyan" },
-  completed: { label: "ENDED", classes: "bg-white/10 border-white/20 text-text-secondary" },
+  upcoming: { label: "UPCOMING", classes: "bg-accent-blue/20 border-accent-blue/50 text-accent-blue" },
+  scheduled: { label: "SCHEDULED", classes: "bg-accent-blue/20 border-accent-blue/50 text-accent-blue" },
+  completed: { label: "ENDED", classes: "bg-bg-secondary border-border text-text-secondary" },
   cancelled: { label: "CANCELLED", classes: "bg-warning/10 border-warning/30 text-warning" },
 };
 

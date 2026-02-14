@@ -14,7 +14,7 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-1 bg-bg-surface border border-white/10 rounded-lg p-1">
+    <div className="flex items-center gap-1 bg-bg-secondary border border-border rounded-lg p-1">
       {routing.locales.map((loc) => (
         <button
           key={loc}
@@ -22,8 +22,8 @@ export function LanguageSwitcher() {
           className={cn(
             "px-3 py-1 rounded text-xs font-mono font-semibold uppercase transition-colors",
             locale === loc
-              ? "bg-accent-cyan/20 text-accent-cyan"
-              : "text-text-muted hover:text-white"
+              ? "bg-accent-blue/20 text-accent-blue"
+              : "text-text-muted hover:text-text-primary"
           )}
           aria-pressed={locale === loc}
         >

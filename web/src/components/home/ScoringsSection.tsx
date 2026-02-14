@@ -17,15 +17,15 @@ const FORM_COLORS: Record<string, string> = {
 export async function ScoringsSection({ standings }: ScoringsSectionProps) {
   const t = await getTranslations("standings");
   return (
-    <section className="py-16 bg-bg-surface">
+    <section className="py-16 bg-bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <h2 className="font-heading font-bold text-3xl text-white mb-8">
+        <h2 className="font-heading font-bold text-3xl text-text-primary mb-8">
           {t("title")}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-text-muted font-mono text-xs uppercase tracking-wider">
+              <tr className="border-b border-border text-text-muted font-mono text-xs uppercase tracking-wider">
                 <th className="pb-3 text-left w-12">#</th>
                 <th className="pb-3 text-left">Team</th>
                 <th className="pb-3 text-center hidden sm:table-cell">
@@ -42,7 +42,7 @@ export async function ScoringsSection({ standings }: ScoringsSectionProps) {
               {standings.map((row, i) => (
                 <tr
                   key={row.team.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                  className="border-b border-border hover:bg-bg-tertiary transition-colors"
                 >
                   <td className="py-3">
                     <span
@@ -63,7 +63,7 @@ export async function ScoringsSection({ standings }: ScoringsSectionProps) {
                         name={row.team.name}
                         size="sm"
                       />
-                      <span className="font-heading font-semibold text-white">
+                      <span className="font-heading font-semibold text-text-primary">
                         {row.team.name}
                       </span>
                     </div>
@@ -94,7 +94,7 @@ export async function ScoringsSection({ standings }: ScoringsSectionProps) {
                       ))}
                     </div>
                   </td>
-                  <td className="py-3 text-right font-mono font-bold text-accent-cyan">
+                  <td className="py-3 text-right font-mono font-bold text-accent-blue">
                     {row.points}
                   </td>
                 </tr>

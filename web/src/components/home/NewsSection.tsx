@@ -13,12 +13,12 @@ export async function NewsSection({ articles }: NewsSectionProps) {
   return (
     <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="font-heading font-bold text-3xl text-white">
+        <h2 className="font-heading font-bold text-3xl text-text-primary">
           {t("title")}
         </h2>
         <Link
           href="/news"
-          className="text-accent-cyan text-sm flex items-center gap-1 hover:gap-2 transition-all"
+          className="text-accent-blue text-sm flex items-center gap-1 hover:gap-2 transition-all"
         >
           {t("viewAll")} <ArrowRight size={14} />
         </Link>
