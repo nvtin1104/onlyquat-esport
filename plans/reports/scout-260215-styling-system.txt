@@ -1,0 +1,258 @@
+ONLYQUAT ESPORT - STYLING SYSTEM SCOUT REPORT
+Date: 2025-02-15
+Codebase: /web/src
+
+SUMMARY
+=======
+The project uses Tailwind CSS 3.4.1 with dark-only theme. NO theme provider or toggle. Colors centralized in Tailwind config. All styling is Tailwind utilities + globals.css.
+
+1. MAIN CSS FILE: globals.css
+Path: C:/project/onlyquat-esport/web/src/app/globals.css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0e17;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl;
+}
+
+.neon-cyan {
+  text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
+}
+
+.neon-purple {
+  text-shadow: 0 0 10px #9333ea, 0 0 20px #9333ea;
+}
+
+Key: Hard-coded dark theme background #0a0e17. Three custom utilities: .glass, .neon-cyan, .neon-purple. Fonts: Rajdhani, Inter, JetBrains Mono from Google Fonts.
+
+2. TAILWIND CONFIGURATION: tailwind.config.ts
+Path: C:/project/onlyquat-esport/web/tailwind.config.ts
+
+COLORS (custom):
+- bg.DEFAULT: #0a0e17
+- bg.surface: #151922
+- bg.card: #1e2530
+- accent.cyan: #00d4ff
+- accent.purple: #9333ea
+- success: #10b981
+- warning: #f59e0b
+- danger: #ef4444
+- text-primary: #ffffff
+- text-secondary: #94a3b8
+- text-muted: #64748b
+
+FONTS (custom):
+- heading: Rajdhani
+- body: Inter
+- mono: JetBrains Mono
+
+CUSTOM ANIMATIONS:
+- gradient-shift (6s infinite)
+- glow-cyan (2s infinite)
+- pulse-live (1.5s infinite, for live indicators)
+
+CUSTOM SCREENS:
+- xs: 475px
+
+3. THEMES/COLORS DEFINITION SYSTEM
+===================================
+NO theme provider or dynamic theme switching exists.
+
+Design is STATIC DARK MODE ONLY via:
+1. Root HTML: <html className="dark">
+2. Tailwind config colors (hardcoded hex values)
+3. Global CSS (background #0a0e17)
+4. Component utilities (cn() from clsx + tailwind-merge)
+
+NO CSS-in-JS, NO styled-components, NO CSS variables, NO theme context.
+
+4. THEME PROVIDER & DARK MODE COMPONENTS
+==========================================
+NO theme provider exists.
+NO dark mode toggle component exists.
+NO light mode support.
+NO CSS variables for dynamic theming.
+
+The site is HARDCODED TO DARK MODE:
+- HTML: <html className="dark">
+- Body bg: #0a0e17
+- All colors defined for dark only
+
+5. ALL COMPONENT FILES (21 total)
+==================================
+
+UI:
+- C:/project/onlyquat-esport/web/src/components/ui/Button.tsx
+- C:/project/onlyquat-esport/web/src/components/ui/Card.tsx
+- C:/project/onlyquat-esport/web/src/components/ui/Badge.tsx
+- C:/project/onlyquat-esport/web/src/components/ui/Tabs.tsx
+
+Layout:
+- C:/project/onlyquat-esport/web/src/components/layout/Header.tsx
+- C:/project/onlyquat-esport/web/src/components/layout/Footer.tsx
+- C:/project/onlyquat-esport/web/src/components/layout/LanguageSwitcher.tsx
+- C:/project/onlyquat-esport/web/src/components/layout/MobileMenu.tsx
+- C:/project/onlyquat-esport/web/src/components/layout/PageTransitionWrapper.tsx
+
+Shared:
+- C:/project/onlyquat-esport/web/src/components/shared/MatchCard.tsx
+- C:/project/onlyquat-esport/web/src/components/shared/ArticleCard.tsx
+- C:/project/onlyquat-esport/web/src/components/shared/TeamLogo.tsx
+
+Home:
+- C:/project/onlyquat-esport/web/src/components/home/HeroSection.tsx
+- C:/project/onlyquat-esport/web/src/components/home/MatchHistorySection.tsx
+- C:/project/onlyquat-esport/web/src/components/home/MinigamesSection.tsx
+- C:/project/onlyquat-esport/web/src/components/home/NewsSection.tsx
+- C:/project/onlyquat-esport/web/src/components/home/ScoringsSection.tsx
+- C:/project/onlyquat-esport/web/src/components/home/TeamsSection.tsx
+- C:/project/onlyquat-esport/web/src/components/home/TournamentsSection.tsx
+
+Page:
+- C:/project/onlyquat-esport/web/src/components/page/NewsFilterClient.tsx
+- C:/project/onlyquat-esport/web/src/components/page/TournamentsFilterClient.tsx
+
+6. LAYOUT.TSX FILES
+===================
+
+ROOT: C:/project/onlyquat-esport/web/src/app/layout.tsx
+- Just imports globals.css and renders children
+
+LOCALE: C:/project/onlyquat-esport/web/src/app/[locale]/layout.tsx
+- HTML: <html lang={locale} className="dark">
+- Body: <body className="bg-bg text-text-primary font-body min-h-screen antialiased">
+- Structure: Header > PageTransitionWrapper > main > Footer
+- Uses NextIntlClientProvider for i18n
+
+7. STYLING DEPENDENCIES
+=======================
+- tailwindcss 3.4.1 (primary)
+- clsx 2.1.1 (conditional classes)
+- tailwind-merge 3.4.0 (merge classes)
+- framer-motion 12.34.0 (animations)
+- postcss 8 (CSS processing)
+
+Class merging utility (lib/utils.ts):
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+8. KEY COMPONENT STYLING
+=========================
+
+BUTTON:
+- Variants: primary (cyan), secondary (purple), ghost (white)
+- Glow: shadow-[0_0_15px_rgba(0,212,255,0.3)]
+- Sizes: sm, md, lg
+
+CARD:
+- Base: bg-bg-card border border-white/10 rounded-xl backdrop-blur-sm
+- Glow: cyan/purple shadow on hover
+- Hover: border-white/20, -translate-y-0.5
+
+BADGE:
+- Status colors: live (red), upcoming (cyan), completed (white/10)
+- Live indicator: animate-pulse-live
+
+TABS:
+- Framer Motion animated indicator
+- Active: bg-accent-cyan/15 border border-accent-cyan/30
+- Uses layoutId="tab-indicator" for smooth animation
+
+HEADER:
+- Scroll detection for glassmorphism effect
+- Scrolled: bg-bg/80 backdrop-blur-md border-b border-white/10
+- Not scrolled: transparent
+
+9. COLOR PALETTE
+================
+BACKGROUNDS:
+- #0a0e17 (main bg)
+- #151922 (surface)
+- #1e2530 (cards)
+
+ACCENTS:
+- #00d4ff (cyan)
+- #9333ea (purple)
+
+STATUS:
+- #10b981 (success)
+- #f59e0b (warning)
+- #ef4444 (danger/live)
+
+TEXT:
+- #ffffff (primary)
+- #94a3b8 (secondary)
+- #64748b (muted)
+
+10. CUSTOM CSS UTILITIES
+=========================
+All in globals.css:
+
+.glass
+- bg-white/5 backdrop-blur-md border border-white/10 rounded-xl
+- Use: Glassmorphism effects
+
+.neon-cyan
+- text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff
+- Use: Glowing cyan text
+
+.neon-purple
+- text-shadow: 0 0 10px #9333ea, 0 0 20px #9333ea
+- Use: Glowing purple text
+
+11. KEY FINDINGS
+=================
+
+STRENGTHS:
++ Cohesive dark theme
++ Centralized color management
++ Custom animations (glow, pulse, gradient)
++ Glassmorphism effects
++ Responsive design
++ Smooth Framer Motion animations
+
+LIMITATIONS:
+- No light mode
+- No theme switching
+- Colors hardcoded (not CSS variables)
+- Limited animation configs
+- No component variant system
+
+TO ADD LIGHT MODE:
+1. Add CSS variables (--color-cyan, etc)
+2. Create theme context
+3. Add light color definitions
+4. Dynamic className="dark" or "light"
+5. Update config to use variables
+
+CRITICAL FILES:
+1. C:/project/onlyquat-esport/web/src/app/globals.css
+2. C:/project/onlyquat-esport/web/tailwind.config.ts
+3. C:/project/onlyquat-esport/web/src/app/[locale]/layout.tsx
+4. C:/project/onlyquat-esport/web/src/lib/utils.ts
+5. All 21 component files (listed above)
+
+STATS:
+- Component files: 21
+- CSS modules: 0
+- SCSS files: 0
+- Theme providers: 0
+- Dark mode toggles: 0
+- Custom animations: 3
+- Custom colors: 12
+- Custom fonts: 3
