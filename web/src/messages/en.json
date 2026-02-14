@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "home": "Home",
+    "tournaments": "Tournaments",
+    "teams": "Teams",
+    "news": "News",
+    "minigames": "Minigames"
+  },
+  "hero": {
+    "liveNow": "LIVE NOW",
+    "viewers": "Viewers",
+    "watchStream": "Watch Stream",
+    "viewBracket": "View Bracket",
+    "featuredMatch": "Featured Match"
+  },
+  "tournaments": {
+    "title": "Tournaments",
+    "live": "Live",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "prizePool": "Prize Pool",
+    "teams": "Teams",
+    "viewAll": "View All"
+  },
+  "teams": {
+    "title": "Top Teams",
+    "rank": "Rank",
+    "winRate": "Win Rate",
+    "viewAll": "View All"
+  },
+  "matches": {
+    "title": "Recent Matches",
+    "vs": "VS",
+    "viewDetails": "View Details"
+  },
+  "standings": {
+    "title": "Standings",
+    "wl": "W-L",
+    "points": "Points",
+    "diff": "Diff"
+  },
+  "news": {
+    "title": "Latest News",
+    "readMore": "Read More",
+    "viewAll": "View All"
+  },
+  "minigames": {
+    "title": "Play & Win",
+    "players": "Players",
+    "playNow": "Play Now"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "followUs": "Follow Us"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "backToHome": "Back to Home"
+  }
+}
