@@ -1,0 +1,29 @@
+[
+  {
+    "id": "t1",
+    "slug": "team-alpha",
+    "name": "Team Alpha",
+    "tag": "ALP",
+    "logoUrl": "https://api.dicebear.com/9.x/identicon/svg?seed=alpha",
+    "region": "VN",
+    "players": ["p1", "p4", "p7"]
+  },
+  {
+    "id": "t2",
+    "slug": "phoenix-rising",
+    "name": "Phoenix Rising",
+    "tag": "PHX",
+    "logoUrl": "https://api.dicebear.com/9.x/identicon/svg?seed=phoenix",
+    "region": "VN",
+    "players": ["p2", "p5", "p8"]
+  },
+  {
+    "id": "t3",
+    "slug": "shadow-legion",
+    "name": "Shadow Legion",
+    "tag": "SHL",
+    "logoUrl": "https://api.dicebear.com/9.x/identicon/svg?seed=shadow",
+    "region": "VN",
+    "players": ["p3", "p6"]
+  }
+]

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "g1",
+    "name": "League of Legends",
+    "shortName": "LoL",
+    "iconUrl": "/images/games/lol.svg",
+    "roles": ["Top", "Jungle", "Mid", "ADC", "Support"]
+  },
+  {
+    "id": "g2",
+    "name": "Valorant",
+    "shortName": "VAL",
+    "iconUrl": "/images/games/val.svg",
+    "roles": ["Duelist", "Controller", "Initiator", "Sentinel"]
+  },
+  {
+    "id": "g3",
+    "name": "Dota 2",
+    "shortName": "Dota2",
+    "iconUrl": "/images/games/dota2.svg",
+    "roles": ["Carry", "Mid", "Offlane", "Support", "Hard Support"]
+  },
+  {
+    "id": "g4",
+    "name": "Counter-Strike 2",
+    "shortName": "CS2",
+    "iconUrl": "/images/games/cs2.svg",
+    "roles": ["Entry", "AWPer", "Lurker", "Support", "IGL"]
+  }
+]

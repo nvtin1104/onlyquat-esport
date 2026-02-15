@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg-base: #121212;
+  --color-bg-elevated: #1A1A1B;
+  --color-bg-surface: #000000;
+
+  --color-border-subtle: #2A2A2B;
+  --color-border-hover: #3A3A3B;
+
+  --color-accent-acid: #CCFF00;
+  --color-accent-lava: #FF4D00;
+  --color-accent-acid-dim: rgba(204,255,0,0.12);
+  --color-accent-acid-glow: rgba(204,255,0,0.4);
+  --color-accent-lava-dim: rgba(255,77,0,0.12);
+  --color-accent-lava-glow: rgba(255,77,0,0.4);
+
+  --color-text-primary: #E8E8E8;
+  --color-text-secondary: #888888;
+  --color-text-dim: #555555;
+
+  --color-tier-s: #CCFF00;
+  --color-tier-a: #00FF88;
+  --color-tier-b: #00AAFF;
+  --color-tier-c: #FFB800;
+  --color-tier-d: #FF4D00;
+  --color-tier-f: #FF4444;
+
+  --font-display: 'Chakra Petch', sans-serif;
+  --font-body: 'Be Vietnam Pro', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(.23, 1, .32, 1);
+}
+
+:root {
+  --bg-base: #121212;
+  --bg-elevated: #1A1A1B;
+  --bg-surface: #000000;
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+  --border-subtle: #2A2A2B;
+  --border-hover: #3A3A3B;
+  --accent-acid: #CCFF00;
+  --accent-lava: #FF4D00;
+  --accent-acid-dim: rgba(204,255,0,0.12);
+  --accent-acid-glow: rgba(204,255,0,0.4);
+  --accent-lava-dim: rgba(255,77,0,0.12);
+  --accent-lava-glow: rgba(255,77,0,0.4);
+  --text-primary: #E8E8E8;
+  --text-secondary: #888888;
+  --text-dim: #555555;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A2B #121212;
+}
+
+::selection {
+  background: #CCFF00;
+  color: #121212;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
