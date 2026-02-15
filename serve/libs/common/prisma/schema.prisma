@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  player
+  organizer
+  admin
+}
+
+enum TournamentStatus {
+  upcoming
+  ongoing
+  completed
+  cancelled
+}
+
+enum MatchStatus {
+  scheduled
+  live
+  completed
+  cancelled
+}
+
+enum PlayerTier {
+  S
+  A
+  B
+  C
+  D
+  F
+}
+
+enum TeamMemberRole {
+  player
+  captain
+  coach
+  substitute
+}
+
+// ─── Models ─────────────────────────────────────────────────────────────────
+
+model Game {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  shortName String
+  iconUrl   String   @default("")
+  roles     String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players     Player[]
+  tournaments Tournament[]
+
+  @@map("games")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  firstName String?
+  lastName  String?
+  role      UserRole @default(player)
+  isActive  Boolean  @default(true)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players              Player[]
+  ratings              Rating[]
+  organizedTournaments Tournament[]
+  refereedMatches      Match[]
+
+  @@map("users")
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  slug      String   @unique
+  name      String   @unique
+  tag       String?
+  logoUrl   String?
+  region    String?
+  wins      Int      @default(0)
+  losses    Int      @default(0)
+  draws     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players         Player[]
+  members         TeamMember[]
+  tournamentTeams TournamentTeam[]
+  matchesAsTeam1  Match[]          @relation("MatchTeam1")
+  matchesAsTeam2  Match[]          @relation("MatchTeam2")
+  matchesWon      Match[]          @relation("MatchWinner")
+  matchEvents     MatchEvent[]
+
+  @@map("teams")
+}
+
+model Player {
+  id           String     @id @default(uuid())
+  slug         String     @unique
+  displayName  String
+  realName     String?
+  nationality  String?
+  imageUrl     String     @default("")
+  bannerUrl    String?
+  role         String?
+  rating       Float      @default(0)
+  aim          Int        @default(0) @db.SmallInt
+  gameIq       Int        @default(0) @db.SmallInt
+  clutch       Int        @default(0) @db.SmallInt
+  teamplay     Int        @default(0) @db.SmallInt
+  consistency  Int        @default(0) @db.SmallInt
+  totalRatings Int        @default(0)
+  tier         PlayerTier @default(F)
+  rank         Int        @default(0)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  gameId String
+  game   Game    @relation(fields: [gameId], references: [id])
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  teamMembers TeamMember[]
+  ratings     Rating[]
+  matchEvents MatchEvent[]
+
+  @@index([rating(sort: Desc)])
+  @@index([tier])
+  @@index([gameId])
+  @@index([teamId])
+  @@map("players")
+}
+
+model TeamMember {
+  id       String         @id @default(uuid())
+  role     TeamMemberRole @default(player)
+  joinedAt DateTime       @default(now())
+  leftAt   DateTime?
+
+  teamId   String
+  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, playerId, leftAt])
+  @@index([teamId])
+  @@index([playerId])
+  @@map("team_members")
+}
+
+model Rating {
+  id          String   @id @default(uuid())
+  overall     Float
+  aim         Int?     @db.SmallInt
+  gameIq      Int?     @db.SmallInt
+  clutch      Int?     @db.SmallInt
+  teamplay    Int?     @db.SmallInt
+  consistency Int?     @db.SmallInt
+  comment     String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  userId   String?
+  user     User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // For anonymous ratings (from mock data)
+  userName   String?
+  userAvatar String?
+
+  @@index([playerId])
+  @@index([userId])
+  @@map("ratings")
+}
+
+model Tournament {
+  id          String           @id @default(uuid())
+  slug        String           @unique
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  status      TournamentStatus @default(upcoming)
+  prizePool   Float            @default(0)
+  rules       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  gameId      String
+  game        Game   @relation(fields: [gameId], references: [id])
+  organizerId String
+  organizer   User   @relation(fields: [organizerId], references: [id])
+
+  tournamentTeams TournamentTeam[]
+  matches         Match[]
+
+  @@index([status])
+  @@index([gameId])
+  @@index([startDate])
+  @@map("tournaments")
+}
+
+model TournamentTeam {
+  id        String @id @default(uuid())
+  seed      Int?
+  placement Int?
+
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId       String
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, teamId])
+  @@map("tournament_teams")
+}
+
+model Match {
+  id            String      @id @default(uuid())
+  scheduledTime DateTime
+  status        MatchStatus @default(scheduled)
+  scoreTeam1    Int?
+  scoreTeam2    Int?
+  duration      Int?
+  streamUrl     String?
+  round         Int?
+  bracketPos    Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  team1Id      String?
+  team1        Team?      @relation("MatchTeam1", fields: [team1Id], references: [id])
+  team2Id      String?
+  team2        Team?      @relation("MatchTeam2", fields: [team2Id], references: [id])
+  winnerId     String?
+  winner       Team?      @relation("MatchWinner", fields: [winnerId], references: [id])
+  refereeId    String?
+  referee      User?      @relation(fields: [refereeId], references: [id])
+  nextMatchId  String?
+  nextMatch    Match?     @relation("BracketProgression", fields: [nextMatchId], references: [id])
+  prevMatches  Match[]    @relation("BracketProgression")
+
+  matchEvents MatchEvent[]
+
+  @@index([tournamentId])
+  @@index([status])
+  @@index([scheduledTime])
+  @@map("matches")
+}
+
+model MatchEvent {
+  id        String   @id @default(uuid())
+  type      String
+  timestamp DateTime @default(now())
+  data      Json     @default("{}")
+
+  matchId  String
+  match    Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId   String?
+  team     Team?   @relation(fields: [teamId], references: [id])
+  playerId String?
+  player   Player? @relation(fields: [playerId], references: [id])
+
+  @@index([matchId])
+  @@index([type])
+  @@map("match_events")
+}

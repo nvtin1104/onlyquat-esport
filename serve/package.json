@@ -15,7 +15,14 @@
     "start:dev:api-gateway": "nest start api-gateway --watch",
     "start:dev:identity-service": "nest start identity-service --watch",
     "start:dev:esports-service": "nest start esports-service --watch",
-    "start:all": "concurrently -n \"gw,id,esp\" -c \"blue,magenta,green\" \"pnpm run start:dev:api-gateway\" \"pnpm run start:dev:identity-service\" \"pnpm run start:dev:esports-service\""
+    "start:all": "concurrently -n \"gw,id,esp\" -c \"blue,magenta,green\" \"pnpm run start:dev:api-gateway\" \"pnpm run start:dev:identity-service\" \"pnpm run start:dev:esports-service\"",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "prisma:studio": "prisma studio",
+    "prisma:reset": "prisma migrate reset",
+    "db:setup": "pnpm prisma:generate && pnpm prisma:migrate && pnpm prisma:seed"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -25,6 +32,7 @@
     "@nestjs/mongoose": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-fastify": "^10.0.0",
+    "@prisma/client": "^7.4.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "mongoose": "^8.0.0",
@@ -37,6 +45,8 @@
     "@nestjs/schematics": "^10.0.0",
     "@types/node": "^20.0.0",
     "concurrently": "^8.2.0",
+    "prisma": "^7.4.0",
+    "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   }
 }

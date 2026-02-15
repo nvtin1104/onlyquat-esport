@@ -25,6 +25,21 @@ services:
     networks:
       - esports_network
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: esports_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: esports_platform_db
+      POSTGRES_USER: esports
+      POSTGRES_PASSWORD: esports_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - esports_network
+
   redis:
     image: redis:7-alpine
     container_name: esports_redis
@@ -39,6 +54,7 @@ services:
 
 volumes:
   mongodb_data:
+  postgres_data:
   redis_data:
 
 networks:
