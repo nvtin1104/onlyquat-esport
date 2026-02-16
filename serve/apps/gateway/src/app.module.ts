@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
+import { AuthController } from './auth/auth.controller';
+import { UsersController } from './users/users.controller';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -9,7 +14,14 @@ import { AppController } from './app.controller';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    // NATS Client for communicating with microservices
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+      }),
+    }),
     ClientsModule.register([
       {
         name: 'IDENTITY_SERVICE',
@@ -27,6 +39,7 @@ import { AppController } from './app.controller';
       },
     ]),
   ],
-  controllers: [AppController],
+  controllers: [AppController, AuthController, UsersController],
+  providers: [JwtStrategy],
 })
 export class AppModule {}

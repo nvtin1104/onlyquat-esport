@@ -5,23 +5,12 @@ import { firstValueFrom } from 'rxjs';
 @Controller()
 export class AppController {
   constructor(
-    @Inject('IDENTITY_SERVICE') private identityClient: ClientProxy,
     @Inject('ESPORTS_SERVICE') private esportsClient: ClientProxy,
   ) {}
 
   @Get('health')
   health() {
     return { status: 'ok', service: 'api-gateway' };
-  }
-
-  @Post('auth/register')
-  async register(@Body() data: any) {
-    return firstValueFrom(this.identityClient.send('auth.register', data));
-  }
-
-  @Post('auth/login')
-  async login(@Body() data: any) {
-    return firstValueFrom(this.identityClient.send('auth.login', data));
   }
 
   @Get('tournaments')

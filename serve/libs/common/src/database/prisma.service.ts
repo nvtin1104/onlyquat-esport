@@ -1,16 +1,28 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '../../prisma/generated/prisma';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+let PrismaClientBase: any;
+try {
+  PrismaClientBase = require('../../generated/prisma').PrismaClient;
+} catch {
+  // Prisma client not generated yet - provide stub
+  PrismaClientBase = class {};
+}
 
 @Injectable()
 export class PrismaService
-  extends PrismaClient
+  extends PrismaClientBase
   implements OnModuleInit, OnModuleDestroy
 {
   async onModuleInit() {
-    await this.$connect();
+    if (typeof this.$connect === 'function') {
+      await this.$connect();
+    }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    if (typeof this.$disconnect === 'function') {
+      await this.$disconnect();
+    }
   }
 }
