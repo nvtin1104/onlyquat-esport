@@ -5,7 +5,10 @@
       "Bash(npx create-next-app:*)",
       "Bash(pnpm add:*)",
       "Bash(npx tsc:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm run start:all:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(pnpm install:*)"
     ]
   },
   "environment": {

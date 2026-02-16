@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsDateString, IsOptional, IsEnum, IsNumber, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, IsOptional, IsEnum, IsNumber, Min, IsUUID } from 'class-validator';
+import { TournamentStatus } from '@app/common';
 
 export class CreateTournamentDto {
   @IsString()
@@ -7,11 +8,15 @@ export class CreateTournamentDto {
 
   @IsString()
   @IsOptional()
-  description?: string;
+  slug?: string;
 
   @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsUUID()
   @IsNotEmpty()
-  game: string;
+  gameId: string;
 
   @IsDateString()
   @IsNotEmpty()
@@ -21,11 +26,11 @@ export class CreateTournamentDto {
   @IsNotEmpty()
   endDate: string;
 
-  @IsEnum(['upcoming', 'ongoing', 'completed', 'cancelled'])
+  @IsEnum(TournamentStatus)
   @IsOptional()
-  status?: string;
+  status?: TournamentStatus;
 
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
   organizerId: string;
 

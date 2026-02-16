@@ -1,52 +1,70 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Tournament, TournamentDocument, Match, MatchDocument, CreateTournamentDto } from '@app/common';
+import { PrismaService } from '@app/common';
+import { CreateTournamentDto } from './dtos';
+import type { Tournament } from '@app/common';
 
 @Injectable()
 export class EsportsService {
-  constructor(
-    @InjectModel(Tournament.name) private tournamentModel: Model<TournamentDocument>,
-    @InjectModel(Match.name) private matchModel: Model<MatchDocument>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Tournament[]> {
-    return this.tournamentModel.find().exec();
+    return this.prisma.tournament.findMany({
+      include: { game: true, organizer: true },
+    });
   }
 
   async findById(tournamentId: string): Promise<Tournament | null> {
-    return this.tournamentModel.findById(tournamentId).exec();
+    return this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: { game: true, organizer: true },
+    });
   }
 
   async create(createTournamentDto: CreateTournamentDto): Promise<Tournament> {
-    const tournament = new this.tournamentModel(createTournamentDto);
-    return tournament.save();
+    const slug =
+      createTournamentDto.slug ??
+      createTournamentDto.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+    return this.prisma.tournament.create({
+      data: {
+        name: createTournamentDto.name,
+        slug,
+        description: createTournamentDto.description,
+        startDate: new Date(createTournamentDto.startDate),
+        endDate: new Date(createTournamentDto.endDate),
+        status: createTournamentDto.status as any,
+        prizePool: createTournamentDto.prizePool,
+        rules: createTournamentDto.rules,
+        game: { connect: { id: createTournamentDto.gameId } },
+        organizer: { connect: { id: createTournamentDto.organizerId } },
+      },
+    });
   }
 
-  /**
-   * Cross-Service Query Example:
-   * This demonstrates the benefit of shared MongoDB database.
-   * We can use populate() to join User data (from identity-service collection)
-   * without needing to make HTTP/NATS calls to identity-service.
-   */
   async findMatchesByTournament(tournamentId: string) {
-    return this.matchModel
-      .find({ tournamentId })
-      .populate('refereeId', 'username email firstName lastName') // Populate User from identity-service's collection
-      .populate('team1Id', 'name tag logo')
-      .populate('team2Id', 'name tag logo')
-      .populate('winnerId', 'name tag')
-      .exec();
+    return this.prisma.match.findMany({
+      where: { tournamentId },
+      include: {
+        team1: true,
+        team2: true,
+        winner: true,
+        referee: true,
+      },
+    });
   }
 
-  /**
-   * Another example: Get tournament with organizer details (User from identity-service)
-   */
   async findTournamentWithOrganizer(tournamentId: string) {
-    return this.tournamentModel
-      .findById(tournamentId)
-      .populate('organizerId', 'username email firstName lastName role') // User from identity-service
-      .populate('teams', 'name tag logo')
-      .exec();
+    return this.prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        organizer: true,
+        tournamentTeams: {
+          include: { team: true },
+        },
+      },
+    });
   }
 }

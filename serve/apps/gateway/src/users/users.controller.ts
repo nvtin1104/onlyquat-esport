@@ -12,7 +12,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { UpdateUserDto, ChangePasswordDto, UpdateRoleDto } from '@app/common';
+import { UpdateUserDto, ChangePasswordDto, UpdateRoleDto } from '../dtos';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)

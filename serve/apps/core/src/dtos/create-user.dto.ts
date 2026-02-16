@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
+import { UserRole } from '@app/common';
 
 export class CreateUserDto {
   @IsEmail()
@@ -22,7 +23,7 @@ export class CreateUserDto {
   @IsOptional()
   lastName?: string;
 
-  @IsEnum(['player', 'organizer', 'admin'])
+  @IsEnum(UserRole)
   @IsOptional()
-  role?: string;
+  role?: UserRole;
 }

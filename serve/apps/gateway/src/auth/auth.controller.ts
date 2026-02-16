@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CreateUserDto, LoginDto } from '@app/common';
+import { CreateUserDto, LoginDto } from '../dtos';
 
 @Controller('auth')
 export class AuthController {

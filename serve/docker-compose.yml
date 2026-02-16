@@ -1,19 +1,6 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:7.0
-    container_name: esports_mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: esports_platform_db
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - esports_network
-
   nats:
     image: nats:2.10-alpine
     container_name: esports_nats
@@ -53,7 +40,6 @@ services:
     command: redis-server --appendonly yes
 
 volumes:
-  mongodb_data:
   postgres_data:
   redis_data:
 

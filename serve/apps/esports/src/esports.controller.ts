@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { EsportsService } from './esports.service';
-import { CreateTournamentDto } from '@app/common';
+import { CreateTournamentDto } from './dtos';
 
 @Controller()
 export class EsportsController {

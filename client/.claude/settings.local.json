@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(docker compose up:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.nestjs.com)",
+      "WebFetch(domain:medium.com)",
+      "Bash(npx nest build:*)"
     ]
   }
 }

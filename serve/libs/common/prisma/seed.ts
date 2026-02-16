@@ -1,6 +1,6 @@
-import { PrismaClient, PlayerTier, TeamMemberRole } from '../generated/prisma';
+import { PrismaClient, PlayerTier, TeamMemberRole } from '../generated/prisma/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({});
 
 async function main() {
   console.log('Seeding database...');

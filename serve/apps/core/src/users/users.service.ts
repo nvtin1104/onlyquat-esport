@@ -4,86 +4,101 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import {
-  User,
-  UserDocument,
-  CreateUserDto,
-  UpdateUserDto,
-  ChangePasswordDto,
-  UpdateRoleDto,
-} from '@app/common';
+import { PrismaService, UserRole } from '@app/common';
+import type { User } from '@app/common';
+import { CreateUserDto, UpdateUserDto, ChangePasswordDto, UpdateRoleDto } from '../dtos';
+
+type SafeUser = Omit<User, 'password'>;
 
 @Injectable()
 export class UsersService {
   private readonly SALT_ROUNDS = 10;
 
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
-    const existingUser = await this.userModel.findOne({
-      email: createUserDto.email,
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
     });
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
 
-    const user = new this.userModel(createUserDto);
-    return user.save();
+    return this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: createUserDto.password,
+        username: createUserDto.username,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        role: (createUserDto.role as UserRole) ?? UserRole.player,
+      },
+    });
   }
 
   async findAll(
     page = 1,
     limit = 20,
-  ): Promise<{ users: User[]; total: number; page: number; limit: number }> {
+  ): Promise<{ users: SafeUser[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
     const [users, total] = await Promise.all([
-      this.userModel.find().skip(skip).limit(limit).select('-password').exec(),
-      this.userModel.countDocuments(),
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        omit: { password: true },
+      }),
+      this.prisma.user.count(),
     ]);
     return { users, total, page, limit };
   }
 
-  async findById(userId: string): Promise<User> {
-    const user = await this.userModel
-      .findById(userId)
-      .select('-password')
-      .exec();
+  async findById(userId: string): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      omit: { password: true },
+    });
     if (!user) {
       throw new NotFoundException('User not found');
     }
     return user;
   }
 
-  async findByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).select('-password').exec();
+  async findByEmail(email: string): Promise<SafeUser | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+      omit: { password: true },
+    });
   }
 
   /** Internal use only - returns password field for auth verification */
-  async findByEmailWithPassword(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).exec();
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 
-  async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.userModel
-      .findByIdAndUpdate(userId, updateUserDto, { new: true })
-      .select('-password')
-      .exec();
+  async update(userId: string, updateUserDto: UpdateUserDto): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: updateUserDto,
+      omit: { password: true },
+    });
   }
 
   async delete(userId: string): Promise<{ message: string }> {
-    const user = await this.userModel
-      .findByIdAndUpdate(userId, { isActive: false }, { new: true })
-      .exec();
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+    });
     return { message: 'User deactivated successfully' };
   }
 
@@ -91,7 +106,7 @@ export class UsersService {
     userId: string,
     changePasswordDto: ChangePasswordDto,
   ): Promise<{ message: string }> {
-    const user = await this.userModel.findById(userId).exec();
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -104,11 +119,14 @@ export class UsersService {
       throw new UnauthorizedException('Old password is incorrect');
     }
 
-    user.password = await bcrypt.hash(
+    const hashedPassword = await bcrypt.hash(
       changePasswordDto.newPassword,
       this.SALT_ROUNDS,
     );
-    await user.save();
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
 
     return { message: 'Password changed successfully' };
   }
@@ -116,14 +134,15 @@ export class UsersService {
   async updateRole(
     userId: string,
     updateRoleDto: UpdateRoleDto,
-  ): Promise<User> {
-    const user = await this.userModel
-      .findByIdAndUpdate(userId, { role: updateRoleDto.role }, { new: true })
-      .select('-password')
-      .exec();
+  ): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { role: updateRoleDto.role as UserRole },
+      omit: { password: true },
+    });
   }
 }

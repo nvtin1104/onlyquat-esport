@@ -1,12 +1,7 @@
-// Database Module (MongoDB - legacy)
-export * from './database/database.module';
-
 // Database Module (PostgreSQL - Prisma)
 export * from './database/prisma.module';
 export * from './database/prisma.service';
 
-// Schemas
-export * from './schemas';
-
-// DTOs
-export * from './dtos';
+// Prisma generated types & enums
+export { UserRole, TournamentStatus, MatchStatus, PlayerTier, TeamMemberRole } from '../generated/prisma/client';
+export type { User, Game, Team, Player, TeamMember, Rating, Tournament, TournamentTeam, Match, MatchEvent } from '../generated/prisma/client';
