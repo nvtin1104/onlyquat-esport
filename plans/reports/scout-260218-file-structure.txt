@@ -1,0 +1,253 @@
+CRITICAL FILES FOR ADMIN DASHBOARD IMPLEMENTATION
+===================================================
+
+FRONTEND FILES TO REUSE/EXTEND
+==============================
+
+1. STYLING & THEME
+/c/project/onlyquat-esport/client/src/app/globals.css
+  - All color variables defined here
+  - Tailwind imports
+  - Custom theme configuration
+  - Font imports
+  - Global effects (noise, scrollbar, selection)
+
+/c/project/onlyquat-esport/client/postcss.config.mjs
+  - Tailwind integration
+
+/c/project/onlyquat-esport/client/next.config.ts
+  - Image optimization (remote patterns allowed)
+
+2. UI COMPONENTS (Custom Library)
+/c/project/onlyquat-esport/client/src/components/ui/
+  ├── Badge.tsx         -> Reuse for status badges
+  ├── Button.tsx        -> Reuse for actions
+  ├── Card.tsx          -> Reuse for dashboard cards
+  ├── Input.tsx         -> Reuse for forms
+  ├── RatingNumber.tsx  -> Reuse for player ratings
+  ├── SectionHeader.tsx -> Reuse for section titles
+  ├── Skeleton.tsx      -> Reuse for loading states
+  └── StatBar.tsx       -> Reuse for statistics
+
+3. LAYOUT COMPONENTS
+/c/project/onlyquat-esport/client/src/components/layout/
+  ├── Header.tsx
+  ├── Footer.tsx
+  └── (Others)
+  -> Can extend with AdminHeader/AdminNavigation
+
+4. CHART COMPONENTS
+/c/project/onlyquat-esport/client/src/components/charts/
+  -> Existing Recharts components, reuse for dashboards
+
+5. APPLICATION ROOT
+/c/project/onlyquat-esport/client/src/app/layout.tsx
+  - Root layout with metadata
+  - Body with globals.css
+  - HTML lang="vi"
+
+/c/project/onlyquat-esport/client/src/app/globals.css
+  - MUST keep when adding admin
+
+6. CONFIGURATION
+/c/project/onlyquat-esport/client/tsconfig.json
+  - Has @/* alias -> use for imports
+
+/c/project/onlyquat-esport/client/package.json
+  - All dependencies already available
+  - No new deps needed if using existing libraries
+
+BACKEND FILES (For API integration)
+===================================
+
+1. DATABASE SCHEMA
+/c/project/onlyquat-esport/serve/libs/common/prisma/schema.prisma
+  - User model with role field (player, organizer, admin)
+  - All admin-relevant models (Tournament, Match, Team, Player, etc)
+  - Use for understanding relationships
+
+2. API GATEWAY
+/c/project/onlyquat-esport/serve/apps/gateway/src/
+  - Entry point for all API calls
+  - JWT validation here
+  - Port 3000
+
+3. AUTHENTICATION
+/c/project/onlyquat-esport/serve/apps/gateway/src/auth/
+  - Login/register logic
+  - JWT generation
+
+/c/project/onlyquat-esport/serve/apps/gateway/src/guards/
+  - JWT verification guards
+  - Role-based access control
+
+/c/project/onlyquat-esport/serve/apps/core/src/
+  - User management service
+  - Auth handlers
+
+4. BUSINESS LOGIC
+/c/project/onlyquat-esport/serve/apps/esports/src/
+  - Tournament/match/team operations
+  - Player management
+
+ADMIN DASHBOARD FILES TO CREATE
+================================
+
+STRUCTURE:
+/c/project/onlyquat-esport/client/src/app/admin/
+├── layout.tsx                    # Admin layout with navigation
+├── page.tsx                      # Admin dashboard (main)
+├── users/
+│   ├── page.tsx                 # Users list
+│   ├── [id]/page.tsx            # User detail/edit
+│   └── new/page.tsx             # Create user
+├── tournaments/
+│   ├── page.tsx                 # Tournaments list
+│   ├── [id]/page.tsx            # Tournament detail
+│   └── new/page.tsx             # Create tournament
+├── matches/
+│   ├── page.tsx                 # Matches list
+│   ├── [id]/page.tsx            # Match detail
+│   └── new/page.tsx             # Create match
+├── teams/
+│   ├── page.tsx                 # Teams list
+│   ├── [id]/page.tsx            # Team detail
+│   └── new/page.tsx             # Create team
+├── players/
+│   ├── page.tsx                 # Players list
+│   ├── [id]/page.tsx            # Player detail
+│   └── new/page.tsx             # Create player
+└── analytics/
+    └── page.tsx                 # Analytics dashboard
+
+COMPONENTS TO CREATE:
+/c/project/onlyquat-esport/client/src/components/admin/
+├── AdminHeader.tsx              # Admin navigation
+├── AdminSidebar.tsx             # Left sidebar navigation
+├── AdminLayout.tsx              # Wrapper for admin pages
+├── DashboardCard.tsx            # Dashboard stat cards
+├── DataTable.tsx                # Reusable data table
+├── UserForm.tsx                 # User CRUD form
+├── TournamentForm.tsx           # Tournament CRUD form
+├── MatchForm.tsx                # Match CRUD form
+├── TeamForm.tsx                 # Team CRUD form
+└── PlayerForm.tsx               # Player CRUD form
+
+HOOKS TO CREATE:
+/c/project/onlyquat-esport/client/src/hooks/
+├── useAdminAuth.ts              # Check admin role
+├── useTournaments.ts            # Fetch tournaments
+├── useMatches.ts                # Fetch matches
+├── useTeams.ts                  # Fetch teams
+├── usePlayers.ts                # Fetch players
+└── useUsers.ts                  # Fetch users
+
+STORES TO CREATE:
+/c/project/onlyquat-esport/client/src/lib/
+├── adminStore.ts                # Admin UI state (Zustand)
+├── api.ts                        # API client helper functions
+└── auth.ts                       # Auth token management
+
+TYPES TO ADD:
+/c/project/onlyquat-esport/client/src/types/
+├── admin.ts                     # Admin-specific types
+├── api.ts                       # API request/response types
+└── auth.ts                      # Auth types
+
+MIDDLEWARE/GUARDS:
+/c/project/onlyquat-esport/client/src/
+├── middleware.ts                # Next.js middleware for auth
+└── lib/authUtils.ts             # Helper functions
+
+FILE SIZE REFERENCE
+===================
+
+Small files (copy/reference pattern):
+- Input.tsx: ~1.4 KB
+- Button.tsx: ~1.6 KB
+- Card.tsx: ~0.7 KB
+
+Medium files (study & build on):
+- globals.css: ~2.3 KB
+- next.config.ts: <1 KB
+
+Large files (reference only):
+- schema.prisma: 286 lines
+- package.json files: 30-70 lines
+
+KEY PATH ALIASES TO USE
+=======================
+
+Frontend (@/* in tsconfig.json):
+@/components    -> src/components
+@/app           -> src/app
+@/lib           -> src/lib
+@/hooks         -> src/hooks
+@/types         -> src/types
+@/data          -> src/data
+
+Backend (@app/* in tsconfig.json):
+@app/common     -> libs/common/src
+
+ENVIRONMENT VARIABLES NEEDED
+=============================
+
+For frontend (if needed):
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+For backend (already exists):
+DATABASE_URL=postgresql://...
+NATS_URL=nats://...
+JWT_SECRET=...
+
+API ENDPOINTS TO INTEGRATE WITH
+=================================
+
+All requests go through: http://localhost:3000
+
+Example endpoints (from gateway):
+POST   /auth/login
+POST   /auth/register
+GET    /tournaments
+POST   /tournaments
+GET    /tournaments/:id
+PUT    /tournaments/:id
+DELETE /tournaments/:id
+... similar for matches, teams, players, users
+
+Note: Exact endpoints depend on gateway implementation
+Recommend reviewing serve/apps/gateway/src/ for current routes
+
+DEPENDENCIES ALREADY AVAILABLE
+===============================
+
+No need to install:
+✓ React 19
+✓ Next.js 16
+✓ TypeScript
+✓ Tailwind CSS v4
+✓ Zustand
+✓ Lucide React
+✓ Framer Motion
+✓ Recharts
+✓ Clsx
+✓ Tailwind Merge
+
+Potentially useful to add:
+- react-table (DataTable library, optional)
+- zod (Schema validation, optional)
+- react-hook-form (Form handling, optional)
+
+GIT CONSIDERATIONS
+==================
+
+Changes will be in: /c/project/onlyquat-esport/
+Branch: main (current)
+Recent: file C:\project\onlyquat-esport\serve\apps\gateway\tsconfig.app.json modified
+
+Files to NOT commit:
+- node_modules/
+- .next/
+- dist/
+- .env (use .env.example)
+

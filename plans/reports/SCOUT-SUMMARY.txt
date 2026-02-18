@@ -1,0 +1,216 @@
+===============================================================================
+ONLYQUAT ESPORTS - PROJECT ARCHITECTURE SCOUT SUMMARY
+===============================================================================
+Generated: Feb 18, 2026
+Scope: Full codebase analysis for admin dashboard implementation
+
+QUICK FACTS
+===========
+Framework: NestJS (backend monorepo) + Next.js 16.1.6 (frontend)
+Database: PostgreSQL + Prisma 7
+Language: TypeScript
+Package Manager: pnpm
+State: Recent migration from MongoDB to PostgreSQL
+Status: Admin dashboard DOES NOT EXIST (new feature)
+
+WORKSPACE LAYOUT
+================
+root/
+├── serve/                    Backend (NestJS microservices)
+│   ├── apps/
+│   │   ├── gateway/         HTTP API Gateway (Port 3000)
+│   │   ├── core/            Auth & Users (NATS)
+│   │   └── esports/         Tournaments & Matches (NATS)
+│   └── libs/
+│       └── common/          Shared (Prisma, models)
+│
+└── client/                   Frontend (Next.js + React 19)
+    └── src/
+        ├── app/            App Router routes
+        ├── components/     React components
+        ├── lib/            Utilities
+        ├── hooks/          Custom hooks
+        ├── types/          TypeScript types
+        └── data/           Mock data
+
+FRONTEND STACK
+==============
+- Next.js 16.1.6 (App Router)
+- React 19.2.3
+- TypeScript 5
+- Tailwind CSS v4
+- Zustand (state management)
+- Framer Motion (animations)
+- Recharts (charts)
+- Lucide React (icons)
+- Custom UI component library (8 components)
+
+BACKEND STACK
+=============
+- NestJS 10.x
+- Prisma 7 ORM
+- PostgreSQL
+- NATS (message broker)
+- JWT authentication
+- Passport.js + passport-jwt
+- Bcrypt (password hashing)
+
+DATABASE MODELS (Ready for Admin)
+=================================
+✓ User (with admin role)
+✓ Player (with tiers S-F)
+✓ Team (with stats)
+✓ Tournament (with status)
+✓ Match (with results)
+✓ Rating (player feedback)
+✓ Game definitions
+✓ Team members
+✓ Match events
+
+STYLING THEME (Gaming/Esports)
+==============================
+Colors:
+- Primary Accent: Acid Green (#CCFF00)
+- Secondary: Lava Orange (#FF4D00)
+- Tier S: Acid, A: Green, B: Cyan, C: Gold, D: Orange, F: Red
+- Dark Theme: #121212, #1A1A1B, #000000
+- Text: #E8E8E8 (primary), #888888 (secondary), #555555 (dim)
+
+Fonts:
+- Display: Chakra Petch
+- Body: Be Vietnam Pro
+- Mono: JetBrains Mono
+
+Effects:
+- Noise texture overlay
+- Custom scrollbar
+- Glow effects
+- Easing: cubic-bezier(.23, 1, .32, 1)
+
+CURRENT ROUTES (Public-facing)
+==============================
+/                    Home (landing)
+/players             Player list
+/players/[slug]      Player detail
+/teams               Team list
+/teams/[slug]        Team detail
+/leaderboard         Rankings
+/compare             Comparison tool
+/admin/*             DOES NOT EXIST YET
+
+KEY INSIGHTS
+============
+
+Advantages:
+✓ All styling ready (Tailwind v4 with custom theme)
+✓ Reusable UI components
+✓ Database already has admin role
+✓ Authentication/authorization framework in place
+✓ API Gateway ready for admin endpoints
+✓ No need to install extra dependencies
+✓ pnpm workspace properly configured
+✓ Recent migration = clean, modern stack
+
+Challenges:
+⚠ Need to build admin routes structure
+⚠ Need to create admin-specific components
+⚠ Need to implement frontend auth middleware
+⚠ Need to add admin-specific API endpoints (or extend existing)
+⚠ No admin form libraries pre-installed
+⚠ No data table library pre-installed
+
+What's Already Working:
+✓ User authentication (JWT)
+✓ Role-based authorization system
+✓ Database with admin role defined
+✓ API Gateway accepting requests
+✓ Styling system with admin colors
+✓ Icon library
+✓ Animation library
+✓ State management
+
+FILES TO READ FIRST
+===================
+1. serve/nest-cli.json          (project structure)
+2. serve/libs/common/prisma/schema.prisma  (database)
+3. client/src/app/globals.css   (theme colors)
+4. serve/apps/gateway/src/      (API entry point)
+5. client/src/components/ui/    (existing components)
+
+KEY COMMANDS
+============
+Backend startup:
+  pnpm run start:all              All services concurrently
+  pnpm run start:dev:gateway      Gateway only (Port 3000)
+  pnpm run db:setup              Database setup
+
+Frontend startup:
+  pnpm run dev                    Dev server
+  pnpm run build                  Production build
+
+Database:
+  pnpm run prisma:studio         View/edit data in UI
+
+RECOMMENDATIONS FOR ADMIN DASHBOARD
+====================================
+
+1. Create /app/admin/ route structure
+   - admin/page.tsx (dashboard)
+   - admin/users/, /tournaments/, /matches/, etc.
+
+2. Build admin components
+   - AdminLayout wrapper
+   - Admin navigation/sidebar
+   - Forms (UserForm, TournamentForm, etc)
+   - Data tables (using Recharts or custom)
+   - Dashboard cards
+
+3. Add hooks for data fetching
+   - useUsers, useTournaments, useMatches, etc.
+   - useAdminAuth (verify role)
+
+4. Create Zustand stores (optional)
+   - adminStore for UI state
+   - API client helper functions
+
+5. Implement auth middleware
+   - Check JWT token
+   - Verify admin role
+   - Redirect if unauthorized
+
+6. Reuse everything styling-wise
+   - Colors already in globals.css
+   - Buttons, Cards, Inputs from /components/ui/
+   - Icons from Lucide React
+
+7. Consider optional dependencies
+   - react-table for data tables
+   - react-hook-form for forms
+   - zod for validation
+
+TECHNICAL DEBT
+==============
+✓ Recently migrated MongoDB → PostgreSQL (clean state)
+✓ Using latest libraries (React 19, Next.js 16, Tailwind v4)
+⚠ Frontend has no auth middleware yet
+⚠ No form validation library
+⚠ No data table library
+
+NEXT STEPS
+==========
+
+1. Review: /plans/reports/scout-260218-architecture.txt (overview)
+2. Review: /plans/reports/scout-260218-file-structure.txt (file reference)
+3. Check: serve/libs/common/prisma/schema.prisma (database structure)
+4. Explore: serve/apps/gateway/src/ (current API endpoints)
+5. Study: client/src/components/ui/ (component patterns)
+6. Start: Create /app/admin/layout.tsx and admin navigation
+
+REPORT FILES
+============
+1. scout-260218-architecture.txt   (Full architecture overview)
+2. scout-260218-file-structure.txt (Detailed file reference)
+3. SCOUT-SUMMARY.txt              (This file)
+
+All files in: /c/project/onlyquat-esport/plans/reports/
+

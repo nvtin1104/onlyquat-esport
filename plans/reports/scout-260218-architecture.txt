@@ -1,0 +1,281 @@
+OnlyQuat Esports Platform - Architecture Scout Report
+======================================================
+Date: February 18, 2026
+
+1. FRAMEWORK & MONOREPO SETUP
+============================
+Type: Polyrepo with Backend Monorepo
+- Backend: NestJS (custom structure, not using Nx)
+- Frontend: Next.js standalone
+- Workspace: pnpm with workspace config
+
+Structure:
+  root/
+  ├── serve/    # Backend NestJS monorepo
+  ├── client/   # Frontend Next.js app
+  └── (misc)
+
+2. BACKEND ARCHITECTURE (serve/)
+================================
+Framework: NestJS Microservices with NATS communication
+
+3 Apps:
+1. gateway    - HTTP entry (Port 3000), routes via NATS
+2. core       - Auth & Users (NATS only)
+3. esports    - Tournaments & Matches (NATS only)
+
+Shared Library:
+- common: PrismaService, database models, utilities
+
+Config: nest-cli.json defines projects, tsconfig.json with aliases
+
+3. DATABASE LAYER
+=================
+PostgreSQL + Prisma ORM v7
+- Adapter: @prisma/adapter-pg (connection pooling)
+- Schema: serve/libs/common/prisma/schema.prisma
+- Generated: serve/libs/common/generated/prisma/
+
+Core Tables:
+- users (auth users: player/organizer/admin)
+- players (ratings, tier S-F)
+- teams (profiles, stats)
+- games (game definitions)
+- tournaments (metadata)
+- matches (results)
+- ratings (feedback)
+- team_members (membership)
+- tournament_teams (enrollment)
+- match_events (live events)
+
+Enums:
+- UserRole: player, organizer, admin
+- PlayerTier: S, A, B, C, D, F
+- TournamentStatus: upcoming, ongoing, completed, cancelled
+- MatchStatus: scheduled, live, completed, cancelled
+
+4. FRONTEND ARCHITECTURE (client/)
+==================================
+Next.js 16.1.6 + React 19 + App Router
+
+Routes:
+- /                    Home (landing)
+- /players             Player list
+- /players/[slug]      Player detail
+- /teams               Team list
+- /teams/[slug]        Team detail
+- /leaderboard         Rankings
+- /compare             Comparison tool
+- /admin/*             (DOES NOT EXIST YET)
+
+Components Structure:
+  src/
+  ├── app/          App Router routes
+  ├── components/
+  │   ├── ui/       Custom UI components
+  │   ├── charts/   Recharts visualizations
+  │   ├── landing/  Landing page
+  │   ├── layout/   Header, Footer
+  │   └── player/   Player-specific UI
+  ├── lib/          Utilities
+  ├── hooks/        Custom hooks
+  ├── types/        TypeScript definitions
+  └── data/         Mock/static data
+
+5. STYLING SYSTEM
+=================
+Tailwind CSS v4 + PostCSS
+Theme: Dark gaming/esports aesthetic
+
+Colors:
+- Background: #121212, #1A1A1B, #000000
+- Primary Accent: Acid green (#CCFF00)
+- Secondary: Lava orange (#FF4D00)
+- Player Tiers: S(Acid), A(Green), B(Cyan), C(Gold), D(Orange), F(Red)
+- Text: Primary (#E8E8E8), Secondary (#888888), Dim (#555555)
+
+Fonts:
+- Display: Chakra Petch (400-700)
+- Body: Be Vietnam Pro (400-800)
+- Mono: JetBrains Mono (400-700)
+
+Custom Effects:
+- Noise texture overlay
+- Glow effects for accents
+- Custom scrollbar
+- Easing: cubic-bezier(.23, 1, .32, 1)
+
+UI Components (custom, no shadcn/ui):
+- Badge.tsx
+- Button.tsx
+- Card.tsx
+- Input.tsx
+- RatingNumber.tsx
+- SectionHeader.tsx
+- Skeleton.tsx
+- StatBar.tsx
+
+6. STATE MANAGEMENT & LIBRARIES
+================================
+Frontend Dependencies:
+- zustand ^5.0.11       State management
+- framer-motion ^12.34  Animations
+- recharts ^3.7.0       Charts
+- lucide-react ^0.564   Icons
+- tailwind-merge ^3.4   Tailwind utilities
+- clsx ^2.1.1          Conditional classes
+
+7. BACKEND TECH STACK
+====================
+Core:
+- @nestjs/core ^10.0.0
+- @nestjs/common ^10.0.0
+- @nestjs/platform-express ^10.0.0
+- @nestjs/platform-fastify ^10.0.0
+
+Database:
+- @prisma/client ^7.4.0
+- @prisma/adapter-pg ^7.4.0
+- pg ^8.18.0
+
+Authentication:
+- @nestjs/jwt ^11.0.2
+- @nestjs/passport ^11.0.5
+- passport ^0.7.0
+- passport-jwt ^4.0.1
+- bcrypt ^6.0.0
+
+Communication:
+- @nestjs/microservices ^10.0.0
+- nats ^2.19.0
+
+Validation:
+- class-validator ^0.14.0
+- class-transformer ^0.5.1
+
+8. BUILD SCRIPTS
+================
+Backend (serve/):
+pnpm run start:all              All services (dev)
+pnpm run start:dev:gateway      Gateway only
+pnpm run start:dev:core         Core only
+pnpm run start:dev:esports      Esports only
+pnpm run db:setup              DB setup (generate+migrate+seed)
+pnpm run prisma:studio         Prisma UI
+
+Frontend (client/):
+pnpm run dev                    Dev server
+pnpm run build                  Production build
+pnpm run start                  Run production
+pnpm run lint                   ESLint
+
+9. AUTHENTICATION & AUTHORIZATION
+==================================
+Current:
+- JWT tokens (@nestjs/jwt)
+- Passport.js + JWT strategy
+- Bcrypt password hashing
+- User roles: player, organizer, admin
+- Guards at: serve/apps/gateway/src/guards/
+- Strategies at: serve/apps/gateway/src/strategies/
+
+Frontend: No auth guard/middleware in current setup
+JWT: Must be stored client-side (not visible in components yet)
+
+10. ADMIN DASHBOARD STATUS
+===========================
+Status: DOES NOT EXIST YET
+- No admin routes
+- No admin components
+- No admin pages
+- No admin navigation
+
+This is a NEW feature that can reuse existing infrastructure.
+
+11. CONFIGURATION FILES
+=======================
+Backend:
+- serve/nest-cli.json        NestJS projects
+- serve/tsconfig.json        TypeScript + aliases
+- serve/package.json         Dependencies
+- serve/docker-compose.yml   Infrastructure
+- serve/.env                 Environment vars
+- serve/.pnpmrc             pnpm config
+
+Frontend:
+- client/next.config.ts      Next.js config
+- client/tsconfig.json       TypeScript + @/* alias
+- client/postcss.config.mjs  Tailwind
+- client/package.json        Dependencies
+- client/eslint.config.mjs   Linting
+
+Path Aliases:
+Backend: @app/common -> libs/common/src
+Frontend: @/* -> src/*
+
+12. INFRASTRUCTURE
+==================
+Docker Compose Services:
+- PostgreSQL    Database
+- NATS          Message broker
+- Redis         Caching
+
+Environment: .env file (DATABASE_URL, NATS_URL, JWT_SECRET, etc)
+
+KEY INSIGHTS FOR ADMIN DASHBOARD
+=================================
+
+Can Reuse:
+✓ Tailwind CSS theme (dark gaming aesthetic)
+✓ Custom UI components (Button, Card, Input, Badge, etc)
+✓ Lucide icons
+✓ Framer Motion animations
+✓ Recharts for charts
+✓ Zustand for state
+✓ TypeScript setup
+✓ API Gateway (localhost:3000)
+✓ Database models
+✓ User roles system
+
+Must Build:
+⚠ Admin route structure (app/admin/*)
+⚠ Protected middleware (JWT + role check)
+⚠ Admin layout/navigation
+⚠ Admin pages (dashboard, users, tournaments, matches, teams, players)
+⚠ Forms for CRUD operations
+⚠ Data tables/lists
+⚠ Admin-specific styling (optional)
+
+Database:
+✓ All tables ready
+✓ Admin role already defined
+✓ Relationships in place
+✓ Indexes for performance
+
+Authentication:
+✓ JWT implemented
+✓ Role-based access control
+✓ Just need frontend middleware
+
+Recent Changes (Git History):
+- f66022b: Prisma 7 PostgreSQL adapter + migrations
+- 260cd25: Migrated from MongoDB/Mongoose to Prisma
+- 0ab903d: Split core service, added JWT auth
+- a53d9ea: Added PostgreSQL + Prisma database
+
+=> Platform recently migrated to PostgreSQL + Prisma!
+
+RECOMMENDATIONS
+===============
+
+1. Create client/src/app/admin/ with layout and pages
+2. Use custom UI components from /components/ui/
+3. Leverage Tailwind theme (colors ready)
+4. Implement role guard middleware
+5. Create data tables using Recharts + custom components
+6. Connect to gateway endpoint (localhost:3000)
+7. Reuse existing icons, animations, colors
+8. Create Zustand stores for admin state
+9. Add admin navigation
+10. Follow existing component patterns
+

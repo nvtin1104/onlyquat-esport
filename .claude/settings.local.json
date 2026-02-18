@@ -10,7 +10,24 @@
       "Bash(npx prisma generate:*)",
       "Bash(pnpm install:*)",
       "Bash(pnpm start:dev:core:*)",
-      "Bash(pnpm start:all)"
+      "Bash(pnpm start:all)",
+      "Bash(\"/c/project/onlyquat-esport/plans/reports/scout-260218-project-architecture.md\":*)",
+      "Bash(\"/c/project/onlyquat-esport/plans/reports/scout-260218-architecture.txt\":*)",
+      "Bash(\"/c/project/onlyquat-esport/plans/reports/scout-260218-file-structure.txt\":*)",
+      "Bash(ls:*)",
+      "Bash(\"/c/project/onlyquat-esport/plans/reports/SCOUT-SUMMARY.txt\":*)",
+      "Bash(/c/project/onlyquat-esport/plans/20260218-admin-dashboard/plan.md:*)",
+      "Bash(__NEW_LINE_1b0dfd4305ffa48b__ cat)",
+      "Bash(/c/project/onlyquat-esport/plans/20260218-admin-dashboard/phase-01-foundation.md:*)",
+      "Bash(/c/project/onlyquat-esport/plans/20260218-admin-dashboard/phase-02-overview.md:*)",
+      "Bash(/c/project/onlyquat-esport/plans/20260218-admin-dashboard/phase-03-players.md:*)",
+      "Bash(/c/project/onlyquat-esport/plans/20260218-admin-dashboard/phase-04-teams-matches.md:*)",
+      "Bash(/c/project/onlyquat-esport/plans/20260218-admin-dashboard/phase-05-moderation-points-users.md:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm create:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm exec vite:*)",
+      "Bash(npx vite build)"
     ]
   },
   "environment": {
