@@ -10,9 +10,18 @@ datasource db {
 // ─── Enums ──────────────────────────────────────────────────────────────────
 
 enum UserRole {
-  player
-  organizer
-  admin
+  ADMIN       // Quản trị toàn hệ thống
+  MOD         // Duyệt rating, quản lý nội dung
+  ORGANIZER   // Quản lý giải đấu, trận đấu
+  PLAYER      // Tuyển thủ (được claim profile)
+  USER        // Fan, đánh giá, minigame
+}
+
+enum UserStatus {
+  ACTIVE,
+  UNACTIVE,
+  BAN,
+  LOCK
 }
 
 enum TournamentStatus {
@@ -46,7 +55,30 @@ enum TeamMemberRole {
 }
 
 // ─── Models ─────────────────────────────────────────────────────────────────
+// CORE MODELS
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  username  String   @unique
+  name String?
+  role      UserRole @default(USER)
+  status  UserStatus  @default(ACTIVE)
+  avatar    String?
+  ggId String?
+  suspendedAt    DateTime? // Thời điểm bắt đầu bị chặn
+  suspendedUntil DateTime? // Thời điểm được mở chặn (null = vĩnh viễn)
+  suspensionReason String? // Lý do: "Vi phạm điều khoản", "Spam", v.v.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  players              Player[]
+  ratings              Rating[]
+  organizedTournaments Tournament[]
+  refereedMatches      Match[]
+
+  @@map("users")
+}
 model Game {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -62,26 +94,7 @@ model Game {
   @@map("games")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  username  String   @unique
-  firstName String?
-  lastName  String?
-  role      UserRole @default(player)
-  isActive  Boolean  @default(true)
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  players              Player[]
-  ratings              Rating[]
-  organizedTournaments Tournament[]
-  refereedMatches      Match[]
-
-  @@map("users")
-}
 
 model Team {
   id        String   @id @default(uuid())
