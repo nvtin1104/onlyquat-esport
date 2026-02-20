@@ -9,7 +9,6 @@ dist/
 *.tsbuildinfo
 
 # Prisma generated client
-libs/common/generated/
 
 # Environment variables
 .env

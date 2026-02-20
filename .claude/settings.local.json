@@ -27,7 +27,10 @@
       "Bash(pnpm create:*)",
       "Bash(pnpm approve-builds:*)",
       "Bash(pnpm exec vite:*)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(git -C \"C:\\\\project\\\\onlyquat-esport\" log -1 --oneline)",
+      "Bash(test:*)",
+      "Bash(git add:*)"
     ]
   },
   "environment": {
