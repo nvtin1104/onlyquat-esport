@@ -18,7 +18,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           'hover:-translate-y-0.5',
           variant === 'primary' && [
             'bg-accent-acid text-bg-base',
-            'hover:shadow-[0_0_30px_rgba(204,255,0,0.4)]',
+            'hover:shadow-[var(--shadow-acid-glow)]',
             '[clip-path:polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]',
           ],
           variant === 'secondary' && [

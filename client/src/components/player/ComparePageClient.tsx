@@ -55,7 +55,7 @@ function PlayerSelector({
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const accentColor = color === 'acid' ? '#CCFF00' : '#FF4D00';
+  const accentColor = color === 'acid' ? 'var(--accent-acid)' : 'var(--accent-lava)';
   const filtered = players.filter((p) =>
     p.displayName.toLowerCase().includes(search.toLowerCase())
   );
@@ -274,10 +274,10 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                 Radar Thống Kê
               </h2>
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
-                <span className="font-display font-semibold text-sm" style={{ color: '#CCFF00' }}>
+                <span className="font-display font-semibold text-sm" style={{ color: 'var(--accent-acid)' }}>
                   — {selectedA.displayName}
                 </span>
-                <span className="font-display font-semibold text-sm" style={{ color: '#FF4D00' }}>
+                <span className="font-display font-semibold text-sm" style={{ color: 'var(--accent-lava)' }}>
                   — {selectedB.displayName}
                 </span>
               </div>
@@ -314,7 +314,7 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                     <div key={key} className="flex items-center px-6 py-4">
                       <span
                         className="font-mono text-base font-bold w-12 text-right"
-                        style={{ color: aWins ? '#CCFF00' : '#555555' }}
+                        style={{ color: aWins ? 'var(--accent-acid)' : 'var(--text-dim)' }}
                       >
                         {valA}
                       </span>
@@ -334,7 +334,7 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                       </div>
                       <span
                         className="font-mono text-base font-bold w-12"
-                        style={{ color: bWins ? '#FF4D00' : '#555555' }}
+                        style={{ color: bWins ? 'var(--accent-lava)' : 'var(--text-dim)' }}
                       >
                         {valB}
                       </span>
@@ -358,11 +358,11 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                 <div className="text-center">
                   <div
                     className="font-display font-bold text-xl"
-                    style={{ color: verdict === 'A' ? '#CCFF00' : '#555555' }}
+                    style={{ color: verdict === 'A' ? 'var(--accent-acid)' : 'var(--text-dim)' }}
                   >
                     {selectedA.displayName}
                   </div>
-                  <div className="font-mono text-4xl font-bold mt-1" style={{ color: '#CCFF00' }}>
+                  <div className="font-mono text-4xl font-bold mt-1" style={{ color: 'var(--accent-acid)' }}>
                     {winsA}
                   </div>
                   <div className="font-mono text-[10px] text-text-dim uppercase tracking-wider mt-1">
@@ -374,7 +374,7 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                   {verdict !== 'tie' ? (
                     <Trophy
                       className="w-8 h-8 mb-2"
-                      style={{ color: verdict === 'A' ? '#CCFF00' : '#FF4D00' }}
+                      style={{ color: verdict === 'A' ? 'var(--accent-acid)' : 'var(--accent-lava)' }}
                     />
                   ) : (
                     <Minus className="w-8 h-8 mb-2 text-text-dim" />
@@ -392,11 +392,11 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                 <div className="text-center">
                   <div
                     className="font-display font-bold text-xl"
-                    style={{ color: verdict === 'B' ? '#FF4D00' : '#555555' }}
+                    style={{ color: verdict === 'B' ? 'var(--accent-lava)' : 'var(--text-dim)' }}
                   >
                     {selectedB.displayName}
                   </div>
-                  <div className="font-mono text-4xl font-bold mt-1" style={{ color: '#FF4D00' }}>
+                  <div className="font-mono text-4xl font-bold mt-1" style={{ color: 'var(--accent-lava)' }}>
                     {winsB}
                   </div>
                   <div className="font-mono text-[10px] text-text-dim uppercase tracking-wider mt-1">
@@ -410,7 +410,7 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                 {verdict === 'tie' ? (
                   <>
                     <span className="text-accent-acid">{selectedA.displayName}</span> và{' '}
-                    <span style={{ color: '#FF4D00' }}>{selectedB.displayName}</span> hòa nhau{' '}
+                    <span style={{ color: 'var(--accent-lava)' }}>{selectedB.displayName}</span> hòa nhau{' '}
                     <span className="text-text-primary font-semibold">
                       {winsA}/{statKeys.length}
                     </span>{' '}
@@ -427,7 +427,7 @@ export function ComparePageClient({ players }: ComparePageClientProps) {
                   </>
                 ) : (
                   <>
-                    <span style={{ color: '#FF4D00' }} className="font-semibold">
+                    <span style={{ color: 'var(--accent-lava)' }} className="font-semibold">
                       {selectedB.displayName}
                     </span>{' '}
                     thắng{' '}

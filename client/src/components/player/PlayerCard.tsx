@@ -22,10 +22,10 @@ export function PlayerCard({ player, rank, showStats = true }: PlayerCardProps) 
       whileHover="hover"
       animate="rest"
       variants={{
-        rest: { y: 0, boxShadow: '0 0 0px rgba(204,255,0,0)' },
+        rest: { y: 0, boxShadow: 'var(--shadow-card)' },
         hover: {
           y: -8,
-          boxShadow: '0 0 40px rgba(204,255,0,0.15)',
+          boxShadow: 'var(--shadow-card-hover)',
           transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
         },
       }}
@@ -47,7 +47,7 @@ export function PlayerCard({ player, rank, showStats = true }: PlayerCardProps) 
             src={player.imageUrl}
             alt={player.displayName}
             fill
-            className="object-cover transition-all duration-400 grayscale-[50%] group-hover:grayscale-0 group-hover:scale-105"
+            className="object-cover transition-all duration-400 dark:grayscale-[50%] group-hover:grayscale-0 group-hover:scale-105"
           />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg-elevated to-transparent" />
         </div>

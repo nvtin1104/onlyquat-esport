@@ -20,10 +20,10 @@ export const fadeUpItem: Variants = {
 };
 
 export const cardHover: Variants = {
-  rest: { y: 0, boxShadow: 'none' },
+  rest: { y: 0, boxShadow: 'var(--shadow-card)' },
   hover: {
     y: -8,
-    boxShadow: '0 0 40px rgba(204,255,0,0.15)',
+    boxShadow: 'var(--shadow-card-hover)',
     transition: { duration: 0.4, ease: easeOutExpo },
   },
 };

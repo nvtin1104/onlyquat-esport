@@ -6,6 +6,7 @@ import { Menu, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NAV_LINKS } from '@/lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -37,14 +38,17 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Mobile Toggle */}
-        <button
-          className="md:hidden text-text-primary"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Right side — theme toggle + mobile menu */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <button
+            className="md:hidden text-text-primary"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Nav */}

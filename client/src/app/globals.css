@@ -1,31 +1,163 @@
 @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════
+   LIGHT THEME (default)
+   ═══════════════════════════════════════════ */
+:root {
+  /* Background */
+  --bg-base: #F5F5F5;
+  --bg-elevated: #FFFFFF;
+  --bg-surface: #FAFAFA;
+  --bg-overlay: rgba(0, 0, 0, 0.4);
+  --bg-card: #FFFFFF;
+
+  /* Border */
+  --border-subtle: #E5E5E5;
+  --border-hover: #D1D1D1;
+
+  /* Accent — darker acid green for light backgrounds (WCAG AA) */
+  --accent-acid: #7AB800;
+  --accent-lava: #E04400;
+  --accent-acid-dim: rgba(122, 184, 0, 0.08);
+  --accent-acid-glow: rgba(122, 184, 0, 0.25);
+  --accent-lava-dim: rgba(224, 68, 0, 0.08);
+  --accent-lava-glow: rgba(224, 68, 0, 0.25);
+
+  /* Text */
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --text-dim: #A0A0A0;
+
+  /* Tier Colors — darker for light backgrounds */
+  --tier-s: #6B9E00;
+  --tier-a: #00B35F;
+  --tier-b: #0088CC;
+  --tier-c: #CC9200;
+  --tier-d: #CC3D00;
+  --tier-f: #CC3333;
+
+  /* Semantic */
+  --success: #00B35F;
+  --warning: #CC9200;
+  --danger: #CC3333;
+  --info: #0088CC;
+
+  /* Shadows — real box-shadow for light mode */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-acid-glow: 0 0 20px rgba(122, 184, 0, 0.15);
+
+  /* Noise overlay — disabled in light mode */
+  --noise-opacity: 0;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #D1D1D1;
+  --scrollbar-track: #F5F5F5;
+
+  /* Selection */
+  --selection-bg: #7AB800;
+  --selection-text: #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════
+   DARK THEME (.dark class set by next-themes)
+   ═══════════════════════════════════════════ */
+.dark {
+  /* Background */
+  --bg-base: #121212;
+  --bg-elevated: #1A1A1B;
+  --bg-surface: #000000;
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+  --bg-card: #0A0A0A;
+
+  /* Border */
+  --border-subtle: #2A2A2B;
+  --border-hover: #3A3A3B;
+
+  /* Accent — bright neon for dark backgrounds */
+  --accent-acid: #CCFF00;
+  --accent-lava: #FF4D00;
+  --accent-acid-dim: rgba(204, 255, 0, 0.12);
+  --accent-acid-glow: rgba(204, 255, 0, 0.4);
+  --accent-lava-dim: rgba(255, 77, 0, 0.12);
+  --accent-lava-glow: rgba(255, 77, 0, 0.4);
+
+  /* Text */
+  --text-primary: #E8E8E8;
+  --text-secondary: #888888;
+  --text-dim: #555555;
+
+  /* Tier Colors — bright neon on dark backgrounds */
+  --tier-s: #CCFF00;
+  --tier-a: #00FF88;
+  --tier-b: #00AAFF;
+  --tier-c: #FFB800;
+  --tier-d: #FF4D00;
+  --tier-f: #FF4444;
+
+  /* Semantic */
+  --success: #00FF88;
+  --warning: #FFB800;
+  --danger: #FF4444;
+  --info: #00AAFF;
+
+  /* Shadows — glow effects for dark mode */
+  --shadow-card: none;
+  --shadow-card-hover: 0 0 40px rgba(204, 255, 0, 0.15);
+  --shadow-acid-glow: 0 0 40px rgba(204, 255, 0, 0.15);
+
+  /* Noise overlay — enabled in dark mode */
+  --noise-opacity: 0.025;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #2A2A2B;
+  --scrollbar-track: #121212;
+
+  /* Selection */
+  --selection-bg: #CCFF00;
+  --selection-text: #121212;
+}
+
+/* ═══════════════════════════════════════════
+   TAILWIND v4 THEME TOKENS
+   ═══════════════════════════════════════════ */
 @theme inline {
-  --color-bg-base: #121212;
-  --color-bg-elevated: #1A1A1B;
-  --color-bg-surface: #000000;
+  --color-bg-base: var(--bg-base);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-overlay: var(--bg-overlay);
+  --color-bg-card: var(--bg-card);
 
-  --color-border-subtle: #2A2A2B;
-  --color-border-hover: #3A3A3B;
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover: var(--border-hover);
 
-  --color-accent-acid: #CCFF00;
-  --color-accent-lava: #FF4D00;
-  --color-accent-acid-dim: rgba(204,255,0,0.12);
-  --color-accent-acid-glow: rgba(204,255,0,0.4);
-  --color-accent-lava-dim: rgba(255,77,0,0.12);
-  --color-accent-lava-glow: rgba(255,77,0,0.4);
+  --color-accent-acid: var(--accent-acid);
+  --color-accent-lava: var(--accent-lava);
+  --color-accent-acid-dim: var(--accent-acid-dim);
+  --color-accent-acid-glow: var(--accent-acid-glow);
+  --color-accent-lava-dim: var(--accent-lava-dim);
+  --color-accent-lava-glow: var(--accent-lava-glow);
 
-  --color-text-primary: #E8E8E8;
-  --color-text-secondary: #888888;
-  --color-text-dim: #555555;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-dim: var(--text-dim);
 
-  --color-tier-s: #CCFF00;
-  --color-tier-a: #00FF88;
-  --color-tier-b: #00AAFF;
-  --color-tier-c: #FFB800;
-  --color-tier-d: #FF4D00;
-  --color-tier-f: #FF4444;
+  --color-tier-s: var(--tier-s);
+  --color-tier-a: var(--tier-a);
+  --color-tier-b: var(--tier-b);
+  --color-tier-c: var(--tier-c);
+  --color-tier-d: var(--tier-d);
+  --color-tier-f: var(--tier-f);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-acid-glow: var(--shadow-acid-glow);
 
   --font-display: 'Chakra Petch', sans-serif;
   --font-body: 'Be Vietnam Pro', sans-serif;
@@ -34,46 +166,32 @@
   --ease-out-expo: cubic-bezier(.23, 1, .32, 1);
 }
 
-:root {
-  --bg-base: #121212;
-  --bg-elevated: #1A1A1B;
-  --bg-surface: #000000;
-  --bg-overlay: rgba(0, 0, 0, 0.85);
-  --border-subtle: #2A2A2B;
-  --border-hover: #3A3A3B;
-  --accent-acid: #CCFF00;
-  --accent-lava: #FF4D00;
-  --accent-acid-dim: rgba(204,255,0,0.12);
-  --accent-acid-glow: rgba(204,255,0,0.4);
-  --accent-lava-dim: rgba(255,77,0,0.12);
-  --accent-lava-glow: rgba(255,77,0,0.4);
-  --text-primary: #E8E8E8;
-  --text-secondary: #888888;
-  --text-dim: #555555;
-}
-
+/* ═══════════════════════════════════════════
+   GLOBAL STYLES
+   ═══════════════════════════════════════════ */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2A2A2B #121212;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 ::selection {
-  background: #CCFF00;
-  color: #121212;
+  background: var(--selection-bg);
+  color: var(--selection-text);
 }
 
 body {
   background: var(--bg-base);
   color: var(--text-primary);
-  font-family: var(--font-body);
+  font-family: 'Be Vietnam Pro', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Noise texture overlay */
+/* Noise texture — only visible in dark mode via --noise-opacity */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  opacity: 0.025;
+  opacity: var(--noise-opacity);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 9999;

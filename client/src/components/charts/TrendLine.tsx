@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useChartTheme } from '@/hooks/useChartTheme';
 
 const mockTrend = [
   { month: 'Sep', rating: 9.2 },
@@ -23,37 +24,40 @@ interface TrendLineProps {
 }
 
 export function TrendLine({ data = mockTrend }: TrendLineProps) {
+  const ct = useChartTheme();
+
   return (
     <ResponsiveContainer width="100%" height={200}>
       <LineChart data={data}>
         <XAxis
           dataKey="month"
-          tick={{ fill: '#555555', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-          axisLine={{ stroke: '#2A2A2B' }}
+          tick={{ fill: ct.axis, fontSize: 10, fontFamily: 'JetBrains Mono' }}
+          axisLine={{ stroke: ct.grid }}
           tickLine={false}
         />
         <YAxis
           domain={[7, 10]}
-          tick={{ fill: '#555555', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-          axisLine={{ stroke: '#2A2A2B' }}
+          tick={{ fill: ct.axis, fontSize: 10, fontFamily: 'JetBrains Mono' }}
+          axisLine={{ stroke: ct.grid }}
           tickLine={false}
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1A1A1B',
-            border: '1px solid #2A2A2B',
+            backgroundColor: ct.tooltip.bg,
+            border: `1px solid ${ct.tooltip.border}`,
             borderRadius: '2px',
             fontFamily: 'JetBrains Mono',
             fontSize: '12px',
+            color: ct.tooltip.text,
           }}
         />
         <Line
           type="monotone"
           dataKey="rating"
-          stroke="#CCFF00"
+          stroke={ct.accent}
           strokeWidth={2}
-          dot={{ fill: '#CCFF00', strokeWidth: 0, r: 4 }}
-          activeDot={{ fill: '#CCFF00', strokeWidth: 0, r: 6 }}
+          dot={{ fill: ct.accent, strokeWidth: 0, r: 4 }}
+          activeDot={{ fill: ct.accent, strokeWidth: 0, r: 6 }}
         />
       </LineChart>
     </ResponsiveContainer>

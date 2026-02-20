@@ -70,7 +70,7 @@ export default async function TeamProfilePage({ params }: Props) {
             className="absolute inset-0 h-72"
             style={{
               background:
-                'radial-gradient(ellipse at 50% -20%, rgba(204,255,0,0.12) 0%, transparent 60%), #121212',
+                'radial-gradient(ellipse at 50% -20%, var(--accent-acid-dim) 0%, transparent 60%), var(--bg-base)',
             }}
           />
           <div className="absolute inset-0 h-72 bg-gradient-to-b from-transparent via-bg-base/60 to-bg-base" />

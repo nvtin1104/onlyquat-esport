@@ -83,7 +83,7 @@ export default async function PlayerProfilePage({ params }: Props) {
               <div
                 className="absolute inset-0"
                 style={{
-                  background: `radial-gradient(ellipse at 60% 0%, ${tierColor}22 0%, transparent 65%), #121212`,
+                  background: `radial-gradient(ellipse at 60% 0%, ${tierColor}22 0%, transparent 65%), var(--bg-base)`,
                 }}
               />
             )}

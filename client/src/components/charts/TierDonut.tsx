@@ -2,13 +2,15 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import type { Player, TierKey } from '@/types';
-import { TIER_COLORS } from '@/lib/utils';
+import { useChartTheme } from '@/hooks/useChartTheme';
 
 interface TierDonutProps {
   players: Player[];
 }
 
 export function TierDonut({ players }: TierDonutProps) {
+  const ct = useChartTheme();
+
   const tierCounts = players.reduce<Record<string, number>>((acc, p) => {
     acc[p.tier] = (acc[p.tier] || 0) + 1;
     return acc;
@@ -17,7 +19,7 @@ export function TierDonut({ players }: TierDonutProps) {
   const data = Object.entries(tierCounts).map(([tier, count]) => ({
     name: `${tier} Tier`,
     value: count,
-    color: TIER_COLORS[tier as TierKey],
+    color: ct.tierColors[tier as TierKey],
   }));
 
   return (
@@ -38,11 +40,12 @@ export function TierDonut({ players }: TierDonutProps) {
         </Pie>
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1A1A1B',
-            border: '1px solid #2A2A2B',
+            backgroundColor: ct.tooltip.bg,
+            border: `1px solid ${ct.tooltip.border}`,
             borderRadius: '2px',
             fontFamily: 'JetBrains Mono',
             fontSize: '12px',
+            color: ct.tooltip.text,
           }}
         />
       </PieChart>

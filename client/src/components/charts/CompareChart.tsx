@@ -2,6 +2,7 @@
 
 import type { PlayerStats } from '@/types';
 import { STAT_LABELS } from '@/lib/constants';
+import { useChartTheme } from '@/hooks/useChartTheme';
 
 interface CompareChartProps {
   statsA: PlayerStats;
@@ -11,6 +12,7 @@ interface CompareChartProps {
 }
 
 export function CompareChart({ statsA, statsB, nameA, nameB }: CompareChartProps) {
+  const ct = useChartTheme();
   const statKeys = ['aim', 'gameIq', 'clutch', 'teamplay', 'consistency'] as const;
 
   return (
@@ -25,7 +27,7 @@ export function CompareChart({ statsA, statsB, nameA, nameB }: CompareChartProps
           <div key={key} className="flex items-center gap-3">
             <span
               className="font-mono text-sm w-8 text-right"
-              style={{ color: aWins ? '#CCFF00' : '#888888' }}
+              style={{ color: aWins ? ct.accent : ct.axis }}
             >
               {valA}
             </span>
@@ -34,7 +36,7 @@ export function CompareChart({ statsA, statsB, nameA, nameB }: CompareChartProps
                 className="h-full rounded-l-full"
                 style={{
                   width: `${valA}%`,
-                  backgroundColor: '#CCFF00',
+                  backgroundColor: ct.accent,
                   opacity: aWins ? 1 : 0.4,
                 }}
               />
@@ -47,14 +49,14 @@ export function CompareChart({ statsA, statsB, nameA, nameB }: CompareChartProps
                 className="h-full rounded-r-full"
                 style={{
                   width: `${valB}%`,
-                  backgroundColor: '#FF4D00',
+                  backgroundColor: ct.lava,
                   opacity: bWins ? 1 : 0.4,
                 }}
               />
             </div>
             <span
               className="font-mono text-sm w-8"
-              style={{ color: bWins ? '#FF4D00' : '#888888' }}
+              style={{ color: bWins ? ct.lava : ct.axis }}
             >
               {valB}
             </span>

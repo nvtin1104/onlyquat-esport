@@ -1,74 +1,97 @@
-# 🎨 ARCADE ARENA — Prompt Thêm Light/Dark Theme
+# 🎨 ARCADE ARENA — Light/Dark Theme Update Prompt (v2)
 
-## Chuyển từ Dark-only → Dual Theme (Light mặc định + Dark toggle)
+## Converting from Dark-only → Dual Theme (Light default + Dark toggle)
 
----
-
-### CONTEXT HIỆN TẠI
-
-```
-Stack:        Next.js 16 + React 19 + Tailwind CSS v4 (@theme inline)
-UI Library:   KHÔNG — tất cả components tự viết (Badge, Button, Card, Input, StatBar...)
-State:        Zustand
-Fonts:        Chakra Petch (display) + Be Vietnam Pro (body) + JetBrains Mono (mono)
-Theme hiện:   Dark only — hardcoded CSS variables trong :root
-Tailwind v4:  Dùng @theme inline thay vì tailwind.config.ts
-```
-
-### MỤC TIÊU
-
-1. **Light theme là mặc định** (lần đầu truy cập = light)
-2. **Dark theme giữ nguyên** aesthetic gaming hiện tại
-3. Toggle switch ở Header
-4. Lưu preference vào `localStorage`
-5. Respect `prefers-color-scheme` nếu chưa có preference
-6. **Không flash** (FOUC) khi load page
-7. Không cài thêm thư viện nào (không next-themes) — tự implement
+### Uses `next-themes` for zero-FOUC, auto-persistence, system preference detection
 
 ---
 
-### BƯỚC 1: Anti-Flash Script (`src/app/layout.tsx`)
+### CURRENT CONTEXT
 
-Thêm inline script vào `<head>` để set theme TRƯỚC khi React hydrate:
+```
+Stack:         Next.js 16 + React 19 + Tailwind CSS v4 (@theme inline)
+UI Library:    NONE — all components hand-crafted (Badge, Button, Card, Input, StatBar...)
+State:         Zustand
+Fonts:         Chakra Petch (display) + Be Vietnam Pro (body) + JetBrains Mono (mono)
+Current Theme: Dark only — hardcoded CSS variables in :root
+Tailwind v4:   Uses @theme inline instead of tailwind.config.ts
+```
+
+### GOALS
+
+1. **Light theme as default** (first visit = light)
+2. **Dark theme preserved** — keep existing gaming aesthetic intact
+3. Toggle switch in Header (Sun/Moon icon)
+4. Persist preference in `localStorage` (automatic via next-themes)
+5. Respect `prefers-color-scheme` when no stored preference exists
+6. **No flash** (FOUC) on page load (handled by next-themes)
+7. Support `system` as a third option (auto-detect OS preference)
+
+### NEW DEPENDENCY
+
+```bash
+pnpm add next-themes
+```
+
+---
+
+## STEP 1: Root Layout — ThemeProvider (`src/app/layout.tsx`)
+
+Replace the entire current layout. `next-themes` handles anti-FOUC script injection, localStorage persistence, and system preference detection automatically.
 
 ```tsx
 // src/app/layout.tsx
+import { ThemeProvider } from 'next-themes';
+
+export const metadata = {
+  title: 'Arcade Arena — E-sports Rating Platform',
+  description: 'Rate, analyze, and compare E-sports players',
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        {/* Fonts */}
-        <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-
-        {/* Anti-FOUC: set theme class trước khi render */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var stored = localStorage.getItem('arcade-arena-theme');
-                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var theme = stored || (prefersDark ? 'dark' : 'light');
-                  document.documentElement.classList.toggle('dark', theme === 'dark');
-                } catch(e) {}
-              })();
-            `,
-          }}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+          rel="stylesheet"
         />
       </head>
-      <body className="font-body bg-base text-primary antialiased transition-colors duration-300">
-        {children}
+      <body className="font-body bg-bg-base text-text-primary antialiased transition-colors duration-300">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={true}
+          disableTransitionOnChange={false}
+          storageKey="arcade-arena-theme"
+          themes={['light', 'dark']}
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
 }
 ```
 
+**What `next-themes` does here automatically:**
+- Injects anti-FOUC `<script>` before paint (no white/dark flash)
+- Reads/writes `localStorage` key `arcade-arena-theme`
+- Listens to `prefers-color-scheme` media query when theme = "system"
+- Adds/removes `class="dark"` on `<html>` element
+- Handles SSR hydration mismatch
+
+**What you do NOT need anymore:**
+- ~~Custom `dangerouslySetInnerHTML` anti-flash script~~
+- ~~Zustand theme store (`src/stores/themeStore.ts`)~~
+- ~~Manual `localStorage.getItem/setItem` logic~~
+- ~~Manual `document.documentElement.classList.toggle`~~
+
 ---
 
-### BƯỚC 2: CSS Variables — Dual Theme (`src/app/globals.css`)
+## STEP 2: CSS Variables — Dual Theme (`src/app/globals.css`)
 
-Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Tailwind v4:
+Replace the entire current `:root` block. Keep `@theme inline` for Tailwind v4 compatibility.
 
 ```css
 @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -88,7 +111,7 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
   --border-subtle: #E5E5E5;
   --border-hover: #D1D1D1;
 
-  /* Accent — giữ acid green nhưng đậm hơn cho light */
+  /* Accent — darker acid green for light backgrounds (WCAG AA) */
   --accent-acid: #7AB800;
   --accent-lava: #E04400;
   --accent-acid-dim: rgba(122, 184, 0, 0.08);
@@ -101,7 +124,7 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
   --text-secondary: #6B6B6B;
   --text-dim: #A0A0A0;
 
-  /* Tier Colors — tối hơn cho nền sáng, đảm bảo contrast */
+  /* Tier Colors — darker for light backgrounds, ensuring contrast */
   --tier-s: #6B9E00;
   --tier-a: #00B35F;
   --tier-b: #0088CC;
@@ -115,12 +138,12 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
   --danger: #CC3333;
   --info: #0088CC;
 
-  /* Shadows */
+  /* Shadows — real box-shadow for light mode */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-acid-glow: 0 0 20px rgba(122, 184, 0, 0.15);
 
-  /* Noise overlay */
+  /* Noise overlay — disabled in light mode */
   --noise-opacity: 0;
 
   /* Scrollbar */
@@ -133,7 +156,7 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
 }
 
 /* ═══════════════════════════════════════════
-   DARK THEME (toggle hoặc prefers-color-scheme)
+   DARK THEME (.dark class set by next-themes)
    ═══════════════════════════════════════════ */
 .dark {
   /* Background */
@@ -147,7 +170,7 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
   --border-subtle: #2A2A2B;
   --border-hover: #3A3A3B;
 
-  /* Accent — neon sáng cho dark bg */
+  /* Accent — bright neon for dark backgrounds */
   --accent-acid: #CCFF00;
   --accent-lava: #FF4D00;
   --accent-acid-dim: rgba(204, 255, 0, 0.12);
@@ -160,7 +183,7 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
   --text-secondary: #888888;
   --text-dim: #555555;
 
-  /* Tier Colors — neon sáng trên nền tối */
+  /* Tier Colors — bright neon on dark backgrounds */
   --tier-s: #CCFF00;
   --tier-a: #00FF88;
   --tier-b: #00AAFF;
@@ -174,12 +197,12 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
   --danger: #FF4444;
   --info: #00AAFF;
 
-  /* Shadows */
+  /* Shadows — glow effects for dark mode */
   --shadow-card: none;
   --shadow-card-hover: 0 0 40px rgba(204, 255, 0, 0.15);
   --shadow-acid-glow: 0 0 40px rgba(204, 255, 0, 0.15);
 
-  /* Noise overlay */
+  /* Noise overlay — enabled in dark mode */
   --noise-opacity: 0.025;
 
   /* Scrollbar */
@@ -239,7 +262,6 @@ Thay thế toàn bộ `:root` hiện tại. Giữ nguyên `@theme inline` cho Ta
 /* ═══════════════════════════════════════════
    GLOBAL STYLES
    ═══════════════════════════════════════════ */
-
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -257,7 +279,7 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Noise texture — chỉ hiện ở dark mode */
+/* Noise texture — only visible in dark mode via --noise-opacity */
 body::before {
   content: '';
   position: fixed;
@@ -271,63 +293,35 @@ body::before {
 
 ---
 
-### BƯỚC 3: Theme Store (`src/stores/themeStore.ts`)
+## STEP 3: Theme Toggle Component (`src/components/ui/ThemeToggle.tsx`)
 
-```typescript
-import { create } from 'zustand';
-
-type Theme = 'light' | 'dark';
-
-interface ThemeStore {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-}
-
-function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  try {
-    const stored = localStorage.getItem('arcade-arena-theme') as Theme | null;
-    if (stored === 'light' || stored === 'dark') return stored;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  } catch {
-    return 'light';
-  }
-}
-
-export const useThemeStore = create<ThemeStore>((set) => ({
-  theme: getInitialTheme(),
-
-  setTheme: (theme) => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('arcade-arena-theme', theme);
-    set({ theme });
-  },
-
-  toggleTheme: () => {
-    set((state) => {
-      const next = state.theme === 'light' ? 'dark' : 'light';
-      document.documentElement.classList.toggle('dark', next === 'dark');
-      localStorage.setItem('arcade-arena-theme', next);
-      return { theme: next };
-    });
-  },
-}));
-```
-
----
-
-### BƯỚC 4: Theme Toggle Component (`src/components/ui/ThemeToggle.tsx`)
+Uses `useTheme` from `next-themes` — no Zustand needed.
 
 ```tsx
 'use client';
 
-import { useThemeStore } from '@/stores/themeStore';
-import { Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { Sun, Moon, Monitor } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useThemeStore();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Avoid hydration mismatch — only render after mount
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    // Skeleton placeholder to prevent layout shift
+    return (
+      <div className="w-10 h-10 rounded-lg bg-bg-elevated border border-border-subtle animate-pulse" />
+    );
+  }
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <button
@@ -338,13 +332,12 @@ export function ThemeToggle() {
         bg-bg-elevated border border-border-subtle
         hover:border-border-hover
         transition-all duration-300
-        cursor-pointer
-        group
+        cursor-pointer group
       "
-      aria-label={theme === 'light' ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng'}
+      aria-label={resolvedTheme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
     >
       <AnimatePresence mode="wait">
-        {theme === 'light' ? (
+        {resolvedTheme === 'light' ? (
           <motion.div
             key="sun"
             initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
@@ -371,15 +364,62 @@ export function ThemeToggle() {
 }
 ```
 
----
+### Optional: 3-State Toggle (Light / System / Dark)
 
-### BƯỚC 5: Thêm ThemeToggle vào Header (`src/components/layout/Header.tsx`)
+If you want users to explicitly choose "System" as an option:
 
 ```tsx
-// Trong Header component, thêm ThemeToggle cạnh nav links:
+'use client';
+
+import { useTheme } from 'next-themes';
+import { Sun, Moon, Monitor } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+export function ThemeToggle3() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return <div className="h-10 w-[132px] rounded-lg bg-bg-elevated border border-border-subtle animate-pulse" />;
+
+  const options = [
+    { value: 'light', icon: Sun, label: 'Light' },
+    { value: 'system', icon: Monitor, label: 'System' },
+    { value: 'dark', icon: Moon, label: 'Dark' },
+  ] as const;
+
+  return (
+    <div className="flex items-center gap-1 p-1 rounded-lg bg-bg-elevated border border-border-subtle">
+      {options.map(({ value, icon: Icon, label }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          className={`
+            flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono
+            transition-all duration-200 cursor-pointer
+            ${theme === value
+              ? 'bg-accent-acid text-black font-bold'
+              : 'text-text-dim hover:text-text-secondary'
+            }
+          `}
+          aria-label={`Set theme to ${label}`}
+        >
+          <Icon size={14} />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## STEP 4: Add ThemeToggle to Header (`src/components/layout/Header.tsx`)
+
+```tsx
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
-// Trong JSX, vị trí phải cùng row với nav:
+// Inside Header JSX, right side alongside nav:
 <div className="flex items-center gap-3">
   <ThemeToggle />
   {/* ...existing nav links, CTA button... */}
@@ -388,12 +428,21 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 ---
 
-### BƯỚC 6: Cập Nhật `src/lib/utils.ts`
+## STEP 5: Update Utilities (`src/lib/utils.ts`)
 
-Thêm tier colors mapping dùng CSS variables thay vì hardcoded hex:
+Replace hardcoded hex colors with CSS variable references:
 
 ```typescript
-// CẬP NHẬT — Dùng CSS variable thay vì hardcoded hex
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export type TierKey = 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// For inline styles (Recharts, Framer Motion, etc.)
 export const TIER_COLORS: Record<TierKey, string> = {
   S: 'var(--tier-s)',
   A: 'var(--tier-a)',
@@ -403,7 +452,7 @@ export const TIER_COLORS: Record<TierKey, string> = {
   F: 'var(--tier-f)',
 };
 
-// Tailwind class mapping (dùng cho className, không dùng inline style)
+// For Tailwind className usage
 export const TIER_TEXT_CLASS: Record<TierKey, string> = {
   S: 'text-tier-s',
   A: 'text-tier-a',
@@ -414,22 +463,58 @@ export const TIER_TEXT_CLASS: Record<TierKey, string> = {
 };
 
 export const TIER_BG_CLASS: Record<TierKey, string> = {
-  S: 'bg-tier-s/10 text-tier-s border-tier-s/30',
-  A: 'bg-tier-a/10 text-tier-a border-tier-a/30',
-  B: 'bg-tier-b/10 text-tier-b border-tier-b/30',
-  C: 'bg-tier-c/10 text-tier-c border-tier-c/30',
-  D: 'bg-tier-d/10 text-tier-d border-tier-d/30',
-  F: 'bg-tier-f/10 text-tier-f border-tier-f/30',
+  S: 'bg-tier-s/10 text-tier-s border border-tier-s/30',
+  A: 'bg-tier-a/10 text-tier-a border border-tier-a/30',
+  B: 'bg-tier-b/10 text-tier-b border border-tier-b/30',
+  C: 'bg-tier-c/10 text-tier-c border border-tier-c/30',
+  D: 'bg-tier-d/10 text-tier-d border border-tier-d/30',
+  F: 'bg-tier-f/10 text-tier-f border border-tier-f/30',
 };
+
+export function getTierFromRating(rating: number): TierKey {
+  if (rating >= 9.0) return 'S';
+  if (rating >= 8.0) return 'A';
+  if (rating >= 7.0) return 'B';
+  if (rating >= 6.0) return 'C';
+  if (rating >= 5.0) return 'D';
+  return 'F';
+}
+
+export function formatRating(rating: number): string {
+  return rating.toFixed(1);
+}
+
+export function formatNumber(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return n.toString();
+}
 ```
 
 ---
 
-### BƯỚC 7: Cập Nhật Animations (`src/lib/animations.ts`)
+## STEP 6: Update Animations (`src/lib/animations.ts`)
 
-Card hover cần dùng CSS variable cho shadow:
+Use CSS variables for shadows so they auto-switch with theme:
 
 ```typescript
+export const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+export const fadeUpItem = {
+  hidden: { opacity: 0, y: 30 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] },
+  },
+};
+
 export const cardHover = {
   rest: {
     y: 0,
@@ -441,84 +526,108 @@ export const cardHover = {
     transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] },
   },
 };
+
+export const fadeIn = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.5 } },
+};
+
+export const slideUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] },
+  },
+};
 ```
 
 ---
 
-### BƯỚC 8: Component Updates Checklist
+## STEP 7: Recharts Theme Hook (`src/hooks/useChartTheme.ts`)
 
-Các components hiện tại dùng hardcoded dark colors cần rà soát:
+Uses `next-themes` instead of Zustand:
 
-```
-┌──────────────────────────┬───────────────────────────────────────────────┐
-│ Component                │ Cần thay đổi                                 │
-├──────────────────────────┼───────────────────────────────────────────────┤
-│ ui/Card.tsx              │ bg-[#0A0A0A] → bg-bg-card                    │
-│                          │ border-[#2A2A2B] → border-border-subtle      │
-│                          │ hover shadow → shadow-card-hover             │
-│                          │                                               │
-│ ui/Badge.tsx             │ Tier colors: hardcoded hex → TIER_BG_CLASS   │
-│                          │                                               │
-│ ui/Button.tsx            │ bg-[#CCFF00] → bg-accent-acid               │
-│                          │ text-[#000] → Cần check contrast cả 2 theme  │
-│                          │ Nút primary: light=dark text, dark=dark text  │
-│                          │                                               │
-│ ui/Input.tsx             │ bg → bg-bg-card                               │
-│                          │ border → border-border-subtle                 │
-│                          │ focus ring → ring-accent-acid                 │
-│                          │                                               │
-│ ui/StatBar.tsx           │ Track bg → bg-border-subtle                   │
-│                          │ Fill bg → bg-accent-acid                      │
-│                          │ Glow → shadow-acid-glow (hover)              │
-│                          │                                               │
-│ ui/RatingNumber.tsx      │ Color → TIER_TEXT_CLASS[tier]                 │
-│                          │ Glow shadow → chỉ dark mode                  │
-│                          │                                               │
-│ ui/Skeleton.tsx          │ shimmer bg → bg-bg-elevated                   │
-│                          │ shimmer highlight → bg-border-subtle          │
-│                          │                                               │
-│ ui/SectionHeader.tsx     │ Text colors → text-text-primary/secondary    │
-│                          │                                               │
-│ layout/Header.tsx        │ bg-[#000]/80 → bg-bg-surface/80             │
-│                          │ backdrop-blur giữ nguyên                      │
-│                          │ Thêm <ThemeToggle />                          │
-│                          │                                               │
-│ layout/Footer.tsx        │ bg → bg-bg-surface                            │
-│                          │ border → border-border-subtle                 │
-│                          │                                               │
-│ landing/HeroSection.tsx  │ Gradient overlays → dùng bg-bg-base           │
-│                          │ Float stat cards → bg-bg-card                 │
-│                          │                                               │
-│ landing/StatsRibbon.tsx  │ bg → bg-bg-surface                            │
-│                          │ Numbers → text-text-primary                   │
-│                          │                                               │
-│ landing/FeaturesGrid.tsx │ Cell bg → bg-bg-card                          │
-│                          │ Hover top-border → border-accent-acid         │
-│                          │                                               │
-│ landing/TopPlayers.tsx   │ PlayerCard → dùng Card tokens                │
-│                          │                                               │
-│ landing/CTABanner.tsx    │ Gradient border → accent-acid → accent-lava  │
-│                          │ bg → bg-bg-card                               │
-│                          │                                               │
-│ player/PlayerCard.tsx    │ Image grayscale → chỉ dark mode:             │
-│                          │   dark:grayscale-[50%] grayscale-0            │
-│                          │ Border glow → var(--shadow-acid-glow)         │
-│                          │                                               │
-│ charts/ (Recharts)       │ Grid stroke → var(--border-subtle)            │
-│                          │ Axis fill → var(--text-dim)                   │
-│                          │ Tooltip bg → var(--bg-card)                   │
-│                          │ Line stroke → var(--accent-acid)              │
-└──────────────────────────┴───────────────────────────────────────────────┘
+```typescript
+'use client';
+
+import { useTheme } from 'next-themes';
+
+export function useChartTheme() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  return {
+    grid:     isDark ? '#2A2A2B' : '#E5E5E5',
+    axis:     isDark ? '#555555' : '#A0A0A0',
+    tooltip: {
+      bg:     isDark ? '#0A0A0A' : '#FFFFFF',
+      border: isDark ? '#2A2A2B' : '#E5E5E5',
+      text:   isDark ? '#E8E8E8' : '#1A1A1A',
+    },
+    accent:   isDark ? '#CCFF00' : '#7AB800',
+    lava:     isDark ? '#FF4D00' : '#E04400',
+    areaFill: isDark ? 'rgba(204,255,0,0.08)' : 'rgba(122,184,0,0.06)',
+    tierColors: isDark
+      ? { S: '#CCFF00', A: '#00FF88', B: '#00AAFF', C: '#FFB800', D: '#FF4D00', F: '#FF4444' }
+      : { S: '#6B9E00', A: '#00B35F', B: '#0088CC', C: '#CC9200', D: '#CC3D00', F: '#CC3333' },
+  };
+}
 ```
 
-**Pattern chung để tìm & thay:**
+Usage in Recharts components:
+
+```tsx
+// Example in RadarChart.tsx
+'use client';
+
+import { useChartTheme } from '@/hooks/useChartTheme';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, Tooltip } from 'recharts';
+
+export function PlayerRadarChart({ stats }: { stats: Record<string, number>[] }) {
+  const ct = useChartTheme();
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <RadarChart data={stats}>
+        <PolarGrid stroke={ct.grid} />
+        <PolarAngleAxis tick={{ fill: ct.axis, fontSize: 11, fontFamily: 'JetBrains Mono' }} />
+        <Radar
+          dataKey="value"
+          fill={ct.accent}
+          fillOpacity={0.3}
+          stroke={ct.accent}
+          strokeWidth={2}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: ct.tooltip.bg,
+            border: `1px solid ${ct.tooltip.border}`,
+            color: ct.tooltip.text,
+            borderRadius: '4px',
+            fontFamily: 'Be Vietnam Pro',
+          }}
+        />
+      </RadarChart>
+    </ResponsiveContainer>
+  );
+}
+```
+
+---
+
+## STEP 8: Component Updates — Find & Replace
+
+All current components using hardcoded dark colors need to be migrated to token-based classes:
+
+### Find & Replace Patterns (regex)
 
 ```
-TÌM (regex):                        THAY BẰNG:
-─────────────────────────────────────────────────────
+FIND:                                REPLACE WITH:
+─────────────────────────────────────────────────────────
 bg-\[#121212\]                   →   bg-bg-base
 bg-\[#1A1A1B\]                   →   bg-bg-elevated
-bg-\[#000000?\]                  →   bg-bg-surface
+bg-\[#000000?\]  or  bg-black    →   bg-bg-surface
 bg-\[#0A0A0A\]                   →   bg-bg-card
 border-\[#2A2A2B\]               →   border-border-subtle
 border-\[#3A3A3B\]               →   border-border-hover
@@ -528,150 +637,164 @@ text-\[#555555?\]                →   text-text-dim
 bg-\[#CCFF00\]                   →   bg-accent-acid
 text-\[#CCFF00\]                 →   text-accent-acid
 bg-\[#FF4D00\]                   →   bg-accent-lava
+text-\[#FF4D00\]                 →   text-accent-lava
+```
+
+### Per-Component Changes
+
+```
+┌──────────────────────────┬───────────────────────────────────────────────┐
+│ Component                │ Required Changes                             │
+├──────────────────────────┼───────────────────────────────────────────────┤
+│ ui/Card.tsx              │ bg-[#0A0A0A] → bg-bg-card                    │
+│                          │ border-[#2A2A2B] → border-border-subtle      │
+│                          │ hover shadow → shadow-card-hover             │
+│                          │                                               │
+│ ui/Badge.tsx             │ Tier colors: hardcoded hex → TIER_BG_CLASS   │
+│                          │                                               │
+│ ui/Button.tsx            │ bg-[#CCFF00] → bg-accent-acid               │
+│                          │ text-[#000] → text-black (stays black both)  │
+│                          │                                               │
+│ ui/Input.tsx             │ bg → bg-bg-card                               │
+│                          │ border → border-border-subtle                 │
+│                          │ focus ring → ring-accent-acid                 │
+│                          │                                               │
+│ ui/StatBar.tsx           │ Track bg → bg-border-subtle                   │
+│                          │ Fill bg → bg-accent-acid                      │
+│                          │ Glow → shadow-acid-glow (on hover)           │
+│                          │                                               │
+│ ui/RatingNumber.tsx      │ Color → TIER_TEXT_CLASS[tier]                 │
+│                          │ Glow shadow → dark mode only: dark:shadow-*  │
+│                          │                                               │
+│ ui/Skeleton.tsx          │ Shimmer bg → bg-bg-elevated                   │
+│                          │ Shimmer highlight → bg-border-subtle          │
+│                          │                                               │
+│ ui/SectionHeader.tsx     │ Text colors → text-text-primary/secondary    │
+│                          │                                               │
+│ layout/Header.tsx        │ bg-[#000]/80 → bg-bg-surface/80             │
+│                          │ backdrop-blur: unchanged                      │
+│                          │ ADD: <ThemeToggle />                          │
+│                          │                                               │
+│ layout/Footer.tsx        │ bg → bg-bg-surface                            │
+│                          │ border → border-border-subtle                 │
+│                          │                                               │
+│ landing/HeroSection.tsx  │ Gradient overlays → use bg-bg-base            │
+│                          │ Floating stat cards → bg-bg-card              │
+│                          │                                               │
+│ landing/StatsRibbon.tsx  │ bg → bg-bg-surface                            │
+│                          │ Numbers → text-text-primary                   │
+│                          │                                               │
+│ landing/FeaturesGrid.tsx │ Cell bg → bg-bg-card                          │
+│                          │ Hover top-border → border-accent-acid         │
+│                          │                                               │
+│ landing/TopPlayers.tsx   │ PlayerCard → use Card tokens                 │
+│                          │                                               │
+│ landing/CTABanner.tsx    │ Gradient border → accent-acid → accent-lava  │
+│                          │ bg → bg-bg-card                               │
+│                          │                                               │
+│ player/PlayerCard.tsx    │ Image grayscale → dark mode only:             │
+│                          │   grayscale-0 dark:grayscale-[50%]            │
+│                          │   hover: grayscale-0 (both themes)            │
+│                          │ Border glow → var(--shadow-acid-glow)         │
+│                          │                                               │
+│ charts/ (all Recharts)   │ Use useChartTheme() hook for all values      │
+│                          │ Grid stroke, axis fill, tooltip, line color   │
+└──────────────────────────┴───────────────────────────────────────────────┘
 ```
 
 ---
 
-### BƯỚC 9: Light Theme Design Notes
+## STEP 9: Light Theme Design Philosophy
 
 ```
 ┌────────────────────────────────────────────────────────────┐
 │              LIGHT THEME DESIGN PHILOSOPHY                 │
 ├────────────────────────────────────────────────────────────┤
 │                                                            │
-│ 1. NỀN: Warm grey (#F5F5F5) thay vì trắng tinh           │
-│    → Dễ nhìn, bớt chói, vẫn chuyên nghiệp                │
+│ 1. BACKGROUND: Warm grey (#F5F5F5) instead of pure white   │
+│    → Easier on the eyes, less glare, still professional    │
 │                                                            │
-│ 2. CARD: Trắng (#FFFFFF) + subtle shadow                  │
-│    → Nổi bật trên nền grey, thay thế border glow          │
+│ 2. CARDS: White (#FFFFFF) with subtle box-shadow           │
+│    → Stand out against grey bg, replacing dark mode glow   │
 │                                                            │
-│ 3. ACCENT: Acid green tối hơn (#7AB800 thay vì #CCFF00)   │
-│    → WCAG AA contrast trên nền trắng (ratio 3.8:1)        │
-│    → Dark mode giữ neon #CCFF00 vì trên nền đen OK        │
+│ 3. ACCENT: Darker acid green (#7AB800 vs #CCFF00)          │
+│    → WCAG AA contrast on white background (3.8:1 ratio)    │
+│    → Dark mode keeps neon #CCFF00 (works on black)         │
 │                                                            │
-│ 4. TIER COLORS: Tối hơn 30-40%                            │
-│    → Đảm bảo đọc được trên nền sáng                       │
-│    → Dark mode giữ nguyên neon cho "gaming" feel           │
+│ 4. TIER COLORS: 30–40% darker versions                    │
+│    → Readable on light backgrounds                         │
+│    → Dark mode keeps neon colors for "gaming" feel         │
 │                                                            │
-│ 5. SHADOWS: Light dùng box-shadow thật                     │
-│    → Dark mode dùng glow (acid green shadow)               │
-│    → Cùng 1 variable, khác giá trị                        │
+│ 5. SHADOWS: Light = real box-shadow, Dark = glow effects   │
+│    → Same CSS variable, different values per theme         │
 │                                                            │
-│ 6. NOISE TEXTURE: Tắt ở light mode                        │
-│    → opacity: 0 (light) vs 0.025 (dark)                   │
+│ 6. NOISE TEXTURE: Disabled in light (opacity: 0)           │
+│    → Enabled in dark (opacity: 0.025) for gritty feel      │
 │                                                            │
-│ 7. PLAYER IMAGE GRAYSCALE: Chỉ dark mode                  │
-│    → Light mode: ảnh full color luôn                       │
-│    → Dark mode: grayscale → color on hover (giữ hiệu ứng) │
+│ 7. PLAYER IMAGE GRAYSCALE: Dark mode only                  │
+│    → Light: full-color images by default                   │
+│    → Dark: grayscale → color on hover (keeps effect)       │
 │                                                            │
-│ 8. TRANSITION: 300ms ease cho tất cả color changes         │
-│    → Smooth, không giật                                    │
+│ 8. TRANSITION: 300ms ease on all color changes             │
+│    → Smooth toggle, no jarring flickers                    │
 │                                                            │
-│ 9. SCROLLBAR: Light grey thumb trên light track            │
-│    → Dark: dark thumb trên dark track                      │
-│                                                            │
-│ 10. OVERALL FEEL:                                          │
-│     Light = Clean, professional, dễ đọc ban ngày           │
-│     Dark = Gaming, immersive, acid neon, đêm khuya         │
+│ 9. OVERALL FEEL:                                           │
+│    Light = Clean, professional, daytime-friendly            │
+│    Dark = Gaming, immersive, acid neon, night-mode          │
 │                                                            │
 └────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### BƯỚC 10: Recharts Theme Hook (`src/hooks/useChartTheme.ts`)
+## FILE SUMMARY
 
-```typescript
-'use client';
-
-import { useThemeStore } from '@/stores/themeStore';
-
-export function useChartTheme() {
-  const { theme } = useThemeStore();
-
-  return {
-    grid: theme === 'dark' ? '#2A2A2B' : '#E5E5E5',
-    axis: theme === 'dark' ? '#555555' : '#A0A0A0',
-    tooltip: {
-      bg: theme === 'dark' ? '#0A0A0A' : '#FFFFFF',
-      border: theme === 'dark' ? '#2A2A2B' : '#E5E5E5',
-      text: theme === 'dark' ? '#E8E8E8' : '#1A1A1A',
-    },
-    accent: theme === 'dark' ? '#CCFF00' : '#7AB800',
-    lava: theme === 'dark' ? '#FF4D00' : '#E04400',
-    areaFill: theme === 'dark' ? 'rgba(204,255,0,0.08)' : 'rgba(122,184,0,0.06)',
-    tierColors: theme === 'dark'
-      ? { S:'#CCFF00', A:'#00FF88', B:'#00AAFF', C:'#FFB800', D:'#FF4D00', F:'#FF4444' }
-      : { S:'#6B9E00', A:'#00B35F', B:'#0088CC', C:'#CC9200', D:'#CC3D00', F:'#CC3333' },
-  };
-}
 ```
+INSTALL:
+  pnpm add next-themes
 
-Dùng trong Recharts components:
+CREATE NEW:
+  src/components/ui/ThemeToggle.tsx    ← Sun/Moon toggle (uses next-themes)
+  src/hooks/useChartTheme.ts           ← Recharts theme values (uses next-themes)
 
-```tsx
-// Ví dụ trong RadarChart.tsx:
-const chartTheme = useChartTheme();
+MODIFY:
+  src/app/layout.tsx                   ← Wrap with <ThemeProvider>
+  src/app/globals.css                  ← Dual :root (light) + .dark variables
+  src/components/layout/Header.tsx     ← Add <ThemeToggle />
+  src/lib/utils.ts                     ← TIER_COLORS using CSS var()
+  src/lib/animations.ts                ← cardHover shadow using CSS var()
 
-<ResponsiveContainer>
-  <RadarChart data={data}>
-    <PolarGrid stroke={chartTheme.grid} />
-    <PolarAngleAxis tick={{ fill: chartTheme.axis, fontSize: 11 }} />
-    <Radar fill={chartTheme.accent} fillOpacity={0.3} stroke={chartTheme.accent} />
-    <Tooltip
-      contentStyle={{
-        backgroundColor: chartTheme.tooltip.bg,
-        border: `1px solid ${chartTheme.tooltip.border}`,
-        color: chartTheme.tooltip.text,
-        borderRadius: '4px',
-      }}
-    />
-  </RadarChart>
-</ResponsiveContainer>
+DELETE (no longer needed):
+  src/stores/themeStore.ts             ← Replaced by next-themes
+
+AUDIT (find & replace hardcoded hex → Tailwind tokens):
+  src/components/ui/*.tsx              ← All UI primitives
+  src/components/layout/*.tsx          ← Header, Footer
+  src/components/landing/*.tsx         ← Hero, Stats, Features, TopPlayers, CTA
+  src/components/player/*.tsx          ← PlayerCard, PlayerGrid, etc.
+  src/components/charts/*.tsx          ← Use useChartTheme()
 ```
 
 ---
 
-### TÓM TẮT FILES CẦN TẠO / SỬA
+## TEST CHECKLIST
 
 ```
-TẠO MỚI:
-  src/stores/themeStore.ts          ← Zustand store
-  src/components/ui/ThemeToggle.tsx  ← Sun/Moon toggle button
-  src/hooks/useChartTheme.ts        ← Recharts theme values
-
-SỬA:
-  src/app/globals.css               ← Dual :root + .dark variables
-  src/app/layout.tsx                ← Anti-flash script + suppressHydrationWarning
-  src/components/layout/Header.tsx  ← Thêm <ThemeToggle />
-  src/lib/utils.ts                  ← TIER_COLORS dùng CSS var()
-  src/lib/animations.ts             ← cardHover shadow dùng CSS var()
-
-RÀ SOÁT (find & replace hardcoded hex → Tailwind tokens):
-  src/components/ui/*.tsx           ← Tất cả UI primitives
-  src/components/layout/*.tsx       ← Header, Footer
-  src/components/landing/*.tsx      ← Hero, Stats, Features, TopPlayers, CTA
-  src/components/player/*.tsx       ← PlayerCard, PlayerGrid, etc.
-  src/components/charts/*.tsx       ← Dùng useChartTheme()
-```
-
----
-
-### TEST CHECKLIST
-
-```
-□ Mở trang lần đầu (no localStorage) → Light theme
-□ Toggle → Dark → reload → vẫn Dark (localStorage)
-□ Xoá localStorage → respect prefers-color-scheme
-□ Không flash trắng/đen khi reload (anti-FOUC script)
-□ Transition mượt 300ms khi toggle
-□ Tất cả text đọc được trên cả 2 theme (contrast check)
-□ Tier badges rõ ràng trên cả light và dark
-□ Charts tooltip/grid đúng màu theo theme
-□ Card shadow: light=box-shadow, dark=glow
-□ Noise overlay: chỉ hiện dark mode
-□ Player image grayscale: chỉ dark mode
-□ Scrollbar phù hợp với theme
-□ Selection highlight đúng màu
-□ Mobile responsive: toggle vẫn hoạt động
+□ First visit (no localStorage) → Light theme loads
+□ Toggle to Dark → reload → persists as Dark
+□ Clear localStorage → respects OS prefers-color-scheme
+□ No white/dark flash on reload (next-themes anti-FOUC)
+□ Smooth 300ms transition when toggling
+□ All text readable in both themes (contrast check)
+□ Tier badges clearly distinguishable on light and dark
+□ Chart tooltips/grid use correct theme colors
+□ Card shadow: light = box-shadow, dark = acid glow
+□ Noise overlay: visible only in dark mode
+□ Player image grayscale: dark mode only
+□ Scrollbar matches current theme
+□ Selection highlight uses correct colors
+□ Mobile responsive: toggle works on all breakpoints
+□ 3-state toggle (if used): Light / System / Dark all work
+□ resolvedTheme correctly resolves "system" → actual "light"/"dark"
+□ No hydration mismatch warnings in console
 ```
