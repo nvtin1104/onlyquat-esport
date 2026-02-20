@@ -8,12 +8,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const TIER_COLORS: Record<TierKey, string> = {
-  S: '#CCFF00',
-  A: '#00FF88',
-  B: '#00AAFF',
-  C: '#FFB800',
-  D: '#FF4D00',
-  F: '#FF4444',
+  S: 'var(--color-tier-s)',
+  A: 'var(--color-tier-a)',
+  B: 'var(--color-tier-b)',
+  C: 'var(--color-tier-c)',
+  D: 'var(--color-tier-d)',
+  F: 'var(--color-tier-f)',
 };
 
 export function getTierFromRating(rating: number): TierKey {

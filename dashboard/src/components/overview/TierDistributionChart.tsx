@@ -20,10 +20,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
   const item = payload[0].payload;
   return (
-    <div
-      className="rounded p-3 border"
-      style={{ backgroundColor: '#0A0A0A', borderColor: '#2A2A2B' }}
-    >
+    <div className="rounded p-3 border bg-bg-card border-border-subtle">
       <p className="font-mono text-xs font-bold" style={{ color: item.color }}>
         Tier {item.tier}
       </p>
@@ -34,10 +31,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 
 export function TierDistributionChart() {
   return (
-    <div
-      className="rounded-sm p-4 border"
-      style={{ backgroundColor: '#0A0A0A', borderColor: '#2A2A2B' }}
-    >
+    <div className="rounded-sm p-4 border bg-bg-card border-border-subtle">
       <h2 className="font-display font-bold text-sm text-text-primary mb-4">Phan bo tier</h2>
 
       <div className="relative">

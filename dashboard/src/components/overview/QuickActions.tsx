@@ -22,8 +22,7 @@ export function QuickActions() {
         <Link
           key={to}
           to={to}
-          className="border rounded-sm p-4 text-center cursor-pointer transition hover:border-border-hover"
-          style={{ backgroundColor: '#0A0A0A', borderColor: '#2A2A2B' }}
+          className="border rounded-sm p-4 text-center cursor-pointer transition bg-bg-card border-border-subtle hover:border-border-hover"
         >
           <Icon className="w-8 h-8 mx-auto mb-2 text-accent-acid" />
           <p className="font-body text-sm text-text-primary">{label}</p>

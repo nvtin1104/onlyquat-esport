@@ -1,26 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+/*
+  @theme inline maps Tailwind utility tokens to CSS custom properties.
+  Themeable tokens (bg, border, text) reference intermediate vars that
+  swap between :root (dark default) and :root[data-theme="light"].
+  Constant tokens (accents, tiers, game colors) are baked in directly.
+*/
 @theme inline {
-  --color-bg-base: #121212;
-  --color-bg-elevated: #1A1A1B;
-  --color-bg-surface: #000000;
-  --color-bg-card: #0A0A0A;
+  /* Background — themeable */
+  --color-bg-base:     var(--bg-base);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-surface:  var(--bg-surface);
+  --color-bg-card:     var(--bg-card);
 
-  --color-border-subtle: #2A2A2B;
-  --color-border-hover: #3A3A3B;
+  /* Border — themeable */
+  --color-border-subtle: var(--border-subtle);
+  --color-border-hover:  var(--border-hover);
 
-  --color-accent-acid: #CCFF00;
-  --color-accent-lava: #FF4D00;
-  --color-accent-acid-dim: rgba(204,255,0,0.12);
-  --color-accent-acid-glow: rgba(204,255,0,0.4);
-  --color-accent-lava-dim: rgba(255,77,0,0.12);
-  --color-accent-lava-glow: rgba(255,77,0,0.4);
+  /* Text — themeable */
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-dim:       var(--text-dim);
 
-  --color-text-primary: #E8E8E8;
-  --color-text-secondary: #888888;
-  --color-text-dim: #555555;
+  /* Accent — constant */
+  --color-accent-acid:       #CCFF00;
+  --color-accent-lava:       #FF4D00;
+  --color-accent-acid-dim:   rgba(204,255,0,0.12);
+  --color-accent-acid-glow:  rgba(204,255,0,0.4);
+  --color-accent-acid-shadow:rgba(204,255,0,0.3);
+  --color-accent-lava-dim:   rgba(255,77,0,0.12);
+  --color-accent-lava-glow:  rgba(255,77,0,0.4);
 
+  /* Tier — constant */
   --color-tier-s: #CCFF00;
   --color-tier-a: #00FF88;
   --color-tier-b: #00AAFF;
@@ -28,26 +40,75 @@
   --color-tier-d: #FF4D00;
   --color-tier-f: #FF4444;
 
+  /* Semantic — constant */
   --color-success: #00FF88;
   --color-warning: #FFB800;
-  --color-danger: #FF4444;
-  --color-info: #00AAFF;
+  --color-danger:  #FF4444;
+  --color-info:    #00AAFF;
 
+  /* Game brand — constant */
+  --color-game-lol:          #C89B3C;
+  --color-game-lol-dim:      rgba(200,155,60,0.1);
+  --color-game-lol-border:   rgba(200,155,60,0.3);
+  --color-game-val:          #FF4654;
+  --color-game-val-dim:      rgba(255,70,84,0.1);
+  --color-game-val-border:   rgba(255,70,84,0.3);
+  --color-game-cs2:          #DE9B35;
+  --color-game-cs2-dim:      rgba(222,155,53,0.1);
+  --color-game-cs2-border:   rgba(222,155,53,0.3);
+  --color-game-dota2:        #E05926;
+  --color-game-dota2-dim:    rgba(224,89,38,0.1);
+  --color-game-dota2-border: rgba(224,89,38,0.3);
+  --color-game-default:      #6B7280;
+  --color-game-default-dim:  rgba(107,114,128,0.1);
+  --color-game-default-border: rgba(107,114,128,0.3);
+
+  /* Typography & easing — constant */
   --font-display: 'Chakra Petch', sans-serif;
-  --font-body: 'Be Vietnam Pro', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
+  --font-body:    'Be Vietnam Pro', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
   --ease-out-expo: cubic-bezier(.23, 1, .32, 1);
 }
 
+/* ─── Dark theme (default) ───────────────────────────── */
+:root {
+  --bg-base:     #121212;
+  --bg-elevated: #1A1A1B;
+  --bg-surface:  #000000;
+  --bg-card:     #0A0A0A;
+
+  --border-subtle: #2A2A2B;
+  --border-hover:  #3A3A3B;
+
+  --text-primary:   #E8E8E8;
+  --text-secondary: #888888;
+  --text-dim:       #555555;
+}
+
+/* ─── Light theme ────────────────────────────────────── */
+:root[data-theme="light"] {
+  --bg-base:     #F5F5F5;
+  --bg-elevated: #FFFFFF;
+  --bg-surface:  #EBEBEB;
+  --bg-card:     #FFFFFF;
+
+  --border-subtle: #D8D8D9;
+  --border-hover:  #C0C0C1;
+
+  --text-primary:   #111111;
+  --text-secondary: #5A5A5A;
+  --text-dim:       #9A9A9A;
+}
+
+/* ─── Global styles ──────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2A2A2B #121212;
+  scrollbar-color: var(--border-subtle) var(--bg-base);
 }
 
 ::selection {
-  background: #CCFF00;
-  color: #121212;
+  background: var(--color-accent-acid);
+  color: var(--bg-base);
 }
 
 body {

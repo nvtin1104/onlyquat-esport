@@ -1,4 +1,5 @@
 import { Bell, Menu, Search } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { UserMenu } from './UserMenu';
 
 interface DashboardHeaderProps {
@@ -45,6 +46,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           </span>
         </div>
 
+        <ThemeToggle />
         <UserMenu />
       </div>
     </header>

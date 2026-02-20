@@ -15,10 +15,7 @@ export function RecentRatingsTable() {
   const rows = recentRatings.slice(0, 5);
 
   return (
-    <div
-      className="rounded-sm p-4 border"
-      style={{ backgroundColor: '#0A0A0A', borderColor: '#2A2A2B' }}
-    >
+    <div className="rounded-sm p-4 border bg-bg-card border-border-subtle">
       <h2 className="font-display font-bold text-sm text-text-primary mb-4">Danh gia gan day</h2>
 
       <Table>
@@ -60,12 +57,8 @@ export function RecentRatingsTable() {
         </TableBody>
       </Table>
 
-      <div className="mt-3 pt-3 border-t" style={{ borderColor: '#2A2A2B' }}>
-        <Link
-          to="/ratings"
-          className="text-sm font-body hover:underline"
-          style={{ color: '#CCFF00' }}
-        >
+      <div className="mt-3 pt-3 border-t border-border-subtle">
+        <Link to="/ratings" className="text-sm font-body text-accent-acid hover:underline">
           Xem tat ca danh gia →
         </Link>
       </div>

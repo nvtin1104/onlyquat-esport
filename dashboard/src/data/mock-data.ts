@@ -1,4 +1,5 @@
 import type { AdminPlayer, AdminTeam, AdminMatch, AdminRating, AdminUser, PointTransaction, KPIData } from '@/types/admin';
+import { TIER_COLORS } from '@/lib/utils';
 
 export const mockPlayers: AdminPlayer[] = [
   { id: 'p1', slug: 'dragonslayer99', displayName: 'DragonSlayer99', realName: 'Nguyen Minh Duc', nationality: 'VN', imageUrl: '/avatars/dragon.webp', gameId: 'g1', gameName: 'League of Legends', gameShort: 'LoL', teamId: 't1', teamTag: 'ALP', role: 'Mid', rating: 9.8, tier: 'S', totalRatings: 12450, rank: 1, isActive: true },
@@ -55,12 +56,12 @@ export const ratingTrend = [
 ];
 
 export const tierDistribution = [
-  { tier: 'S', count: 305, color: '#CCFF00' },
-  { tier: 'A', count: 637, color: '#00FF88' },
-  { tier: 'B', count: 764, color: '#00AAFF' },
-  { tier: 'C', count: 509, color: '#FFB800' },
-  { tier: 'D', count: 254, color: '#FF4D00' },
-  { tier: 'F', count: 78, color: '#FF4444' },
+  { tier: 'S', count: 305, color: TIER_COLORS.S },
+  { tier: 'A', count: 637, color: TIER_COLORS.A },
+  { tier: 'B', count: 764, color: TIER_COLORS.B },
+  { tier: 'C', count: 509, color: TIER_COLORS.C },
+  { tier: 'D', count: 254, color: TIER_COLORS.D },
+  { tier: 'F', count: 78, color: TIER_COLORS.F },
 ];
 
 export const mockTransactions: PointTransaction[] = [

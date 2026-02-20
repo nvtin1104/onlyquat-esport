@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { ratingTrend } from '@/data/mock-data';
 import { formatNumber } from '@/lib/utils';
+import { useChartTheme } from '@/lib/hooks/useChartTheme';
 
 interface TooltipPayloadItem {
   value: number;
@@ -24,13 +25,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
 
   return (
-    <div
-      className="rounded p-3 border"
-      style={{
-        backgroundColor: '#0A0A0A',
-        borderColor: '#2A2A2B',
-      }}
-    >
+    <div className="rounded p-3 border bg-bg-card border-border-subtle">
       <p className="font-mono text-xs text-text-secondary mb-1">{label}</p>
       <p className="font-mono text-sm font-bold text-accent-acid">
         {formatNumber(payload[0].value)}
@@ -39,27 +34,20 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   );
 }
 
-const tickStyle = {
-  fontFamily: 'JetBrains Mono, monospace',
-  fontSize: 11,
-  fill: '#555555',
-};
-
 export function RatingTrendChart() {
+  const chart = useChartTheme();
+
   return (
-    <div
-      className="rounded-sm p-4 border"
-      style={{ backgroundColor: '#0A0A0A', borderColor: '#2A2A2B' }}
-    >
+    <div className="rounded-sm p-4 border bg-bg-card border-border-subtle">
       <h2 className="font-display font-bold text-sm text-text-primary mb-4">
         Xu huong danh gia
       </h2>
       <ResponsiveContainer width="100%" height={220}>
         <AreaChart data={ratingTrend} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-          <CartesianGrid stroke="#2A2A2B" strokeDasharray="3 3" />
-          <XAxis dataKey="month" tick={tickStyle} axisLine={false} tickLine={false} />
+          <CartesianGrid stroke={chart.gridStroke} strokeDasharray="3 3" />
+          <XAxis dataKey="month" tick={chart.tickStyle} axisLine={false} tickLine={false} />
           <YAxis
-            tick={tickStyle}
+            tick={chart.tickStyle}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v: number) => formatNumber(v)}
@@ -69,9 +57,9 @@ export function RatingTrendChart() {
           <Area
             type="monotone"
             dataKey="count"
-            stroke="#CCFF00"
+            stroke={chart.stroke}
             strokeWidth={2}
-            fill="#CCFF00"
+            fill={chart.fill}
             fillOpacity={0.08}
           />
         </AreaChart>

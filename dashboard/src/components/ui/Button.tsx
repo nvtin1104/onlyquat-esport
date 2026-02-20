@@ -6,7 +6,7 @@ type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-accent-acid text-black font-bold hover:shadow-[0_0_20px_rgba(204,255,0,0.3)] active:scale-[0.98]',
+    'bg-accent-acid text-black font-bold hover:shadow-[0_0_20px_var(--color-accent-acid-shadow)] active:scale-[0.98]',
   secondary:
     'bg-bg-elevated text-text-primary border border-border-subtle hover:border-border-hover',
   ghost:
