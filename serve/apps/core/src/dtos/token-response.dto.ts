@@ -1,3 +1,5 @@
+import { UserRole, UserStatus } from '@app/common';
+
 export class TokenResponseDto {
   accessToken: string;
   refreshToken: string;
@@ -5,6 +7,8 @@ export class TokenResponseDto {
     id: string;
     email: string;
     username: string;
-    role: string;
+    name: string | null;
+    roles: UserRole[];
+    status: UserStatus;
   };
 }

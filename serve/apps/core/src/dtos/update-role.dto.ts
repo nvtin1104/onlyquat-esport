@@ -1,8 +1,10 @@
-import { IsEnum, IsNotEmpty } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, ArrayMinSize } from 'class-validator';
 import { UserRole } from '@app/common';
 
 export class UpdateRoleDto {
-  @IsEnum(UserRole)
+  @IsArray()
   @IsNotEmpty()
-  role: UserRole;
+  @ArrayMinSize(1)
+  @IsEnum(UserRole, { each: true })
+  roles: UserRole[];
 }

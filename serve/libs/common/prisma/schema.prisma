@@ -10,17 +10,19 @@ datasource db {
 // ─── Enums ──────────────────────────────────────────────────────────────────
 
 enum UserRole {
-  ADMIN       // Quản trị toàn hệ thống
-  MOD         // Duyệt rating, quản lý nội dung
-  ORGANIZER   // Quản lý giải đấu, trận đấu
-  PLAYER      // Tuyển thủ (được claim profile)
-  USER        // Fan, đánh giá, minigame
+  ADMIN     // Quản trị toàn hệ thống
+  STAFF     // Nhân viên
+  ORGANIZER // Tổ chức
+  CREATOR   // Nhà sáng tạo
+  PARTNER   // Đối tác
+  PLAYER    // Tuyển thủ (được claim profile)
+  USER      // Fan, đánh giá, minigame
 }
 
 enum UserStatus {
-  ACTIVE,
-  UNACTIVE,
-  BAN,
+  ACTIVE
+  UNACTIVE
+  BAN
   LOCK
 }
 
@@ -55,22 +57,25 @@ enum TeamMemberRole {
 }
 
 // ─── Models ─────────────────────────────────────────────────────────────────
-// CORE MODELS
+// USER MODELS
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  username  String   @unique
-  name String?
-  role      UserRole @default(USER)
-  status  UserStatus  @default(ACTIVE)
-  avatar    String?
-  ggId String?
-  suspendedAt    DateTime? // Thời điểm bắt đầu bị chặn
-  suspendedUntil DateTime? // Thời điểm được mở chặn (null = vĩnh viễn)
-  suspensionReason String? // Lý do: "Vi phạm điều khoản", "Spam", v.v.
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String     @id @default(uuid())
+  email            String     @unique
+  password         String
+  username         String     @unique
+  name             String?
+  accountType      Int        @default(1) // 0: admin, 1: user
+  role             UserRole[] @default([USER])
+  status           UserStatus @default(ACTIVE)
+  avatar           String?
+  ggId             String?
+  bio              String?
+  suspendedAt      DateTime?
+  suspendedUntil   DateTime?
+  suspensionReason String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
   players              Player[]
   ratings              Rating[]
@@ -79,6 +84,7 @@ model User {
 
   @@map("users")
 }
+
 model Game {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -93,8 +99,6 @@ model Game {
 
   @@map("games")
 }
-
-
 
 model Team {
   id        String   @id @default(uuid())

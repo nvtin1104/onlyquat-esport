@@ -20,17 +20,12 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<TokenResponseDto> {
-    const existingUser = await this.usersService.findByEmail(
-      createUserDto.email,
-    );
+    const existingUser = await this.usersService.findByEmail(createUserDto.email);
     if (existingUser) {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      this.SALT_ROUNDS,
-    );
+    const hashedPassword = await bcrypt.hash(createUserDto.password, this.SALT_ROUNDS);
 
     const user = await this.usersService.create({
       ...createUserDto,
@@ -45,23 +40,20 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role,
+        name: user.name,
+        roles: user.role,
+        status: user.status,
       },
     };
   }
 
   async login(loginDto: LoginDto): Promise<TokenResponseDto> {
-    const user = await this.usersService.findByEmailWithPassword(
-      loginDto.email,
-    );
+    const user = await this.usersService.findByEmailWithPassword(loginDto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -74,7 +66,9 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        role: user.role,
+        name: user.name,
+        roles: user.role,
+        status: user.status,
       },
     };
   }
@@ -96,9 +90,7 @@ export class AuthService {
     }
   }
 
-  async validateToken(
-    token: string,
-  ): Promise<{ valid: boolean; payload?: any }> {
+  async validateToken(token: string): Promise<{ valid: boolean; payload?: any }> {
     try {
       const payload = this.jwtService.verify(token);
       return {
@@ -113,9 +105,7 @@ export class AuthService {
   private async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
 
-    const accessToken = this.jwtService.sign(payload, {
-      expiresIn: '15m',
-    });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),

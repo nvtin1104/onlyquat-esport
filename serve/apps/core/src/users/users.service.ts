@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { PrismaService, UserRole } from '@app/common';
+import { PrismaService, UserRole, UserStatus } from '@app/common';
 import type { User } from '@app/common';
 import { CreateUserDto, UpdateUserDto, ChangePasswordDto, UpdateRoleDto } from '../dtos';
 
@@ -30,9 +30,9 @@ export class UsersService {
         email: createUserDto.email,
         password: createUserDto.password,
         username: createUserDto.username,
-        firstName: createUserDto.firstName,
-        lastName: createUserDto.lastName,
-        role: (createUserDto.role as UserRole) ?? UserRole.player,
+        name: createUserDto.name,
+        role: [UserRole.USER],
+        accountType: 1,
       },
     });
   }
@@ -97,7 +97,7 @@ export class UsersService {
     }
     await this.prisma.user.update({
       where: { id: userId },
-      data: { isActive: false },
+      data: { status: UserStatus.UNACTIVE },
     });
     return { message: 'User deactivated successfully' };
   }
@@ -141,7 +141,7 @@ export class UsersService {
     }
     return this.prisma.user.update({
       where: { id: userId },
-      data: { role: updateRoleDto.role as UserRole },
+      data: { role: updateRoleDto.roles },
       omit: { password: true },
     });
   }
