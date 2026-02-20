@@ -21,6 +21,11 @@ export class AuthController {
     return firstValueFrom(this.identityClient.send('auth.login', loginDto));
   }
 
+  @Post('admin/login')
+  async adminLogin(@Body() loginDto: LoginDto) {
+    return firstValueFrom(this.identityClient.send('auth.adminLogin', loginDto));
+  }
+
   @Post('refresh')
   async refresh(@Body() data: { refreshToken: string }) {
     return firstValueFrom(this.identityClient.send('auth.refresh', data));

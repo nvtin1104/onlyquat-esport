@@ -1,11 +1,29 @@
+import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, PlayerTier, TeamMemberRole } from '../generated/prisma/client';
+import { PrismaClient, PlayerTier, TeamMemberRole, UserRole, UserStatus } from '../generated/prisma/client';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding database...');
+
+  // ─── Admin Account ───────────────────────────────────────────────────
+  const adminPassword = await bcrypt.hash('Admin@123456', 10);
+  await prisma.user.upsert({
+    where: { email: 'admin@onlyquat.com' },
+    update: {},
+    create: {
+      email: 'admin@onlyquat.com',
+      password: adminPassword,
+      username: 'admin',
+      name: 'Super Admin',
+      accountType: 0,
+      role: [UserRole.ADMIN],
+      status: UserStatus.ACTIVE,
+    },
+  });
+  console.log('  Created admin account: admin@onlyquat.com / Admin@123456');
 
   // ─── Games ──────────────────────────────────────────────────────────
   const games = await Promise.all([

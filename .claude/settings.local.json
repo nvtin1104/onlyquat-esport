@@ -30,7 +30,9 @@
       "Bash(npx vite build)",
       "Bash(git -C \"C:\\\\project\\\\onlyquat-esport\" log -1 --oneline)",
       "Bash(test:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(awk:*)"
     ]
   },
   "environment": {

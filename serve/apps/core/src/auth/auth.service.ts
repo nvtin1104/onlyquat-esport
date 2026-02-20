@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -51,6 +52,36 @@ export class AuthService {
     const user = await this.usersService.findByEmailWithPassword(loginDto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const tokens = await this.generateTokens(user.id, user.email);
+
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        name: user.name,
+        roles: user.role,
+        status: user.status,
+      },
+    };
+  }
+
+  async adminLogin(loginDto: LoginDto): Promise<TokenResponseDto> {
+    const user = await this.usersService.findByEmailWithPassword(loginDto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.accountType !== 0) {
+      throw new ForbiddenException('Access denied: admin only');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);

@@ -17,6 +17,11 @@ export class AuthController {
     return this.authService.login(data);
   }
 
+  @MessagePattern('auth.adminLogin')
+  async adminLogin(@Payload() data: LoginDto) {
+    return this.authService.adminLogin(data);
+  }
+
   @MessagePattern('auth.refresh')
   async refresh(@Payload() data: { refreshToken: string }) {
     return this.authService.refresh(data.refreshToken);
