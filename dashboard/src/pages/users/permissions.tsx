@@ -9,7 +9,7 @@ import { usePermissionsStore } from '@/stores/permissionsStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { PERMISSION_METADATA, PERMISSION_MODULES } from '@/constants/permissions';
 import type { AdminUser } from '@/types/admin';
-import { PermissionPicker } from './PermissionGroupsPage';
+import { PermissionPicker } from '../permissions/groups';
 import { toast } from '@/stores/toastStore';
 import {
     Dialog,

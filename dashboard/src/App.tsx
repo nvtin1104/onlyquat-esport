@@ -3,22 +3,22 @@ import { AuthInitializer } from './components/AuthInitializer';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Toaster } from './components/ui/sonner';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
-import { LoginPage } from './pages/LoginPage';
-import { OverviewPage } from './pages/OverviewPage';
-import { PlayersPage } from './pages/PlayersPage';
-import { PlayerFormPage } from './pages/PlayerFormPage';
-import { TeamsPage } from './pages/TeamsPage';
-import { MatchesPage } from './pages/MatchesPage';
-import { RatingsPage } from './pages/RatingsPage';
-import { PointsPage } from './pages/PointsPage';
-import { UsersPage } from './pages/UsersPage';
-import { UserCreatePage } from './pages/UserCreatePage';
-import { UserDetailPage } from './pages/UserDetailPage';
-import { PermissionGroupsPage } from './pages/PermissionGroupsPage';
-import { UserPermissionsPage } from './pages/UserPermissionsPage';
-import { UserPermissionDetailPage } from './pages/UserPermissionDetailPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { NotFoundPage } from './pages/NotFoundPage';
+import { LoginPage } from './pages/auth/login';
+import { OverviewPage } from './pages/overview/index';
+import { PlayersPage } from './pages/players/list';
+import { PlayerFormPage } from './pages/players/form';
+import { TeamsPage } from './pages/teams/list';
+import { MatchesPage } from './pages/matches/list';
+import { RatingsPage } from './pages/ratings/list';
+import { PointsPage } from './pages/points/list';
+import { UsersPage } from './pages/users/list';
+import { UserCreatePage } from './pages/users/create';
+import { UserDetailPage } from './pages/users/detail';
+import { PermissionGroupsPage } from './pages/permissions/groups';
+import { UserPermissionsPage } from './pages/users/permissions';
+import { UserPermissionDetailPage } from './pages/users/permission-detail';
+import { SettingsPage } from './pages/settings/index';
+import { NotFoundPage } from './pages/not-found';
 
 export function App() {
   return (

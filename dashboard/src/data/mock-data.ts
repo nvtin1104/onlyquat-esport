@@ -32,11 +32,11 @@ export const mockRatings: AdminRating[] = [
   { id: 'r5', userName: 'ThuHa', playerName: 'ShadowViper', playerGame: 'Valorant', playerRole: 'Controller', overall: 8.9, aim: 85, gameIq: 92, clutch: 88, teamplay: 90, consistency: 87, comment: 'Smoke rat chuan, IQ game cao', timeAgo: '15 phut truoc', status: 'rejected' },
 ];
 
-export const mockUsers: AdminUser[] = [
-  { id: 'u1', username: 'NamAnh', email: 'nam@email.com', role: 'user', points: 1250, ratingsCount: 45, joinedAt: '2025-06-15', isActive: true },
-  { id: 'u2', username: 'HuyPro', email: 'huy@email.com', role: 'moderator', points: 3400, ratingsCount: 120, joinedAt: '2025-03-20', isActive: true },
-  { id: 'u3', username: 'AdminThu', email: 'thu@arcadearena.vn', role: 'admin', points: 9999, ratingsCount: 5, joinedAt: '2025-01-01', isActive: true },
-  { id: 'u4', username: 'SpamBot99', email: 'spam@fake.com', role: 'user', points: 0, ratingsCount: 200, joinedAt: '2026-02-10', isActive: false },
+export const mockUsers: any[] = [
+  { id: 'u1', username: 'NamAnh', email: 'nam@email.com', role: ['USER'], points: 1250, ratingsCount: 45, joinedAt: '2025-06-15', status: 'ACTIVE' },
+  { id: 'u2', username: 'HuyPro', email: 'huy@email.com', role: ['STAFF'], points: 3400, ratingsCount: 120, joinedAt: '2025-03-20', status: 'ACTIVE' },
+  { id: 'u3', username: 'AdminThu', email: 'thu@arcadearena.vn', role: ['ADMIN'], points: 9999, ratingsCount: 5, joinedAt: '2025-01-01', status: 'ACTIVE' },
+  { id: 'u4', username: 'SpamBot99', email: 'spam@fake.com', role: ['USER'], points: 0, ratingsCount: 200, joinedAt: '2026-02-10', status: 'BANNED' },
 ];
 
 export const kpiData: Record<string, KPIData> = {

@@ -5,9 +5,9 @@ import { DataCard } from '@/components/shared/DataCard';
 import { Button } from '@/components/ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
-import { TransactionsTable } from '@/components/points/TransactionsTable';
-import { PointsCharts } from '@/components/points/PointsCharts';
-import { GiftPointsDialog } from '@/components/points/GiftPointsDialog';
+import { TransactionsTable } from './components/TransactionsTable';
+import { PointsCharts } from './components/PointsCharts';
+import { GiftPointsDialog } from './components/GiftPointsDialog';
 import { mockTransactions, mockUsers } from '@/data/mock-data';
 
 const sortedByPoints = [...mockUsers].sort((a, b) => b.points - a.points).slice(0, 20);

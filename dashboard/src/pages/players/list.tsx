@@ -5,9 +5,9 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { PlayersToolbar } from '@/components/players/PlayersToolbar';
-import { PlayersTable } from '@/components/players/PlayersTable';
-import { BulkActionsBar } from '@/components/players/BulkActionsBar';
+import { PlayersToolbar } from './components/PlayersToolbar';
+import { PlayersTable } from './components/PlayersTable';
+import { BulkActionsBar } from './components/BulkActionsBar';
 import { mockPlayers } from '@/data/mock-data';
 import type { AdminPlayer } from '@/types/admin';
 

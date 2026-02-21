@@ -3,9 +3,9 @@ import { mockMatches } from '@/data/mock-data';
 import type { AdminMatch } from '@/types/admin';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/Button';
-import { MatchesTable } from '@/components/matches/MatchesTable';
-import { CreateMatchDialog } from '@/components/matches/CreateMatchDialog';
-import { UpdateResultDialog } from '@/components/matches/UpdateResultDialog';
+import { MatchesTable } from './components/MatchesTable';
+import { CreateMatchDialog } from './components/CreateMatchDialog';
+import { UpdateResultDialog } from './components/UpdateResultDialog';
 import { Plus } from 'lucide-react';
 
 export function MatchesPage() {

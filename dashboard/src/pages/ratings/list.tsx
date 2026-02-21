@@ -5,8 +5,8 @@ import { SearchInput } from '@/components/shared/SearchInput';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
-import { RatingCard } from '@/components/ratings/RatingCard';
-import { RejectDialog } from '@/components/ratings/RejectDialog';
+import { RatingCard } from './components/RatingCard';
+import { RejectDialog } from './components/RejectDialog';
 import { mockRatings, games } from '@/data/mock-data';
 import type { AdminRating } from '@/types/admin';
 
@@ -62,7 +62,7 @@ export function RatingsPage() {
     .filter((r) =>
       search
         ? r.playerName.toLowerCase().includes(search.toLowerCase()) ||
-          r.userName.toLowerCase().includes(search.toLowerCase())
+        r.userName.toLowerCase().includes(search.toLowerCase())
         : true
     );
 

@@ -5,8 +5,8 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Button } from '@/components/ui/Button';
-import { TeamsTable } from '@/components/teams/TeamsTable';
-import { TeamRosterSheet } from '@/components/teams/TeamRosterSheet';
+import { TeamsTable } from './components/TeamsTable';
+import { TeamRosterSheet } from './components/TeamRosterSheet';
 import { Plus } from 'lucide-react';
 
 export function TeamsPage() {

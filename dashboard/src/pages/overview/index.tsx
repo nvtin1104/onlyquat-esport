@@ -1,11 +1,11 @@
 import { Users, Star, Swords, Coins } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { DataCard } from '@/components/shared/DataCard';
-import { RatingTrendChart } from '@/components/overview/RatingTrendChart';
-import { TierDistributionChart } from '@/components/overview/TierDistributionChart';
-import { RecentRatingsTable } from '@/components/overview/RecentRatingsTable';
-import { TopPlayersList } from '@/components/overview/TopPlayersList';
-import { QuickActions } from '@/components/overview/QuickActions';
+import { RatingTrendChart } from './components/RatingTrendChart';
+import { TierDistributionChart } from './components/TierDistributionChart';
+import { RecentRatingsTable } from './components/RecentRatingsTable';
+import { TopPlayersList } from './components/TopPlayersList';
+import { QuickActions } from './components/QuickActions';
 import { kpiData } from '@/data/mock-data';
 import { formatNumber } from '@/lib/utils';
 

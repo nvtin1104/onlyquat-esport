@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { PlayerForm } from '@/components/players/PlayerForm';
-import type { PlayerFormValues } from '@/components/players/PlayerForm';
+import { PlayerForm } from './components/PlayerForm';
+import type { PlayerFormValues } from './components/PlayerForm';
 import { mockPlayers } from '@/data/mock-data';
 
 export function PlayerFormPage() {

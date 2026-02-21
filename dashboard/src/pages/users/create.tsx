@@ -87,7 +87,7 @@ export function UserCreatePage() {
                 <PageHeader title="Tạo người dùng" description="Thêm tài khoản người dùng mới" />
             </div>
 
-            <div className="max-w-xl">
+            <div >
                 <div className="bg-bg-surface border border-border-subtle rounded-sm p-6">
                     {error && (
                         <div className="mb-4 px-3 py-2 bg-danger/10 border border-danger/30 rounded-sm text-danger text-sm">
