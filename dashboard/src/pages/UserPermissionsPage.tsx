@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Shield, Key, AlertCircle, Loader2, User as UserIcon, CheckCircle2, XCircle, RefreshCcw, Info, Plus } from 'lucide-react';
+import { Search, Shield, Key, AlertCircle, Loader2, User as UserIcon, CheckCircle2, XCircle, RefreshCcw, Info, Plus, Save, RotateCcw } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -9,6 +9,16 @@ import { usePermissionsStore } from '@/stores/permissionsStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { PERMISSION_METADATA, PERMISSION_MODULES } from '@/constants/permissions';
 import type { AdminUser } from '@/types/admin';
+import { PermissionPicker } from './PermissionGroupsPage';
+import { toast } from '@/stores/toastStore';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/Dialog';
 
 // ── Components ───────────────────────────────────────────────────────────────
 
@@ -87,6 +97,7 @@ export function UserPermissionsPage() {
         groups,
         userPermissions,
         isLoading: permsLoading,
+        isSubmitting,
         error,
         fetchGroups,
         fetchUserPermissions,
@@ -96,16 +107,28 @@ export function UserPermissionsPage() {
         revokeCustom,
         rebuildCache,
         clearError,
-        clearUserPermissions
     } = usePermissionsStore();
 
     const [search, setSearch] = useState('');
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
+    // Staged changes
+    const [stagedGroupIds, setStagedGroupIds] = useState<string[]>([]);
+    const [stagedAdditionalPerms, setStagedAdditionalPerms] = useState<string[]>([]);
+    const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
+
     useEffect(() => {
-        fetchGroups(true); // Fetch active groups
-        fetchUsers(); // Initial fetch
+        fetchGroups(true);
+        fetchUsers();
     }, [fetchGroups, fetchUsers]);
+
+    // Update staged changes when userPermissions changes from store
+    useEffect(() => {
+        if (userPermissions && userPermissions.userId === selectedUserId) {
+            setStagedGroupIds(userPermissions.groups.map(g => g.id));
+            setStagedAdditionalPerms(userPermissions.additionalPermissions);
+        }
+    }, [userPermissions, selectedUserId]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -118,14 +141,73 @@ export function UserPermissionsPage() {
         fetchUserPermissions(user.id);
     };
 
-    const handleToggleGroup = (groupId: string, isAssigned: boolean) => {
-        if (!selectedUserId) return;
-        if (isAssigned) {
-            removeGroup(selectedUserId, groupId);
-        } else {
-            assignGroup(selectedUserId, groupId);
+    const handleToggleGroup = (groupId: string) => {
+        setStagedGroupIds(prev =>
+            prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
+        );
+    };
+
+    const handleRevokeStaged = (code: string) => {
+        setStagedAdditionalPerms(prev => prev.filter(p => p !== code));
+    };
+
+    const handleAddOverrides = (codes: string[]) => {
+        setStagedAdditionalPerms(codes);
+    };
+
+    const handleReset = () => {
+        if (userPermissions) {
+            setStagedGroupIds(userPermissions.groups.map(g => g.id));
+            setStagedAdditionalPerms(userPermissions.additionalPermissions);
         }
     };
+
+    const hasChanges = useMemo(() => {
+        if (!userPermissions) return false;
+        const currentGroups = userPermissions.groups.map(g => g.id).sort().join(',');
+        const newGroups = [...stagedGroupIds].sort().join(',');
+        const currentPerms = [...userPermissions.additionalPermissions].sort().join(',');
+        const newPerms = [...stagedAdditionalPerms].sort().join(',');
+
+        return currentGroups !== newGroups || currentPerms !== newPerms;
+    }, [userPermissions, stagedGroupIds, stagedAdditionalPerms]);
+
+    const handleSave = async () => {
+        if (!selectedUserId || !userPermissions) return;
+
+        try {
+            // 1. Handle Groups
+            const currentGroupIds = userPermissions.groups.map(g => g.id);
+            const toAdd = stagedGroupIds.filter(id => !currentGroupIds.includes(id));
+            const toRemove = currentGroupIds.filter(id => !stagedGroupIds.includes(id));
+
+            for (const gid of toAdd) await assignGroup(selectedUserId, gid);
+            for (const gid of toRemove) await removeGroup(selectedUserId, gid);
+
+            // 2. Handle Additional Permissions
+            const currentPerms = userPermissions.additionalPermissions;
+            const permsToAdd = stagedAdditionalPerms.filter(p => !currentPerms.includes(p));
+            const permsToRemove = currentPerms.filter(p => !stagedAdditionalPerms.includes(p));
+
+            for (const p of permsToAdd) await grantCustom(selectedUserId, p);
+            for (const p of permsToRemove) await revokeCustom(selectedUserId, p);
+
+            // 3. Rebuild Cache
+            await rebuildCache(selectedUserId);
+            toast.success('Cập nhật quyền hạn thành công!');
+        } catch (err) {
+            // Store handles error
+        }
+    };
+
+    const effectivePermissions = useMemo(() => {
+        // Calculate effective permissions from staged state
+        const fromGroups = groups
+            .filter(g => stagedGroupIds.includes(g.id))
+            .flatMap(g => g.permissions);
+
+        return Array.from(new Set([...fromGroups, ...stagedAdditionalPerms]));
+    }, [groups, stagedGroupIds, stagedAdditionalPerms]);
 
     const selectedUser = users.find(u => u.id === selectedUserId);
 
@@ -174,7 +256,7 @@ export function UserPermissionsPage() {
                                             : 'border-transparent hover:bg-bg-elevated'
                                     )}
                                 >
-                                    <Avatar alt={user.username} fallback={user.username} size="sm" />
+                                    <Avatar alt={user.username || 'user'} fallback={user.username || '?'} size="sm" />
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium truncate text-text-primary">{user.username}</p>
                                         <p className="text-[10px] text-text-dim truncate">{user.email}</p>
@@ -204,21 +286,38 @@ export function UserPermissionsPage() {
                             )}
 
                             {/* User Header */}
-                            <div className="bg-bg-surface border border-border-subtle rounded-sm p-5 flex items-center justify-between">
+                            <div className="bg-bg-surface border border-border-subtle rounded-sm p-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
                                 <div className="flex items-center gap-4">
                                     <Avatar alt={selectedUser?.username || 'user'} fallback={selectedUser?.username || '?'} size="lg" />
                                     <div>
-                                        <h2 className="text-xl font-bold text-text-primary">{selectedUser?.username}</h2>
-                                        <div className="flex gap-2 mt-1">
-                                            <Badge className="bg-bg-elevated border-border-subtle text-[10px]">{selectedUser?.id}</Badge>
-                                            <Badge className="bg-accent-acid/10 text-accent-acid border-accent-acid/20 text-[10px]">{selectedUser?.role.join(', ')}</Badge>
+                                        <h2 className="text-xl font-bold text-text-primary leading-none">{selectedUser?.username}</h2>
+                                        <div className="flex gap-2 mt-1.5">
+                                            <Badge className="bg-bg-elevated border-border-subtle text-[10px] h-4">{selectedUser?.id.split('-')[0]}</Badge>
+                                            <Badge className="bg-accent-acid/10 text-accent-acid border-accent-acid/20 text-[10px] h-4">{selectedUser?.role.join(', ')}</Badge>
                                         </div>
                                     </div>
                                 </div>
-                                <Button variant="outline" size="sm" onClick={() => userPermissions && rebuildCache(userPermissions.userId)}>
-                                    <RefreshCcw className={cn("h-4 w-4 mr-2", permsLoading && "animate-spin")} />
-                                    Làm mới Cache
-                                </Button>
+
+                                <div className="flex gap-2">
+                                    {hasChanges && (
+                                        <>
+                                            <Button variant="outline" size="sm" onClick={handleReset} disabled={isSubmitting}>
+                                                <RotateCcw className="h-3.5 w-3.5 mr-2" />
+                                                Hủy
+                                            </Button>
+                                            <Button variant="primary" size="sm" onClick={handleSave} disabled={isSubmitting}>
+                                                {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
+                                                Lưu thay đổi
+                                            </Button>
+                                        </>
+                                    )}
+                                    {!hasChanges && (
+                                        <Button variant="outline" size="sm" onClick={() => rebuildCache(selectedUserId)} disabled={isSubmitting}>
+                                            <RefreshCcw className={cn("h-3.5 w-3.5 mr-2", isSubmitting && "animate-spin")} />
+                                            Làm mới Cache
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -231,7 +330,7 @@ export function UserPermissionsPage() {
 
                                     <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
                                         {groups.map((group) => {
-                                            const isAssigned = userPermissions.groups.some(g => g.id === group.id);
+                                            const isAssigned = stagedGroupIds.includes(group.id);
                                             return (
                                                 <div
                                                     key={group.id}
@@ -245,7 +344,7 @@ export function UserPermissionsPage() {
                                                         <p className="text-[10px] text-text-dim">{group.permissions.length} quyền hạn</p>
                                                     </div>
                                                     <button
-                                                        onClick={() => handleToggleGroup(group.id, isAssigned)}
+                                                        onClick={() => handleToggleGroup(group.id)}
                                                         className={cn(
                                                             'p-2 rounded-sm transition-all',
                                                             isAssigned
@@ -265,14 +364,14 @@ export function UserPermissionsPage() {
                                 <div className="bg-bg-base/30 border border-border-subtle rounded-sm p-4">
                                     <h3 className="text-[10px] font-mono uppercase text-text-dim tracking-wider mb-4 flex items-center justify-between">
                                         QUYỀN HẠN CÁ NHÂN (OVERRIDES)
-                                        <Shield className="h-3 w-3 opacity-50 cursor-help" />
+                                        <Shield className="h-3 w-3 opacity-50" />
                                     </h3>
 
-                                    <div className="flex flex-wrap gap-1.5 min-h-[100px] content-start">
-                                        {userPermissions.additionalPermissions.length === 0 && (
-                                            <p className="text-[10px] text-text-dim italic text-center w-full mt-8 opacity-50">Chưa có quyền cá nhân.</p>
+                                    <div className="flex flex-wrap gap-1.5 min-h-[100px] content-start mb-4">
+                                        {stagedAdditionalPerms.length === 0 && (
+                                            <p className="text-[10px] text-text-dim italic text-center w-full mt-6 opacity-50">Chưa có quyền cá nhân.</p>
                                         )}
-                                        {userPermissions.additionalPermissions.map((code) => {
+                                        {stagedAdditionalPerms.map((code) => {
                                             const meta = PERMISSION_METADATA.find(p => p.code === code);
                                             return (
                                                 <Badge
@@ -281,7 +380,7 @@ export function UserPermissionsPage() {
                                                 >
                                                     <span className="text-[10px] font-medium">{meta?.name || code}</span>
                                                     <button
-                                                        onClick={() => selectedUserId && revokeCustom(selectedUserId, code)}
+                                                        onClick={() => handleRevokeStaged(code)}
                                                         className="text-text-dim hover:text-danger p-0.5 rounded-full hover:bg-danger/10 opacity-0 group-hover:opacity-100 transition-all font-bold text-[8px]"
                                                     >
                                                         ✕
@@ -290,17 +389,52 @@ export function UserPermissionsPage() {
                                             );
                                         })}
                                     </div>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full border-dashed text-[10px]"
+                                        onClick={() => setIsOverrideDialogOpen(true)}
+                                    >
+                                        <Plus className="h-3 w-3 mr-1" />
+                                        Thêm quyền ghi đè
+                                    </Button>
                                 </div>
                             </div>
 
                             {/* Effective View */}
                             <div className="space-y-2">
-                                <EffectivePermissionList permissions={userPermissions.effectivePermissions} />
+                                <EffectivePermissionList permissions={effectivePermissions} />
                             </div>
                         </>
                     )}
                 </div>
             </div>
+
+            {/* Override Selection Dialog */}
+            <Dialog open={isOverrideDialogOpen} onOpenChange={setIsOverrideDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Thêm quyền ghi đè (Overrides)</DialogTitle>
+                        <DialogDescription>
+                            Chọn các quyền cụ thể để gán riêng cho người dùng này. Các quyền này sẽ được cộng dồn với quyền từ các nhóm đã gán.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4">
+                        <PermissionPicker
+                            selected={stagedAdditionalPerms}
+                            onChange={handleAddOverrides}
+                        />
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="primary" size="sm" onClick={() => setIsOverrideDialogOpen(false)}>
+                            Xong
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

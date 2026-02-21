@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { usePermissionsStore } from '@/stores/permissionsStore';
 import { PERMISSION_METADATA, PERMISSION_MODULES } from '@/constants/permissions';
+import { toast } from '@/stores/toastStore';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { groupPermissionSchema, type GroupPermissionFormValues } from '@/lib/schemas/permission.schema';
@@ -23,7 +24,7 @@ import type { GroupPermission } from '@/types/permissions';
 
 // ── Components ───────────────────────────────────────────────────────────────
 
-function PermissionPicker({
+export function PermissionPicker({
     selected,
     onChange,
 }: {
@@ -145,12 +146,14 @@ export function PermissionGroupsPage() {
         try {
             if (editingGroup) {
                 await updateGroup(editingGroup.id, data);
+                toast.success('Cập nhật nhóm quyền thành công');
             } else {
                 await createGroup(data);
+                toast.success('Tạo nhóm quyền mới thành công');
             }
             setDialogOpen(false);
         } catch {
-            // Error handled by store
+            toast.error(error || 'Thao tác thất bại');
         }
     };
 
@@ -158,8 +161,9 @@ export function PermissionGroupsPage() {
         if (confirm('Bạn có chắc chắn muốn xoá nhóm quyền này?')) {
             try {
                 await deleteGroup(id);
+                toast.success('Đã xoá nhóm quyền');
             } catch (err: any) {
-                alert(err.message);
+                toast.error(err.message || 'Xoá thất bại');
             }
         }
     };
