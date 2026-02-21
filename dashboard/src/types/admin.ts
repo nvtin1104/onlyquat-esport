@@ -64,16 +64,28 @@ export interface AdminRating {
   status: 'pending' | 'approved' | 'rejected';
 }
 
+export type UserRole = 'ROOT' | 'ADMIN' | 'STAFF' | 'USER';
+export type UserStatus = 'ACTIVE' | 'UNACTIVE' | 'BANNED';
+
 export interface AdminUser {
   id: string;
-  username: string;
   email: string;
-  role: 'user' | 'moderator' | 'admin';
-  points: number;
-  ratingsCount: number;
-  joinedAt: string;
-  isActive: boolean;
+  username: string;
+  name: string | null;
+  role: UserRole[];
+  status: UserStatus;
+  accountType: number;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface UsersListResponse {
+  users: AdminUser[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 
 export interface PointTransaction {
   id: string;

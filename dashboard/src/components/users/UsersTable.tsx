@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { MoreHorizontal } from 'lucide-react';
+import { ExternalLink, MoreHorizontal } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -17,9 +17,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/DropdownMenu';
-import { StatusBadge } from '@/components/shared/StatusBadge';
 import { cn } from '@/lib/utils';
-import type { AdminUser } from '@/types/admin';
+import type { AdminUser, UserRole, UserStatus } from '@/types/admin';
 
 interface UsersTableProps {
   users: AdminUser[];
@@ -28,24 +27,42 @@ interface UsersTableProps {
   onViewDetail: (user: AdminUser) => void;
 }
 
-function getRoleBadge(role: AdminUser['role']): { label: string; className: string } {
-  switch (role) {
-    case 'admin':
-      return {
-        label: 'Admin',
-        className: 'bg-accent-acid/10 text-accent-acid border-accent-acid/30',
-      };
-    case 'moderator':
-      return {
-        label: 'Moderator',
-        className: 'bg-info/10 text-info border-info/30',
-      };
-    default:
-      return {
-        label: 'User',
-        className: 'bg-bg-elevated text-text-dim border-border-subtle',
-      };
-  }
+const ROLE_CONFIG: Record<UserRole, { label: string; className: string }> = {
+  ROOT: { label: 'Root', className: 'bg-danger/10 text-danger border-danger/30' },
+  ADMIN: { label: 'Admin', className: 'bg-accent-acid/10 text-accent-acid border-accent-acid/30' },
+  STAFF: { label: 'Staff', className: 'bg-info/10 text-info border-info/30' },
+  USER: { label: 'User', className: 'bg-bg-elevated text-text-dim border-border-subtle' },
+};
+
+const STATUS_CONFIG: Record<UserStatus, { label: string; className: string }> = {
+  ACTIVE: { label: 'Hoạt động', className: 'text-success' },
+  UNACTIVE: { label: 'Chưa kích hoạt', className: 'text-text-dim' },
+  BANNED: { label: 'Bị cấm', className: 'text-danger' },
+};
+
+function RoleBadges({ roles }: { roles: UserRole[] }) {
+  return (
+    <div className="flex flex-wrap gap-1">
+      {roles.map((r) => {
+        const cfg = ROLE_CONFIG[r] ?? ROLE_CONFIG.USER;
+        return (
+          <Badge key={r} className={cfg.className}>
+            {cfg.label}
+          </Badge>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatusCell({ status }: { status: UserStatus }) {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.UNACTIVE;
+  return (
+    <span className={cn('flex items-center gap-1.5 font-mono text-[10px] uppercase', cfg.className)}>
+      <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
+      {cfg.label}
+    </span>
+  );
 }
 
 export function UsersTable({ users, onChangeRole, onBan, onViewDetail }: UsersTableProps) {
@@ -54,107 +71,93 @@ export function UsersTable({ users, onChangeRole, onBan, onViewDetail }: UsersTa
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nguoi dung</TableHead>
+            <TableHead>Người dùng</TableHead>
             <TableHead>Role</TableHead>
-            <TableHead>Diem</TableHead>
-            <TableHead>Danh gia</TableHead>
-            <TableHead>Ngay tham gia</TableHead>
-            <TableHead>Trang thai</TableHead>
-            <TableHead className="w-12"></TableHead>
+            <TableHead>Trạng thái</TableHead>
+            <TableHead>Loại TK</TableHead>
+            <TableHead>Ngày tạo</TableHead>
+            <TableHead className="w-12" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-text-dim py-8">
-                Khong co nguoi dung nao.
+              <TableCell colSpan={6} className="text-center text-text-dim py-10">
+                Không có người dùng nào.
               </TableCell>
             </TableRow>
           ) : (
-            users.map((user) => {
-              const roleBadge = getRoleBadge(user.role);
-              return (
-                <TableRow key={user.id}>
-                  {/* User */}
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        alt={user.username}
-                        fallback={user.username}
-                        size="sm"
-                      />
-                      <div>
-                        <p className="font-medium text-text-primary">{user.username}</p>
-                        <p className="text-xs text-text-dim">{user.email}</p>
-                      </div>
+            users.map((user) => (
+              <TableRow
+                key={user.id}
+                className="cursor-pointer"
+                onClick={() => onViewDetail(user)}
+              >
+                {/* User info */}
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar alt={user.username} fallback={user.username} size="sm" />
+                    <div>
+                      <p className="font-medium text-text-primary">{user.username}</p>
+                      <p className="text-xs text-text-dim">{user.email}</p>
+                      {user.name && (
+                        <p className="text-xs text-text-secondary">{user.name}</p>
+                      )}
                     </div>
-                  </TableCell>
+                  </div>
+                </TableCell>
 
-                  {/* Role */}
-                  <TableCell>
-                    <Badge className={roleBadge.className}>
-                      {roleBadge.label}
-                    </Badge>
-                  </TableCell>
+                {/* Roles */}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <RoleBadges roles={user.role} />
+                </TableCell>
 
-                  {/* Points */}
-                  <TableCell>
-                    <span className="font-mono">{user.points.toLocaleString()}</span>
-                  </TableCell>
+                {/* Status */}
+                <TableCell><StatusCell status={user.status} /></TableCell>
 
-                  {/* Ratings */}
-                  <TableCell>
-                    <span className="font-mono text-text-secondary">{user.ratingsCount}</span>
-                  </TableCell>
+                {/* Account type */}
+                <TableCell>
+                  <span className="text-xs text-text-dim font-mono">
+                    {user.accountType === 0 ? 'Admin' : 'Public'}
+                  </span>
+                </TableCell>
 
-                  {/* Joined */}
-                  <TableCell className="text-text-dim text-xs">
-                    {format(new Date(user.joinedAt), 'dd/MM/yyyy')}
-                  </TableCell>
+                {/* Created at */}
+                <TableCell className="text-text-dim text-xs">
+                  {format(new Date(user.createdAt), 'dd/MM/yyyy')}
+                </TableCell>
 
-                  {/* Status */}
-                  <TableCell>
-                    {user.isActive ? (
-                      <StatusBadge status="active" />
-                    ) : (
-                      <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase text-danger">
-                        <span className="w-1.5 h-1.5 rounded-full bg-danger flex-shrink-0" />
-                        banned
-                      </span>
-                    )}
-                  </TableCell>
-
-                  {/* Actions */}
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        className={cn(
-                          'p-1.5 rounded-sm text-text-dim hover:text-text-primary',
-                          'hover:bg-bg-elevated transition-colors duration-100'
-                        )}
+                {/* Actions */}
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      className={cn(
+                        'p-1.5 rounded-sm text-text-dim hover:text-text-primary',
+                        'hover:bg-bg-elevated transition-colors duration-100',
+                      )}
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => onViewDetail(user)}>
+                        <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                        Xem chi tiết
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => onChangeRole(user)}>
+                        Đổi role
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onSelect={() => onBan(user)}
+                        className="text-danger hover:text-danger"
                       >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => onViewDetail(user)}>
-                          Xem chi tiet
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => onChangeRole(user)}>
-                          Doi role
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onSelect={() => onBan(user)}
-                          className="text-danger hover:text-danger"
-                        >
-                          {user.isActive ? 'Ban' : 'Unban'}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              );
-            })
+                        {user.status === 'BANNED' ? 'Bỏ cấm' : 'Cấm người dùng'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
           )}
         </TableBody>
       </Table>

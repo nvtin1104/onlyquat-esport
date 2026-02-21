@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
@@ -9,67 +10,97 @@ import {
 } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
+import { banUserSchema, type BanUserFormValues } from '@/lib/schemas/user.schema';
 import type { AdminUser } from '@/types/admin';
 
 interface BanUserDialogProps {
   user: AdminUser | null;
   open: boolean;
+  isLoading?: boolean;
   onClose: () => void;
-  onConfirm: (userId: string, reason: string) => void;
+  onConfirm: (userId: string) => Promise<void>;
 }
 
-export function BanUserDialog({ user, open, onClose, onConfirm }: BanUserDialogProps) {
-  const [reason, setReason] = useState('');
+export function BanUserDialog({
+  user,
+  open,
+  isLoading,
+  onClose,
+  onConfirm,
+}: BanUserDialogProps) {
+  const isBanning = user?.status !== 'BANNED';
 
-  function handleConfirm() {
-    if (!user) return;
-    onConfirm(user.id, reason);
-    setReason('');
-    onClose();
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<BanUserFormValues>({
+    resolver: isBanning ? zodResolver(banUserSchema) : undefined,
+    defaultValues: { reason: '' },
+  });
 
   function handleClose() {
-    setReason('');
+    reset();
     onClose();
   }
 
-  const isBanning = user?.isActive ?? true;
+  async function onSubmit() {
+    if (!user) return;
+    await onConfirm(user.id);
+    reset();
+  }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isBanning ? 'Cam nguoi dung' : 'Bo cam nguoi dung'}</DialogTitle>
+          <DialogTitle>
+            {isBanning ? 'Cấm người dùng' : 'Bỏ cấm người dùng'}
+          </DialogTitle>
           {user && (
             <DialogDescription>
-              Ban muon {isBanning ? 'cam' : 'bo cam'}{' '}
+              Bạn muốn {isBanning ? 'cấm' : 'bỏ cấm'}{' '}
               <strong className="text-text-primary">{user.username}</strong>?
             </DialogDescription>
           )}
         </DialogHeader>
 
-        {isBanning && (
-          <div>
-            <label className="font-mono text-xs text-text-dim uppercase mb-1.5 block">
-              Ly do
-            </label>
-            <Textarea
-              placeholder="Nhap ly do cam nguoi dung..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={3}
-            />
-          </div>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {isBanning && (
+            <div>
+              <label className="font-mono text-xs text-text-dim uppercase mb-1.5 block">
+                Lý do cấm
+              </label>
+              <Textarea
+                {...register('reason')}
+                placeholder="Nhập lý do cấm người dùng..."
+                rows={3}
+              />
+              {errors.reason && (
+                <p className="text-danger text-xs mt-1">{errors.reason.message}</p>
+              )}
+            </div>
+          )}
 
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={handleClose}>
-            Huy
-          </Button>
-          <Button variant="destructive" size="sm" onClick={handleConfirm}>
-            {isBanning ? 'Xac nhan cam' : 'Xac nhan bo cam'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" size="sm" onClick={handleClose}>
+              Huỷ
+            </Button>
+            <Button
+              type="submit"
+              variant="destructive"
+              size="sm"
+              disabled={isLoading}
+            >
+              {isLoading
+                ? 'Đang xử lý...'
+                : isBanning
+                  ? 'Xác nhận cấm'
+                  : 'Xác nhận bỏ cấm'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
