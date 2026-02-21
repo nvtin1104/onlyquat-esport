@@ -23,27 +23,29 @@
   --color-text-secondary: var(--text-secondary);
   --color-text-dim:       var(--text-dim);
 
-  /* Accent — constant */
-  --color-accent-acid:       #CCFF00;
+  /* Accent — themeable via intermediate var */
+  --color-accent-acid:       var(--accent-acid);
   --color-accent-lava:       #FF4D00;
-  --color-accent-acid-dim:   rgba(204,255,0,0.12);
-  --color-accent-acid-glow:  rgba(204,255,0,0.4);
-  --color-accent-acid-shadow:rgba(204,255,0,0.3);
+  --color-accent-acid-dim:   var(--accent-acid-dim);
+  --color-accent-acid-glow:  var(--accent-acid-glow);
+  --color-accent-acid-shadow:var(--accent-acid-shadow);
   --color-accent-lava-dim:   rgba(255,77,0,0.12);
   --color-accent-lava-glow:  rgba(255,77,0,0.4);
 
-  /* Tier — constant */
-  --color-tier-s: #CCFF00;
-  --color-tier-a: #00FF88;
+  /* Tier — themeable via intermediate var */
+  --color-tier-s:  var(--tier-s);
+
+  /* Tier — remaining constants (tier-s overridden above) */
+  --color-tier-a: #00CC70;
   --color-tier-b: #00AAFF;
   --color-tier-c: #FFB800;
   --color-tier-d: #FF4D00;
   --color-tier-f: #FF4444;
 
-  /* Semantic — constant */
-  --color-success: #00FF88;
+  /* Semantic — themeable via intermediate var */
+  --color-success: var(--semantic-success);
   --color-warning: #FFB800;
-  --color-danger:  #FF4444;
+  --color-danger:  #E53535;
   --color-info:    #00AAFF;
 
   /* Game brand — constant */
@@ -83,21 +85,37 @@
   --text-primary:   #E8E8E8;
   --text-secondary: #888888;
   --text-dim:       #555555;
+
+  /* Dark accent */
+  --accent-acid:        #CCFF00;
+  --accent-acid-dim:    rgba(204,255,0,0.12);
+  --accent-acid-glow:   rgba(204,255,0,0.4);
+  --accent-acid-shadow: rgba(204,255,0,0.3);
+  --tier-s:             #CCFF00;
+  --semantic-success:   #00FF88;
 }
 
 /* ─── Light theme ────────────────────────────────────── */
 :root[data-theme="light"] {
-  --bg-base:     #F5F5F5;
+  --bg-base:     #F2F4F7;
   --bg-elevated: #FFFFFF;
-  --bg-surface:  #EBEBEB;
+  --bg-surface:  #E8EBF0;
   --bg-card:     #FFFFFF;
 
-  --border-subtle: #D8D8D9;
-  --border-hover:  #C0C0C1;
+  --border-subtle: #D1D5DD;
+  --border-hover:  #A8AEB8;
 
-  --text-primary:   #111111;
-  --text-secondary: #5A5A5A;
-  --text-dim:       #9A9A9A;
+  --text-primary:   #0F1117;
+  --text-secondary: #4A5060;
+  --text-dim:       #8A909E;
+
+  /* Light accent — toned-down forest green, less glaring */
+  --accent-acid:        #4D8A00;
+  --accent-acid-dim:    rgba(77,138,0,0.10);
+  --accent-acid-glow:   rgba(77,138,0,0.25);
+  --accent-acid-shadow: rgba(77,138,0,0.20);
+  --tier-s:             #4D8A00;
+  --semantic-success:   #1A9E5C;
 }
 
 /* ─── Global styles ──────────────────────────────────── */
