@@ -32,12 +32,12 @@ export class AdminPermissionsController {
   @Get()
   @Auth(PERMISSIONS.SYSTEM_PERMISSIONS)
   @ApiOperation({
-    summary: 'List all permissions',
-    description: 'Returns master permission list. Requires: `system:permissions`',
+    summary: 'List all group permissions',
+    description: 'Returns all permission groups. Requires: `system:permissions`',
   })
-  async findAll(@Query('module') module?: string) {
+  async findAll(@Query('activeOnly') activeOnly?: boolean) {
     return firstValueFrom(
-      this.identityClient.send('permissions.findAll', { module }),
+      this.identityClient.send('permissions.findAll', { activeOnly }),
     );
   }
 
