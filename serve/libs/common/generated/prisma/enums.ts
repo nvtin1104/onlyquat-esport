@@ -10,6 +10,7 @@
 */
 
 export const UserRole = {
+  ROOT: 'ROOT',
   ADMIN: 'ADMIN',
   STAFF: 'STAFF',
   ORGANIZER: 'ORGANIZER',

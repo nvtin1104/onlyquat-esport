@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +15,7 @@ import { UserRole } from '@app/common';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly SALT_ROUNDS = 10;
 
   constructor(
@@ -52,17 +54,41 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<TokenResponseDto> {
+    this.logger.log(`Login attempt for: ${loginDto.email}`);
+
+    // Step 1: Find user
     const user = await this.usersService.findByEmailWithPassword(loginDto.email);
     if (!user) {
+      this.logger.warn(`Login failed: User not found - ${loginDto.email}`);
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    this.logger.debug(`User found: ${user.email} (ID: ${user.id})`);
+
+    // Step 2: Verify password
+    if (!user.password) {
+      this.logger.error(`Login failed: No password set for user - ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
+      this.logger.warn(`Login failed: Invalid password - ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
+    this.logger.debug(`Password verified for: ${user.email}`);
 
+    // Step 3: Build permissions
+    try {
+      await this.permissionsService.buildUserPermissions(user.id);
+      this.logger.debug(`Permissions built for: ${user.email}`);
+    } catch (error) {
+      this.logger.error(`Failed to build permissions for ${user.email}:`, error.message);
+      // Continue login even if permissions fail
+    }
+
+    // Step 4: Generate tokens
     const tokens = await this.generateTokens(user.id, user.email, user.role as UserRole[]);
+    this.logger.log(`Login successful: ${user.email}`);
 
     return {
       ...tokens,
@@ -78,21 +104,48 @@ export class AuthService {
   }
 
   async adminLogin(loginDto: LoginDto): Promise<TokenResponseDto> {
+    this.logger.log(`Admin login attempt for: ${loginDto.email}`);
+
+    // Step 1: Find user
     const user = await this.usersService.findByEmailWithPassword(loginDto.email);
     if (!user) {
+      this.logger.warn(`Admin login failed: User not found - ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
+    this.logger.debug(`User found: ${user.email} (ID: ${user.id})`);
 
+    // Step 2: Check account type
     if (user.accountType !== 0) {
+      this.logger.warn(`Admin login failed: Invalid account type - ${loginDto.email} (type: ${user.accountType})`);
       throw new ForbiddenException('Access denied: admin only');
+    }
+    this.logger.debug(`Account type valid: ${user.accountType}`);
+
+    // Step 3: Verify password
+    if (!user.password) {
+      this.logger.error(`Admin login failed: No password set for user - ${loginDto.email}`);
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
+      this.logger.warn(`Admin login failed: Invalid password - ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
+    this.logger.debug(`Password verified for: ${user.email}`);
 
+    // Step 4: Build permissions
+    try {
+      await this.permissionsService.buildUserPermissions(user.id);
+      this.logger.debug(`Permissions built for: ${user.email}`);
+    } catch (error) {
+      this.logger.error(`Failed to build permissions for ${user.email}:`, error.message);
+      // Continue login even if permissions fail
+    }
+
+    // Step 5: Generate tokens
     const tokens = await this.generateTokens(user.id, user.email, user.role as UserRole[]);
+    this.logger.log(`Admin login successful: ${user.email}`);
 
     return {
       ...tokens,
@@ -145,7 +198,15 @@ export class AuthService {
   }
 
   private async generateTokens(userId: string, email: string, roles: UserRole[]) {
-    const permissions = await this.permissionsService.getCachedPermissions(userId);
+    let permissions: string[] = [];
+    
+    try {
+      permissions = await this.permissionsService.getCachedPermissions(userId);
+      this.logger.debug(`Loaded ${permissions.length} permissions for user ${userId}`);
+    } catch (error) {
+      this.logger.warn(`Failed to load permissions for user ${userId}: ${error.message}`);
+      permissions = [];
+    }
 
     const payload = { sub: userId, email, roles, permissions };
 

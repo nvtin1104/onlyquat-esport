@@ -1,5 +1,8 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('player', 'organizer', 'admin');
+CREATE TYPE "UserRole" AS ENUM ('ROOT', 'ADMIN', 'STAFF', 'ORGANIZER', 'CREATOR', 'PARTNER', 'PLAYER', 'USER');
+
+-- CreateEnum
+CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'UNACTIVE', 'BAN', 'LOCK');
 
 -- CreateEnum
 CREATE TYPE "TournamentStatus" AS ENUM ('upcoming', 'ongoing', 'completed', 'cancelled');
@@ -14,6 +17,64 @@ CREATE TYPE "PlayerTier" AS ENUM ('S', 'A', 'B', 'C', 'D', 'F');
 CREATE TYPE "TeamMemberRole" AS ENUM ('player', 'captain', 'coach', 'substitute');
 
 -- CreateTable
+CREATE TABLE "users" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "name" TEXT,
+    "accountType" INTEGER NOT NULL DEFAULT 1,
+    "role" "UserRole"[] DEFAULT ARRAY['USER']::"UserRole"[],
+    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
+    "avatar" TEXT,
+    "ggId" TEXT,
+    "bio" TEXT,
+    "suspendedAt" TIMESTAMP(3),
+    "suspendedUntil" TIMESTAMP(3),
+    "suspensionReason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "group_permissions" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "isSystem" BOOLEAN NOT NULL DEFAULT false,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "permissions" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "group_permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_permissions" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "cachedCodes" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "additionalPermissions" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "user_permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user_group_permissions" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "groupPermissionId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_group_permissions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "games" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -24,23 +85,6 @@ CREATE TABLE "games" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "games_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "users" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
-    "firstName" TEXT,
-    "lastName" TEXT,
-    "role" "UserRole" NOT NULL DEFAULT 'player',
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "avatar" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -188,13 +232,28 @@ CREATE TABLE "match_events" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "games_name_key" ON "games"("name");
-
--- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "group_permissions_name_key" ON "group_permissions"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_permissions_userId_key" ON "user_permissions"("userId");
+
+-- CreateIndex
+CREATE INDEX "user_group_permissions_userId_idx" ON "user_group_permissions"("userId");
+
+-- CreateIndex
+CREATE INDEX "user_group_permissions_groupPermissionId_idx" ON "user_group_permissions"("groupPermissionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_group_permissions_userId_groupPermissionId_key" ON "user_group_permissions"("userId", "groupPermissionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "games_name_key" ON "games"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "teams_slug_key" ON "teams"("slug");
@@ -261,6 +320,15 @@ CREATE INDEX "match_events_matchId_idx" ON "match_events"("matchId");
 
 -- CreateIndex
 CREATE INDEX "match_events_type_idx" ON "match_events"("type");
+
+-- AddForeignKey
+ALTER TABLE "user_permissions" ADD CONSTRAINT "user_permissions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_group_permissions" ADD CONSTRAINT "user_group_permissions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user_permissions"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_group_permissions" ADD CONSTRAINT "user_group_permissions_groupPermissionId_fkey" FOREIGN KEY ("groupPermissionId") REFERENCES "group_permissions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "players" ADD CONSTRAINT "players_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

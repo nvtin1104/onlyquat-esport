@@ -23,25 +23,20 @@ export * from './enums';
  */
 export type User = Prisma.UserModel
 /**
- * Model Permission
+ * Model GroupPermission
  * 
  */
-export type Permission = Prisma.PermissionModel
-/**
- * Model RolePermission
- * 
- */
-export type RolePermission = Prisma.RolePermissionModel
+export type GroupPermission = Prisma.GroupPermissionModel
 /**
  * Model UserPermission
  * 
  */
 export type UserPermission = Prisma.UserPermissionModel
 /**
- * Model UserPermissionItem
+ * Model UserGroupPermission
  * 
  */
-export type UserPermissionItem = Prisma.UserPermissionItemModel
+export type UserGroupPermission = Prisma.UserGroupPermissionModel
 /**
  * Model Game
  * 

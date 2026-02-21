@@ -52,10 +52,9 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Permission: 'Permission',
-  RolePermission: 'RolePermission',
+  GroupPermission: 'GroupPermission',
   UserPermission: 'UserPermission',
-  UserPermissionItem: 'UserPermissionItem',
+  UserGroupPermission: 'UserGroupPermission',
   Game: 'Game',
   Team: 'Team',
   Player: 'Player',
@@ -105,36 +104,25 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
-export const PermissionScalarFieldEnum = {
+export const GroupPermissionScalarFieldEnum = {
   id: 'id',
-  code: 'code',
-  module: 'module',
-  action: 'action',
   name: 'name',
   description: 'description',
   isSystem: 'isSystem',
   isActive: 'isActive',
+  permissions: 'permissions',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type PermissionScalarFieldEnum = (typeof PermissionScalarFieldEnum)[keyof typeof PermissionScalarFieldEnum]
-
-
-export const RolePermissionScalarFieldEnum = {
-  id: 'id',
-  role: 'role',
-  permissionId: 'permissionId',
-  createdAt: 'createdAt'
-} as const
-
-export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum]
+export type GroupPermissionScalarFieldEnum = (typeof GroupPermissionScalarFieldEnum)[keyof typeof GroupPermissionScalarFieldEnum]
 
 
 export const UserPermissionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   cachedCodes: 'cachedCodes',
+  additionalPermissions: 'additionalPermissions',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -142,15 +130,14 @@ export const UserPermissionScalarFieldEnum = {
 export type UserPermissionScalarFieldEnum = (typeof UserPermissionScalarFieldEnum)[keyof typeof UserPermissionScalarFieldEnum]
 
 
-export const UserPermissionItemScalarFieldEnum = {
+export const UserGroupPermissionScalarFieldEnum = {
   id: 'id',
-  userPermissionId: 'userPermissionId',
-  permissionId: 'permissionId',
-  granted: 'granted',
+  userId: 'userId',
+  groupPermissionId: 'groupPermissionId',
   createdAt: 'createdAt'
 } as const
 
-export type UserPermissionItemScalarFieldEnum = (typeof UserPermissionItemScalarFieldEnum)[keyof typeof UserPermissionItemScalarFieldEnum]
+export type UserGroupPermissionScalarFieldEnum = (typeof UserGroupPermissionScalarFieldEnum)[keyof typeof UserGroupPermissionScalarFieldEnum]
 
 
 export const GameScalarFieldEnum = {
