@@ -1,6 +1,6 @@
-# CLAUDE.md — onlyquat-esport
+# GEMINI.md — onlyquat-esport
 
-Instructions and context for Claude Code when working in this repository.
+Instructions and context for Gemini when working in this repository.
 
 ---
 
@@ -205,7 +205,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 ---
 
-## Rules for Claude
+## Rules for Gemini
 
 - Always read relevant files before modifying them.
 - Use `PrismaService` from `libs/common` — never create separate DB connections.
