@@ -1,9 +1,12 @@
+import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, UserRole } from '../../generated/prisma/client';
 import { getAllPermissionCodes } from '../../src/constants/permissions';
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter } as any);
+function createPrismaClient(): PrismaClient {
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  return new PrismaClient({ adapter } as any);
+}
 
 // GroupPermission seed data - default permission groups for each role
 const GROUP_PERMISSION_SEED = [
@@ -96,7 +99,10 @@ const ROLE_TO_GROUP: Record<UserRole, string> = {
   USER: 'User Default',
 };
 
-export async function seedPermissions() {
+export async function seedPermissions(externalClient?: PrismaClient) {
+  const prisma = externalClient ?? createPrismaClient();
+  const isStandalone = !externalClient;
+
   console.log('🔐 Seeding permission groups...');
 
   // Create GroupPermissions
@@ -143,7 +149,7 @@ export async function seedPermissions() {
     for (const role of user.role) {
       const groupName = ROLE_TO_GROUP[role as UserRole];
       const groupId = groupMap.get(groupName);
-      
+
       if (groupId) {
         await prisma.userGroupPermission.upsert({
           where: {
@@ -164,11 +170,17 @@ export async function seedPermissions() {
 
   console.log(`  ✅ Assigned groups to ${users.length} existing users`);
   console.log('🔐 Permission seed complete!');
+
+  if (isStandalone) {
+    await prisma.$disconnect();
+  }
 }
 
 // Run directly if called as script
 if (require.main === module) {
   seedPermissions()
-    .catch(console.error)
-    .finally(() => prisma.$disconnect());
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    });
 }

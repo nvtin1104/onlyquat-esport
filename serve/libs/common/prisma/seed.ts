@@ -415,7 +415,7 @@ async function main() {
   console.log(`  Created ${ratingsData.length} ratings`);
 
   // ─── Permissions ────────────────────────────────────────────────────
-  await seedPermissions();
+  await seedPermissions(prisma);
 
   console.log('Seeding complete!');
 }
