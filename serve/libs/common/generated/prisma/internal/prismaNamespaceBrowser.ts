@@ -52,6 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  Permission: 'Permission',
+  RolePermission: 'RolePermission',
+  UserPermission: 'UserPermission',
+  UserPermissionItem: 'UserPermissionItem',
   Game: 'Game',
   Team: 'Team',
   Player: 'Player',
@@ -99,6 +103,54 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const PermissionScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  module: 'module',
+  action: 'action',
+  name: 'name',
+  description: 'description',
+  isSystem: 'isSystem',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PermissionScalarFieldEnum = (typeof PermissionScalarFieldEnum)[keyof typeof PermissionScalarFieldEnum]
+
+
+export const RolePermissionScalarFieldEnum = {
+  id: 'id',
+  role: 'role',
+  permissionId: 'permissionId',
+  createdAt: 'createdAt'
+} as const
+
+export type RolePermissionScalarFieldEnum = (typeof RolePermissionScalarFieldEnum)[keyof typeof RolePermissionScalarFieldEnum]
+
+
+export const UserPermissionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  cachedCodes: 'cachedCodes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserPermissionScalarFieldEnum = (typeof UserPermissionScalarFieldEnum)[keyof typeof UserPermissionScalarFieldEnum]
+
+
+export const UserPermissionItemScalarFieldEnum = {
+  id: 'id',
+  userPermissionId: 'userPermissionId',
+  permissionId: 'permissionId',
+  granted: 'granted',
+  createdAt: 'createdAt'
+} as const
+
+export type UserPermissionItemScalarFieldEnum = (typeof UserPermissionItemScalarFieldEnum)[keyof typeof UserPermissionItemScalarFieldEnum]
 
 
 export const GameScalarFieldEnum = {

@@ -32,7 +32,11 @@
       "Bash(test:*)",
       "Bash(git add:*)",
       "Bash(git ls-tree:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(while read dir)",
+      "Bash(do echo \"$dir\")",
+      "Bash(done)",
+      "Bash(python3:*)"
     ]
   },
   "environment": {

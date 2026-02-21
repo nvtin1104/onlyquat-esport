@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, PlayerTier, TeamMemberRole, UserRole, UserStatus } from '../generated/prisma/client';
+import { seedPermissions } from './seeds/permissions.seed';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -412,6 +413,9 @@ async function main() {
     await prisma.rating.create({ data });
   }
   console.log(`  Created ${ratingsData.length} ratings`);
+
+  // ─── Permissions ────────────────────────────────────────────────────
+  await seedPermissions();
 
   console.log('Seeding complete!');
 }

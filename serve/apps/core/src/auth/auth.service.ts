@@ -8,7 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { PermissionsService } from '../permissions/permissions.service';
 import { CreateUserDto, LoginDto, TokenResponseDto } from '../dtos';
+import { UserRole } from '@app/common';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +18,7 @@ export class AuthService {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly permissionsService: PermissionsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -33,7 +36,7 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.email, user.role as UserRole[]);
 
     return {
       ...tokens,
@@ -59,7 +62,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.email, user.role as UserRole[]);
 
     return {
       ...tokens,
@@ -89,7 +92,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email);
+    const tokens = await this.generateTokens(user.id, user.email, user.role as UserRole[]);
 
     return {
       ...tokens,
@@ -110,8 +113,16 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
 
+      const user = await this.usersService.findById(payload.sub);
+      const permissions = await this.permissionsService.buildUserPermissions(payload.sub);
+
       const accessToken = this.jwtService.sign(
-        { sub: payload.sub, email: payload.email },
+        {
+          sub: payload.sub,
+          email: payload.email,
+          roles: user.role,
+          permissions,
+        },
         { expiresIn: '15m' },
       );
 
@@ -133,15 +144,20 @@ export class AuthService {
     }
   }
 
-  private async generateTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
+  private async generateTokens(userId: string, email: string, roles: UserRole[]) {
+    const permissions = await this.permissionsService.getCachedPermissions(userId);
+
+    const payload = { sub: userId, email, roles, permissions };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
 
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: '7d',
-    });
+    const refreshToken = this.jwtService.sign(
+      { sub: userId, email },
+      {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: '7d',
+      },
+    );
 
     return { accessToken, refreshToken };
   }

@@ -9,6 +9,10 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/Permission'
+export type * from './models/RolePermission'
+export type * from './models/UserPermission'
+export type * from './models/UserPermissionItem'
 export type * from './models/Game'
 export type * from './models/Team'
 export type * from './models/Player'

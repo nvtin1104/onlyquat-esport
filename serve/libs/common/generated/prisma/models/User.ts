@@ -304,6 +304,7 @@ export type UserWhereInput = {
   ratings?: Prisma.RatingListRelationFilter
   organizedTournaments?: Prisma.TournamentListRelationFilter
   refereedMatches?: Prisma.MatchListRelationFilter
+  permission?: Prisma.XOR<Prisma.UserPermissionNullableScalarRelationFilter, Prisma.UserPermissionWhereInput> | null
 }
 
 export type UserOrderByWithRelationInput = {
@@ -327,6 +328,7 @@ export type UserOrderByWithRelationInput = {
   ratings?: Prisma.RatingOrderByRelationAggregateInput
   organizedTournaments?: Prisma.TournamentOrderByRelationAggregateInput
   refereedMatches?: Prisma.MatchOrderByRelationAggregateInput
+  permission?: Prisma.UserPermissionOrderByWithRelationInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -353,6 +355,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   ratings?: Prisma.RatingListRelationFilter
   organizedTournaments?: Prisma.TournamentListRelationFilter
   refereedMatches?: Prisma.MatchListRelationFilter
+  permission?: Prisma.XOR<Prisma.UserPermissionNullableScalarRelationFilter, Prisma.UserPermissionWhereInput> | null
 }, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -422,6 +425,7 @@ export type UserCreateInput = {
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentCreateNestedManyWithoutOrganizerInput
   refereedMatches?: Prisma.MatchCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -445,6 +449,7 @@ export type UserUncheckedCreateInput = {
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentUncheckedCreateNestedManyWithoutOrganizerInput
   refereedMatches?: Prisma.MatchUncheckedCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -468,6 +473,7 @@ export type UserUpdateInput = {
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUpdateManyWithoutOrganizerNestedInput
   refereedMatches?: Prisma.MatchUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -491,6 +497,7 @@ export type UserUncheckedUpdateInput = {
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUncheckedUpdateManyWithoutOrganizerNestedInput
   refereedMatches?: Prisma.MatchUncheckedUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -621,14 +628,14 @@ export type UserSumOrderByAggregateInput = {
   accountType?: Prisma.SortOrder
 }
 
-export type UserNullableScalarRelationFilter = {
-  is?: Prisma.UserWhereInput | null
-  isNot?: Prisma.UserWhereInput | null
-}
-
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type UserCreateroleInput = {
@@ -666,6 +673,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UserCreateNestedOneWithoutPermissionInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPermissionInput, Prisma.UserUncheckedCreateWithoutPermissionInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPermissionInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPermissionNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPermissionInput, Prisma.UserUncheckedCreateWithoutPermissionInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPermissionInput
+  upsert?: Prisma.UserUpsertWithoutPermissionInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPermissionInput, Prisma.UserUpdateWithoutPermissionInput>, Prisma.UserUncheckedUpdateWithoutPermissionInput>
 }
 
 export type UserCreateNestedOneWithoutPlayersInput = {
@@ -730,6 +751,114 @@ export type UserUpdateOneWithoutRefereedMatchesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRefereedMatchesInput, Prisma.UserUpdateWithoutRefereedMatchesInput>, Prisma.UserUncheckedUpdateWithoutRefereedMatchesInput>
 }
 
+export type UserCreateWithoutPermissionInput = {
+  id?: string
+  email: string
+  password: string
+  username: string
+  name?: string | null
+  accountType?: number
+  role?: Prisma.UserCreateroleInput | $Enums.UserRole[]
+  status?: $Enums.UserStatus
+  avatar?: string | null
+  ggId?: string | null
+  bio?: string | null
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  players?: Prisma.PlayerCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
+  organizedTournaments?: Prisma.TournamentCreateNestedManyWithoutOrganizerInput
+  refereedMatches?: Prisma.MatchCreateNestedManyWithoutRefereeInput
+}
+
+export type UserUncheckedCreateWithoutPermissionInput = {
+  id?: string
+  email: string
+  password: string
+  username: string
+  name?: string | null
+  accountType?: number
+  role?: Prisma.UserCreateroleInput | $Enums.UserRole[]
+  status?: $Enums.UserStatus
+  avatar?: string | null
+  ggId?: string | null
+  bio?: string | null
+  suspendedAt?: Date | string | null
+  suspendedUntil?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
+  ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
+  organizedTournaments?: Prisma.TournamentUncheckedCreateNestedManyWithoutOrganizerInput
+  refereedMatches?: Prisma.MatchUncheckedCreateNestedManyWithoutRefereeInput
+}
+
+export type UserCreateOrConnectWithoutPermissionInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPermissionInput, Prisma.UserUncheckedCreateWithoutPermissionInput>
+}
+
+export type UserUpsertWithoutPermissionInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPermissionInput, Prisma.UserUncheckedUpdateWithoutPermissionInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPermissionInput, Prisma.UserUncheckedCreateWithoutPermissionInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPermissionInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPermissionInput, Prisma.UserUncheckedUpdateWithoutPermissionInput>
+}
+
+export type UserUpdateWithoutPermissionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.IntFieldUpdateOperationsInput | number
+  role?: Prisma.UserUpdateroleInput | $Enums.UserRole[]
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ggId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
+  organizedTournaments?: Prisma.TournamentUpdateManyWithoutOrganizerNestedInput
+  refereedMatches?: Prisma.MatchUpdateManyWithoutRefereeNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPermissionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.IntFieldUpdateOperationsInput | number
+  role?: Prisma.UserUpdateroleInput | $Enums.UserRole[]
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ggId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
+  ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
+  organizedTournaments?: Prisma.TournamentUncheckedUpdateManyWithoutOrganizerNestedInput
+  refereedMatches?: Prisma.MatchUncheckedUpdateManyWithoutRefereeNestedInput
+}
+
 export type UserCreateWithoutPlayersInput = {
   id?: string
   email: string
@@ -750,6 +879,7 @@ export type UserCreateWithoutPlayersInput = {
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentCreateNestedManyWithoutOrganizerInput
   refereedMatches?: Prisma.MatchCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlayersInput = {
@@ -772,6 +902,7 @@ export type UserUncheckedCreateWithoutPlayersInput = {
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentUncheckedCreateNestedManyWithoutOrganizerInput
   refereedMatches?: Prisma.MatchUncheckedCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlayersInput = {
@@ -810,6 +941,7 @@ export type UserUpdateWithoutPlayersInput = {
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUpdateManyWithoutOrganizerNestedInput
   refereedMatches?: Prisma.MatchUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlayersInput = {
@@ -832,6 +964,7 @@ export type UserUncheckedUpdateWithoutPlayersInput = {
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUncheckedUpdateManyWithoutOrganizerNestedInput
   refereedMatches?: Prisma.MatchUncheckedUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRatingsInput = {
@@ -854,6 +987,7 @@ export type UserCreateWithoutRatingsInput = {
   players?: Prisma.PlayerCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentCreateNestedManyWithoutOrganizerInput
   refereedMatches?: Prisma.MatchCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRatingsInput = {
@@ -876,6 +1010,7 @@ export type UserUncheckedCreateWithoutRatingsInput = {
   players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentUncheckedCreateNestedManyWithoutOrganizerInput
   refereedMatches?: Prisma.MatchUncheckedCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRatingsInput = {
@@ -914,6 +1049,7 @@ export type UserUpdateWithoutRatingsInput = {
   players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUpdateManyWithoutOrganizerNestedInput
   refereedMatches?: Prisma.MatchUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRatingsInput = {
@@ -936,6 +1072,7 @@ export type UserUncheckedUpdateWithoutRatingsInput = {
   players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUncheckedUpdateManyWithoutOrganizerNestedInput
   refereedMatches?: Prisma.MatchUncheckedUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOrganizedTournamentsInput = {
@@ -958,6 +1095,7 @@ export type UserCreateWithoutOrganizedTournamentsInput = {
   players?: Prisma.PlayerCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   refereedMatches?: Prisma.MatchCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOrganizedTournamentsInput = {
@@ -980,6 +1118,7 @@ export type UserUncheckedCreateWithoutOrganizedTournamentsInput = {
   players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   refereedMatches?: Prisma.MatchUncheckedCreateNestedManyWithoutRefereeInput
+  permission?: Prisma.UserPermissionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOrganizedTournamentsInput = {
@@ -1018,6 +1157,7 @@ export type UserUpdateWithoutOrganizedTournamentsInput = {
   players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   refereedMatches?: Prisma.MatchUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrganizedTournamentsInput = {
@@ -1040,6 +1180,7 @@ export type UserUncheckedUpdateWithoutOrganizedTournamentsInput = {
   players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   refereedMatches?: Prisma.MatchUncheckedUpdateManyWithoutRefereeNestedInput
+  permission?: Prisma.UserPermissionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRefereedMatchesInput = {
@@ -1062,6 +1203,7 @@ export type UserCreateWithoutRefereedMatchesInput = {
   players?: Prisma.PlayerCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentCreateNestedManyWithoutOrganizerInput
+  permission?: Prisma.UserPermissionCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRefereedMatchesInput = {
@@ -1084,6 +1226,7 @@ export type UserUncheckedCreateWithoutRefereedMatchesInput = {
   players?: Prisma.PlayerUncheckedCreateNestedManyWithoutUserInput
   ratings?: Prisma.RatingUncheckedCreateNestedManyWithoutUserInput
   organizedTournaments?: Prisma.TournamentUncheckedCreateNestedManyWithoutOrganizerInput
+  permission?: Prisma.UserPermissionUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRefereedMatchesInput = {
@@ -1122,6 +1265,7 @@ export type UserUpdateWithoutRefereedMatchesInput = {
   players?: Prisma.PlayerUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUpdateManyWithoutOrganizerNestedInput
+  permission?: Prisma.UserPermissionUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRefereedMatchesInput = {
@@ -1144,6 +1288,7 @@ export type UserUncheckedUpdateWithoutRefereedMatchesInput = {
   players?: Prisma.PlayerUncheckedUpdateManyWithoutUserNestedInput
   ratings?: Prisma.RatingUncheckedUpdateManyWithoutUserNestedInput
   organizedTournaments?: Prisma.TournamentUncheckedUpdateManyWithoutOrganizerNestedInput
+  permission?: Prisma.UserPermissionUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -1225,6 +1370,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   ratings?: boolean | Prisma.User$ratingsArgs<ExtArgs>
   organizedTournaments?: boolean | Prisma.User$organizedTournamentsArgs<ExtArgs>
   refereedMatches?: boolean | Prisma.User$refereedMatchesArgs<ExtArgs>
+  permission?: boolean | Prisma.User$permissionArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1291,6 +1437,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   ratings?: boolean | Prisma.User$ratingsArgs<ExtArgs>
   organizedTournaments?: boolean | Prisma.User$organizedTournamentsArgs<ExtArgs>
   refereedMatches?: boolean | Prisma.User$refereedMatchesArgs<ExtArgs>
+  permission?: boolean | Prisma.User$permissionArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1303,6 +1450,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     ratings: Prisma.$RatingPayload<ExtArgs>[]
     organizedTournaments: Prisma.$TournamentPayload<ExtArgs>[]
     refereedMatches: Prisma.$MatchPayload<ExtArgs>[]
+    permission: Prisma.$UserPermissionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1719,6 +1867,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   ratings<T extends Prisma.User$ratingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ratingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RatingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   organizedTournaments<T extends Prisma.User$organizedTournamentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$organizedTournamentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TournamentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   refereedMatches<T extends Prisma.User$refereedMatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$refereedMatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  permission<T extends Prisma.User$permissionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$permissionArgs<ExtArgs>>): Prisma.Prisma__UserPermissionClient<runtime.Types.Result.GetResult<Prisma.$UserPermissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2245,6 +2394,25 @@ export type User$refereedMatchesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.MatchScalarFieldEnum | Prisma.MatchScalarFieldEnum[]
+}
+
+/**
+ * User.permission
+ */
+export type User$permissionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserPermission
+   */
+  select?: Prisma.UserPermissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserPermission
+   */
+  omit?: Prisma.UserPermissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserPermissionInclude<ExtArgs> | null
+  where?: Prisma.UserPermissionWhereInput
 }
 
 /**
