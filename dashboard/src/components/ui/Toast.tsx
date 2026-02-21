@@ -1,105 +1,57 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
-} from 'react';
-import { createPortal } from 'react-dom';
-import { X, CheckCircle, XCircle, Info } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react';
+import { useToastStore, type ToastType } from '@/stores/toastStore';
 import { cn } from '@/lib/utils';
 
-type ToastVariant = 'success' | 'error' | 'info';
-
-interface ToastItem {
-  id: string;
-  message: string;
-  variant: ToastVariant;
-}
-
-interface ToastContextValue {
-  toast: (message: string, variant?: ToastVariant) => void;
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-const DISMISS_DELAY = 3000;
-
-const variantStyles: Record<ToastVariant, { container: string; icon: ReactNode }> = {
-  success: {
-    container: 'border-success/30 bg-success/10',
-    icon: <CheckCircle className="w-4 h-4 text-success shrink-0" />,
-  },
-  error: {
-    container: 'border-danger/30 bg-danger/10',
-    icon: <XCircle className="w-4 h-4 text-danger shrink-0" />,
-  },
-  info: {
-    container: 'border-info/30 bg-info/10',
-    icon: <Info className="w-4 h-4 text-info shrink-0" />,
-  },
+const icons: Record<ToastType, React.ReactNode> = {
+  success: <CheckCircle2 className="h-5 w-5 text-success" />,
+  error: <AlertCircle className="h-5 w-5 text-danger" />,
+  info: <Info className="h-5 w-5 text-info" />,
+  warning: <AlertTriangle className="h-5 w-5 text-warning" />,
 };
 
-function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
+const bgClasses: Record<ToastType, string> = {
+  success: 'border-success/30 bg-bg-elevated/90 after:bg-success',
+  error: 'border-danger/30 bg-bg-elevated/90 after:bg-danger',
+  info: 'border-info/30 bg-bg-elevated/90 after:bg-info',
+  warning: 'border-warning/30 bg-bg-elevated/90 after:bg-warning',
+};
 
-  const dismiss = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const toast = useCallback((message: string, variant: ToastVariant = 'info') => {
-    const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, message, variant }]);
-    setTimeout(() => dismiss(id), DISMISS_DELAY);
-  }, [dismiss]);
+export function ToastContainer() {
+  const { toasts, removeToast } = useToastStore();
 
   return (
-    <ToastContext.Provider value={{ toast }}>
-      {children}
-      {createPortal(
-        <div
-          aria-live="polite"
-          aria-atomic="false"
-          className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
-        >
-          {toasts.map((t) => {
-            const style = variantStyles[t.variant];
-            return (
-              <div
-                key={t.id}
-                role="alert"
-                className={cn(
-                  'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-sm',
-                  'border bg-bg-card shadow-lg min-w-[260px] max-w-[380px]',
-                  'animate-in slide-in-from-bottom-2 fade-in-0 duration-200',
-                  style.container
-                )}
-              >
-                {style.icon}
-                <span className="font-body text-sm text-text-primary flex-1">{t.message}</span>
-                <button
-                  type="button"
-                  onClick={() => dismiss(t.id)}
-                  className="text-text-dim hover:text-text-primary transition-colors duration-150 shrink-0"
-                  aria-label="Dismiss"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            );
-          })}
-        </div>,
-        document.body
-      )}
-    </ToastContext.Provider>
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none w-full max-w-[380px]">
+      <AnimatePresence mode="popLayout">
+        {toasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            layout
+            initial={{ opacity: 0, y: 20, scale: 0.9, filter: 'blur(4px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, scale: 0.9, filter: 'blur(4px)', transition: { duration: 0.2 } }}
+            className={cn(
+              "pointer-events-auto relative overflow-hidden rounded-sm border p-4 shadow-2xl backdrop-blur-md",
+              "flex items-start gap-3 transition-all",
+              "after:absolute after:left-0 after:top-0 after:h-full after:w-[3px]",
+              bgClasses[toast.type]
+            )}
+          >
+            <div className="mt-0.5 shrink-0">{icons[toast.type]}</div>
+            <div className="flex-1 pt-0.5">
+              <p className="text-sm font-medium text-text-primary leading-tight">
+                {toast.message}
+              </p>
+            </div>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="mt-0.5 shrink-0 text-text-dim hover:text-text-primary transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
   );
 }
-
-function useToast(): ToastContextValue {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used inside <ToastProvider>');
-  return ctx;
-}
-
-export { ToastProvider, useToast };
-export type { ToastVariant, ToastItem };

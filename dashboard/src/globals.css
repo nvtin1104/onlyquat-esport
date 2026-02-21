@@ -25,6 +25,7 @@
 
   /* Accent — themeable via intermediate var */
   --color-accent-acid:       var(--accent-acid);
+  --color-accent-acid-fg:    var(--accent-acid-fg);
   --color-accent-lava:       #FF4D00;
   --color-accent-acid-dim:   var(--accent-acid-dim);
   --color-accent-acid-glow:  var(--accent-acid-glow);
@@ -88,6 +89,7 @@
 
   /* Dark accent */
   --accent-acid:        #CCFF00;
+  --accent-acid-fg:     #000000;
   --accent-acid-dim:    rgba(204,255,0,0.12);
   --accent-acid-glow:   rgba(204,255,0,0.4);
   --accent-acid-shadow: rgba(204,255,0,0.3);
@@ -111,6 +113,7 @@
 
   /* Light accent — toned-down forest green, less glaring */
   --accent-acid:        #4D8A00;
+  --accent-acid-fg:     #FFFFFF;
   --accent-acid-dim:    rgba(77,138,0,0.10);
   --accent-acid-glow:   rgba(77,138,0,0.25);
   --accent-acid-shadow: rgba(77,138,0,0.20);
