@@ -1,7 +1,9 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
+  Delete,
   Body,
   Param,
   Inject,
@@ -13,14 +15,14 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Auth, JwtAuth } from '../decorators/auth.decorator';
 import { PERMISSIONS } from '@app/common';
-import { UpdateUserDto, ChangePasswordDto, UpdateRoleDto } from '../dtos';
+import { UpdateUserDto, ChangePasswordDto, UpdateRoleDto, AdminCreateUserDto } from '../dtos';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(
     @Inject('IDENTITY_SERVICE') private readonly identityClient: ClientProxy,
-  ) {}
+  ) { }
 
   @Get('me')
   @JwtAuth()
@@ -67,9 +69,18 @@ export class UsersController {
   ) {
     return firstValueFrom(
       this.identityClient.send('user.findAll', {
-        page: page || 1,
-        limit: limit || 20,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 20,
       }),
+    );
+  }
+
+  @Post()
+  @Auth(PERMISSIONS.USER_CREATE)
+  @ApiOperation({ summary: 'Admin create user — requires user:create' })
+  async adminCreate(@Body() adminCreateUserDto: AdminCreateUserDto) {
+    return firstValueFrom(
+      this.identityClient.send('user.adminCreate', { adminCreateUserDto }),
     );
   }
 
@@ -97,6 +108,15 @@ export class UsersController {
   async banUser(@Param('id') id: string) {
     return firstValueFrom(
       this.identityClient.send('user.ban', { userId: id }),
+    );
+  }
+
+  @Delete(':id')
+  @Auth(PERMISSIONS.USER_DELETE)
+  @ApiOperation({ summary: 'Delete (deactivate) user — requires user:delete' })
+  async deleteUser(@Param('id') id: string) {
+    return firstValueFrom(
+      this.identityClient.send('user.delete', { userId: id }),
     );
   }
 }
