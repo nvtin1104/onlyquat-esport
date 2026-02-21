@@ -12,6 +12,8 @@
 *.swp
 *.swo
 *~
+# Prisma generated client
+libs/common/generated/
 
 # OS files
 .DS_Store
