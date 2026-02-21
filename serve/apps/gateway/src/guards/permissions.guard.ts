@@ -24,6 +24,11 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('No permissions found in token');
     }
 
+    // ROOT users bypass all permission checks
+    if (user.role?.includes('ROOT')) {
+      return true;
+    }
+
     const userPerms = new Set<string>(user.permissions);
 
     // User must have ALL required permissions.
