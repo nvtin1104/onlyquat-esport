@@ -38,8 +38,8 @@ export function App() {
             <Route path="points" element={<PointsPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="users/create" element={<UserCreatePage />} />
-            <Route path="users/:id" element={<UserDetailPage />} />
             <Route path="users/permissions" element={<UserPermissionsPage />} />
+            <Route path="users/:id" element={<UserDetailPage />} />
             <Route path="users/:id/permissions" element={<UserPermissionDetailPage />} />
             <Route path="permissions/groups" element={<PermissionGroupsPage />} />
             <Route path="settings" element={<SettingsPage />} />

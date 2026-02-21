@@ -131,6 +131,36 @@ model UserGroupPermission {
   @@index([groupPermissionId])
   @@map("user_group_permissions")
 }
+// ─── Information System ───────────────────────────────────────────────────────
+enum OrganizationType {
+  ORGANIZER // Đơn vị tổ chức
+  SPONSOR   // Nhà tài trợ
+  CLUB      // Chủ quản đội tuyển
+  AGENCY    // Đại diện/Môi giới
+}
+
+model Organization {
+  id          String             @id @default(uuid())
+  name        String             @unique
+  shortName   String?            // Tên viết tắt (ví dụ: VNG, ESL)
+  logo        String?
+  website     String?
+  ownerId
+  managerId
+  
+  // Mảng chứa các vai trò (Một tổ chức có thể đóng nhiều vai trò)
+  roles       OrganizationType[] 
+
+  // Các quan hệ (Relations)
+  teams       Team[]             // Các đội tuyển thuộc chủ quản này
+  tournaments Tournament[]       // Các giải đấu do đơn vị này tổ chức
+  sponsoredMatches Match[]       // Các trận đấu được tài trợ bởi đơn vị này
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@map("organizations")
+}
 
 model Game {
   id        String   @id @default(uuid())
