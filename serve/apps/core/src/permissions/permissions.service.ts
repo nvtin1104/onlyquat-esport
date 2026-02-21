@@ -4,7 +4,7 @@ import { UserRole } from '@app/common';
 
 @Injectable()
 export class PermissionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Build flattened permission array for a user.
@@ -234,6 +234,15 @@ export class PermissionsService {
       name: g.name,
       permissions: g.permissions,
     }));
+  }
+
+  /** Find group by ID */
+  async findGroupById(id: string) {
+    const group = await this.prisma.groupPermission.findUnique({
+      where: { id },
+    });
+    if (!group) throw new Error('GroupPermission not found');
+    return group;
   }
 
   /** Get user's permissions with details */

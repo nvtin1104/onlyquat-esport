@@ -8,7 +8,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { PrismaService, UserRole, UserStatus } from '@app/common';
 import type { User } from '@app/common';
-import { CreateUserDto, UpdateUserDto, ChangePasswordDto, UpdateRoleDto } from '../dtos';
+import { CreateUserDto, UpdateUserDto, ChangePasswordDto, UpdateRoleDto, AdminCreateUserDto } from '../dtos';
 
 type SafeUser = Omit<User, 'password'>;
 
@@ -16,7 +16,7 @@ type SafeUser = Omit<User, 'password'>;
 export class UsersService {
   private readonly SALT_ROUNDS = 10;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Validate that accountType = 0 for ROOT, ADMIN, STAFF roles
@@ -49,6 +49,39 @@ export class UsersService {
         role: [UserRole.USER],
         accountType: 1,
       },
+    });
+  }
+
+  async adminCreate(adminCreateUserDto: AdminCreateUserDto): Promise<SafeUser> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: adminCreateUserDto.email },
+    });
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const existingUsername = await this.prisma.user.findFirst({
+      where: { username: adminCreateUserDto.username },
+    });
+    if (existingUsername) {
+      throw new ConflictException('Username already exists');
+    }
+
+    // Validate accountType for admin roles
+    this.validateRoleAccountType(adminCreateUserDto.roles, adminCreateUserDto.accountType);
+
+    const hashedPassword = await bcrypt.hash(adminCreateUserDto.password, this.SALT_ROUNDS);
+
+    return this.prisma.user.create({
+      data: {
+        email: adminCreateUserDto.email,
+        password: hashedPassword,
+        username: adminCreateUserDto.username,
+        name: adminCreateUserDto.name,
+        role: adminCreateUserDto.roles,
+        accountType: adminCreateUserDto.accountType,
+      },
+      omit: { password: true },
     });
   }
 
