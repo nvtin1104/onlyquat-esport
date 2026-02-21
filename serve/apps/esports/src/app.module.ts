@@ -3,6 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '@app/common';
 import { EsportsController } from './esports.controller';
 import { EsportsService } from './esports.service';
+import { RegionController } from './region/region.controller';
+import { RegionService } from './region/region.service';
+import { OrganizationController } from './organization/organization.controller';
+import { OrganizationService } from './organization/organization.service';
 
 @Module({
   imports: [
@@ -12,7 +16,7 @@ import { EsportsService } from './esports.service';
     }),
     PrismaModule,
   ],
-  controllers: [EsportsController],
-  providers: [EsportsService],
+  controllers: [EsportsController, RegionController, OrganizationController],
+  providers: [EsportsService, RegionService, OrganizationService],
 })
 export class AppModule {}

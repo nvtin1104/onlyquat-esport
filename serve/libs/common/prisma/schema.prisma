@@ -57,6 +57,15 @@ enum TeamMemberRole {
   substitute
 }
 
+// ─── Information System ───────────────────────────────────────────────────────
+
+enum OrganizationType {
+  ORGANIZER // Đơn vị tổ chức
+  SPONSOR   // Nhà tài trợ
+  CLUB      // Chủ quản đội tuyển
+  AGENCY    // Đại diện/Môi giới
+}
+
 // ─── Models ─────────────────────────────────────────────────────────────────
 // USER MODELS
 
@@ -83,6 +92,8 @@ model User {
   organizedTournaments Tournament[]
   refereedMatches      Match[]
   permission           UserPermission?
+  ownedOrganizations   Organization[] @relation("OrgOwner")
+  managedOrganizations Organization[] @relation("OrgManager")
 
   @@map("users")
 }
@@ -131,34 +142,50 @@ model UserGroupPermission {
   @@index([groupPermissionId])
   @@map("user_group_permissions")
 }
-// ─── Information System ───────────────────────────────────────────────────────
-enum OrganizationType {
-  ORGANIZER // Đơn vị tổ chức
-  SPONSOR   // Nhà tài trợ
-  CLUB      // Chủ quản đội tuyển
-  AGENCY    // Đại diện/Môi giới
+
+// ─── Information System Models ────────────────────────────────────────────────
+
+model Region {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  code      String   @unique
+  logo      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teams         Team[]
+  organizations Organization[]
+
+  @@map("regions")
 }
 
 model Organization {
   id          String             @id @default(uuid())
   name        String             @unique
-  shortName   String?            // Tên viết tắt (ví dụ: VNG, ESL)
+  shortName   String?
   logo        String?
   website     String?
-  ownerId
-  managerId
-  
-  // Mảng chứa các vai trò (Một tổ chức có thể đóng nhiều vai trò)
-  roles       OrganizationType[] 
+  description String?
+  mediaLinks  Json               @default("[]")
+  roles       OrganizationType[]
 
-  // Các quan hệ (Relations)
-  teams       Team[]             // Các đội tuyển thuộc chủ quản này
-  tournaments Tournament[]       // Các giải đấu do đơn vị này tổ chức
-  sponsoredMatches Match[]       // Các trận đấu được tài trợ bởi đơn vị này
+  ownerId   String
+  owner     User    @relation("OrgOwner", fields: [ownerId], references: [id])
+  managerId String?
+  manager   User?   @relation("OrgManager", fields: [managerId], references: [id])
 
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  regionId String?
+  region   Region? @relation(fields: [regionId], references: [id])
 
+  teams            Team[]
+  tournaments      Tournament[] @relation("OrgTournaments")
+  sponsoredMatches Match[]      @relation("OrgSponsoredMatches")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([regionId])
+  @@index([ownerId])
   @@map("organizations")
 }
 
@@ -183,12 +210,17 @@ model Team {
   name      String   @unique
   tag       String?
   logoUrl   String?
-  region    String?
+  regionTag String?  @map("region") // legacy string field — use regionId FK for new code
   wins      Int      @default(0)
   losses    Int      @default(0)
   draws     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  regionId       String?
+  region         Region?       @relation(fields: [regionId], references: [id], onDelete: SetNull)
 
   players         Player[]
   members         TeamMember[]
@@ -198,6 +230,8 @@ model Team {
   matchesWon      Match[]          @relation("MatchWinner")
   matchEvents     MatchEvent[]
 
+  @@index([organizationId])
+  @@index([regionId])
   @@map("teams")
 }
 
@@ -302,12 +336,16 @@ model Tournament {
   organizerId String
   organizer   User   @relation(fields: [organizerId], references: [id])
 
+  organizationId String?
+  organization   Organization? @relation("OrgTournaments", fields: [organizationId], references: [id], onDelete: SetNull)
+
   tournamentTeams TournamentTeam[]
   matches         Match[]
 
   @@index([status])
   @@index([gameId])
   @@index([startDate])
+  @@index([organizationId])
   @@map("tournaments")
 }
 
@@ -352,11 +390,15 @@ model Match {
   nextMatch    Match?     @relation("BracketProgression", fields: [nextMatchId], references: [id])
   prevMatches  Match[]    @relation("BracketProgression")
 
+  sponsorId String?
+  sponsor   Organization? @relation("OrgSponsoredMatches", fields: [sponsorId], references: [id], onDelete: SetNull)
+
   matchEvents MatchEvent[]
 
   @@index([tournamentId])
   @@index([status])
   @@index([scheduledTime])
+  @@index([sponsorId])
   @@map("matches")
 }
 

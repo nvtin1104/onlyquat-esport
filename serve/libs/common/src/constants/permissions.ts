@@ -62,6 +62,20 @@ export const PERMISSIONS = {
   CONTENT_CREATE: 'content:create',
   CONTENT_MANAGE: 'content:manage',
 
+  // REGION
+  REGION_VIEW: 'region:view',
+  REGION_CREATE: 'region:create',
+  REGION_UPDATE: 'region:update',
+  REGION_DELETE: 'region:delete',
+  REGION_MANAGE: 'region:manage',
+
+  // ORGANIZATION
+  ORGANIZATION_VIEW: 'organization:view',
+  ORGANIZATION_CREATE: 'organization:create',
+  ORGANIZATION_UPDATE: 'organization:update',
+  ORGANIZATION_DELETE: 'organization:delete',
+  ORGANIZATION_MANAGE: 'organization:manage',
+
   // SYSTEM
   SYSTEM_SETTINGS: 'system:settings',
   SYSTEM_LOGS: 'system:logs',
@@ -126,6 +140,20 @@ export const PERMISSION_METADATA: PermissionDefinition[] = [
   { code: 'content:view', module: 'content', action: 'view', name: 'Xem nội dung', description: 'Xem bài viết, tin tức' },
   { code: 'content:create', module: 'content', action: 'create', name: 'Tạo nội dung', description: 'Tạo bài viết mới' },
   { code: 'content:manage', module: 'content', action: 'manage', name: 'Quản lý nội dung (Full)', description: 'Toàn quyền nội dung' },
+
+  // REGION
+  { code: 'region:view',   module: 'region', action: 'view',   name: 'Xem khu vực',            description: 'Xem danh sách khu vực' },
+  { code: 'region:create', module: 'region', action: 'create', name: 'Tạo khu vực',             description: 'Tạo khu vực mới' },
+  { code: 'region:update', module: 'region', action: 'update', name: 'Sửa khu vực',             description: 'Chỉnh sửa khu vực' },
+  { code: 'region:delete', module: 'region', action: 'delete', name: 'Xoá khu vực',             description: 'Xoá khu vực' },
+  { code: 'region:manage', module: 'region', action: 'manage', name: 'Quản lý khu vực (Full)',  description: 'Toàn quyền khu vực' },
+
+  // ORGANIZATION
+  { code: 'organization:view',   module: 'organization', action: 'view',   name: 'Xem tổ chức',            description: 'Xem danh sách tổ chức' },
+  { code: 'organization:create', module: 'organization', action: 'create', name: 'Tạo tổ chức',             description: 'Tạo tổ chức mới' },
+  { code: 'organization:update', module: 'organization', action: 'update', name: 'Sửa tổ chức',             description: 'Chỉnh sửa thông tin tổ chức' },
+  { code: 'organization:delete', module: 'organization', action: 'delete', name: 'Xoá tổ chức',             description: 'Xoá tổ chức' },
+  { code: 'organization:manage', module: 'organization', action: 'manage', name: 'Quản lý tổ chức (Full)',  description: 'Toàn quyền tổ chức' },
 
   // SYSTEM
   { code: 'system:settings', module: 'system', action: 'settings', name: 'Cấu hình hệ thống', description: 'Thay đổi settings' },

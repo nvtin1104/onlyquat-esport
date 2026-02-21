@@ -9,19 +9,21 @@ export * from './constants/permissions';
 export * from './filters';
 
 // Prisma generated types & enums
-export { UserRole, UserStatus, TournamentStatus, MatchStatus, PlayerTier, TeamMemberRole } from '../generated/prisma/client';
-export type { 
-  User, 
-  Game, 
-  Team, 
-  Player, 
-  TeamMember, 
-  Rating, 
-  Tournament, 
-  TournamentTeam, 
-  Match, 
-  MatchEvent, 
+export { UserRole, UserStatus, TournamentStatus, MatchStatus, PlayerTier, TeamMemberRole, OrganizationType } from '../generated/prisma/client';
+export type {
+  User,
+  Game,
+  Team,
+  Player,
+  TeamMember,
+  Rating,
+  Tournament,
+  TournamentTeam,
+  Match,
+  MatchEvent,
   GroupPermission,
   UserPermission,
-  UserGroupPermission
+  UserGroupPermission,
+  Region,
+  Organization,
 } from '../generated/prisma/client';

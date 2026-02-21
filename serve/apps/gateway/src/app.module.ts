@@ -7,6 +7,8 @@ import { AppController } from './app.controller';
 import { AuthController } from './auth/auth.controller';
 import { UsersController } from './users/users.controller';
 import { AdminPermissionsController } from './admin/permissions.controller';
+import { RegionsController } from './regions/regions.controller';
+import { OrganizationsController } from './organizations/organizations.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PermissionsGuard } from './guards/permissions.guard';
 
@@ -41,7 +43,7 @@ import { PermissionsGuard } from './guards/permissions.guard';
       },
     ]),
   ],
-  controllers: [AppController, AuthController, UsersController, AdminPermissionsController],
+  controllers: [AppController, AuthController, UsersController, AdminPermissionsController, RegionsController, OrganizationsController],
   providers: [JwtStrategy, PermissionsGuard],
 })
 export class AppModule {}

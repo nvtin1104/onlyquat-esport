@@ -122,8 +122,8 @@ pnpm run prisma:studio       # visual DB browser
 pnpm run prisma:reset        # drop + recreate + seed
 ```
 
-**Key models:** `User`, `Tournament`, `Match`, `Team`, `Player`
-**Key enums:** `UserRole`, `UserStatus`, `TournamentStatus`, `MatchStatus`, `PlayerTier`, `TeamMemberRole`
+**Key models:** `User`, `Tournament`, `Match`, `Team`, `Player`, `Region`, `Organization`
+**Key enums:** `UserRole`, `UserStatus`, `TournamentStatus`, `MatchStatus`, `PlayerTier`, `TeamMemberRole`, `OrganizationType`
 
 ---
 
