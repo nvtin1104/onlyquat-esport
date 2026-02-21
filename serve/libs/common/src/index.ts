@@ -5,6 +5,9 @@ export * from './database/prisma.service';
 // Permission constants
 export * from './constants/permissions';
 
+// Shared filters
+export * from './filters';
+
 // Prisma generated types & enums
 export { UserRole, UserStatus, TournamentStatus, MatchStatus, PlayerTier, TeamMemberRole } from '../generated/prisma/client';
 export type { 
