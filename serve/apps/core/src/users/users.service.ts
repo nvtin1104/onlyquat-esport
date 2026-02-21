@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService, UserRole, UserStatus } from '@app/common';
@@ -16,6 +17,20 @@ export class UsersService {
   private readonly SALT_ROUNDS = 10;
 
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Validate that accountType = 0 for ROOT, ADMIN, STAFF roles
+   */
+  private validateRoleAccountType(roles: UserRole[], accountType: number): void {
+    const adminRoles: UserRole[] = [UserRole.ROOT, UserRole.ADMIN, UserRole.STAFF];
+    const hasAdminRole = roles.some((role) => adminRoles.includes(role));
+
+    if (hasAdminRole && accountType !== 0) {
+      throw new BadRequestException(
+        'Users with ROOT, ADMIN, or STAFF roles must have accountType = 0',
+      );
+    }
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.prisma.user.findUnique({
@@ -139,6 +154,10 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    // Validate accountType for admin roles
+    this.validateRoleAccountType(updateRoleDto.roles, user.accountType);
+
     return this.prisma.user.update({
       where: { id: userId },
       data: { role: updateRoleDto.roles },
