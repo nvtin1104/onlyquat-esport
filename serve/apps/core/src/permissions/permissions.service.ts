@@ -1,5 +1,5 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '@app/common';
+import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { PrismaService, getAllPermissionCodes, isValidPermissionCode } from '@app/common';
 import { UserRole } from '@app/common';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class PermissionsService {
 
   /**
    * Build flattened permission array for a user.
-   * Logic: (role defaults) + (custom granted) - (custom revoked)
+   * Logic: ROOT users get all permissions, others get (group perms) + (additional perms)
    */
   async buildUserPermissions(userId: string): Promise<string[]> {
     const user = await this.prisma.user.findUnique({
@@ -17,35 +17,36 @@ export class PermissionsService {
     });
     if (!user) throw new Error('User not found');
 
-    // 1. Union of all role-based defaults
-    const rolePerms = await this.prisma.rolePermission.findMany({
-      where: { role: { in: user.role as UserRole[] } },
-      include: { permission: { select: { code: true, isActive: true } } },
-    });
-    const basePerms = new Set(
-      rolePerms
-        .filter((rp) => rp.permission.isActive)
-        .map((rp) => rp.permission.code),
-    );
+    // ROOT users bypass - return all permissions
+    if (user.role.includes(UserRole.ROOT)) {
+      return getAllPermissionCodes();
+    }
 
-    // 2. Apply custom overrides
-    const userPerm = await this.prisma.userPermission.findUnique({
+    // 1. Fetch user's GroupPermissions
+    const userGroups = await this.prisma.userGroupPermission.findMany({
       where: { userId },
       include: {
-        customItems: {
-          include: { permission: { select: { code: true } } },
+        groupPermission: {
+          select: { permissions: true, isActive: true },
         },
       },
     });
 
-    if (userPerm?.customItems) {
-      for (const item of userPerm.customItems) {
-        if (item.granted) {
-          basePerms.add(item.permission.code);
-        } else {
-          basePerms.delete(item.permission.code);
-        }
+    const basePerms = new Set<string>();
+    for (const ug of userGroups) {
+      if (ug.groupPermission.isActive) {
+        ug.groupPermission.permissions.forEach((p) => basePerms.add(p));
       }
+    }
+
+    // 2. Add additional permissions from UserPermission
+    const userPerm = await this.prisma.userPermission.findUnique({
+      where: { userId },
+      select: { additionalPermissions: true },
+    });
+
+    if (userPerm?.additionalPermissions) {
+      userPerm.additionalPermissions.forEach((p) => basePerms.add(p));
     }
 
     // 3. Sort and cache
@@ -54,7 +55,7 @@ export class PermissionsService {
     await this.prisma.userPermission.upsert({
       where: { userId },
       update: { cachedCodes: permArray },
-      create: { userId, cachedCodes: permArray },
+      create: { userId, cachedCodes: permArray, additionalPermissions: [] },
     });
 
     return permArray;
@@ -72,110 +73,198 @@ export class PermissionsService {
 
   /** Grant extra permission to a specific user */
   async grantCustom(userId: string, permissionCode: string): Promise<string[]> {
-    const perm = await this.prisma.permission.findUnique({
-      where: { code: permissionCode },
-    });
-    if (!perm) throw new Error(`Permission '${permissionCode}' not found`);
+    if (!isValidPermissionCode(permissionCode)) {
+      throw new BadRequestException(`Invalid permission code: ${permissionCode}`);
+    }
 
-    const up = await this.prisma.userPermission.upsert({
+    const userPerm = await this.prisma.userPermission.upsert({
       where: { userId },
       update: {},
-      create: { userId, cachedCodes: [] },
+      create: { userId, cachedCodes: [], additionalPermissions: [] },
     });
 
-    await this.prisma.userPermissionItem.upsert({
-      where: {
-        userPermissionId_permissionId: {
-          userPermissionId: up.id,
-          permissionId: perm.id,
-        },
-      },
-      update: { granted: true },
-      create: {
-        userPermissionId: up.id,
-        permissionId: perm.id,
-        granted: true,
-      },
-    });
+    const current = userPerm.additionalPermissions || [];
+    if (!current.includes(permissionCode)) {
+      await this.prisma.userPermission.update({
+        where: { userId },
+        data: { additionalPermissions: [...current, permissionCode] },
+      });
+    }
 
     return this.buildUserPermissions(userId);
   }
 
-  /** Revoke permission from user (overrides role defaults) */
+  /** Revoke permission from user (removes from additionalPermissions) */
   async revokeCustom(userId: string, permissionCode: string): Promise<string[]> {
-    const perm = await this.prisma.permission.findUnique({
-      where: { code: permissionCode },
-    });
-    if (!perm) throw new Error(`Permission '${permissionCode}' not found`);
-
-    const up = await this.prisma.userPermission.upsert({
+    const userPerm = await this.prisma.userPermission.findUnique({
       where: { userId },
-      update: {},
-      create: { userId, cachedCodes: [] },
+      select: { additionalPermissions: true },
     });
 
-    await this.prisma.userPermissionItem.upsert({
-      where: {
-        userPermissionId_permissionId: {
-          userPermissionId: up.id,
-          permissionId: perm.id,
-        },
-      },
-      update: { granted: false },
-      create: {
-        userPermissionId: up.id,
-        permissionId: perm.id,
-        granted: false,
-      },
-    });
+    if (userPerm?.additionalPermissions) {
+      const updated = userPerm.additionalPermissions.filter(
+        (p) => p !== permissionCode,
+      );
+      await this.prisma.userPermission.update({
+        where: { userId },
+        data: { additionalPermissions: updated },
+      });
+    }
 
     return this.buildUserPermissions(userId);
   }
 
-  /** Delete a non-system permission */
-  async deletePermission(id: string) {
-    const perm = await this.prisma.permission.findUnique({ where: { id } });
-    if (!perm) throw new Error('Permission not found');
-    if (perm.isSystem) {
-      throw new ForbiddenException('System permissions cannot be deleted');
+  /** Create a new GroupPermission */
+  async createGroupPermission(data: {
+    name: string;
+    description?: string;
+    permissions: string[];
+    isSystem?: boolean;
+  }) {
+    // Validate all permission codes
+    const invalid = data.permissions.filter((p) => !isValidPermissionCode(p));
+    if (invalid.length > 0) {
+      throw new BadRequestException(
+        `Invalid permission codes: ${invalid.join(', ')}`,
+      );
     }
-    return this.prisma.permission.delete({ where: { id } });
-  }
 
-  async findAll(module?: string) {
-    return this.prisma.permission.findMany({
-      where: module ? { module } : undefined,
-      orderBy: [{ module: 'asc' }, { action: 'asc' }],
+    return this.prisma.groupPermission.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        permissions: data.permissions,
+        isSystem: data.isSystem || false,
+        isActive: true,
+      },
     });
   }
 
+  /** Update a GroupPermission */
+  async updateGroupPermission(
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      permissions?: string[];
+      isActive?: boolean;
+    },
+  ) {
+    const group = await this.prisma.groupPermission.findUnique({
+      where: { id },
+    });
+    if (!group) throw new Error('GroupPermission not found');
+
+    // Validate permission codes if provided
+    if (data.permissions) {
+      const invalid = data.permissions.filter((p) => !isValidPermissionCode(p));
+      if (invalid.length > 0) {
+        throw new BadRequestException(
+          `Invalid permission codes: ${invalid.join(', ')}`,
+        );
+      }
+    }
+
+    return this.prisma.groupPermission.update({
+      where: { id },
+      data,
+    });
+  }
+
+  /** Delete a non-system GroupPermission */
+  async deleteGroupPermission(id: string) {
+    const group = await this.prisma.groupPermission.findUnique({
+      where: { id },
+    });
+    if (!group) throw new Error('GroupPermission not found');
+    if (group.isSystem) {
+      throw new ForbiddenException('System groups cannot be deleted');
+    }
+    return this.prisma.groupPermission.delete({ where: { id } });
+  }
+
+  /** Assign a GroupPermission to a user */
+  async assignGroupToUser(userId: string, groupPermissionId: string) {
+    // Verify group exists
+    const group = await this.prisma.groupPermission.findUnique({
+      where: { id: groupPermissionId },
+    });
+    if (!group) throw new Error('GroupPermission not found');
+
+    // Create junction record (idempotent via unique constraint)
+    await this.prisma.userGroupPermission.upsert({
+      where: {
+        userId_groupPermissionId: { userId, groupPermissionId },
+      },
+      update: {},
+      create: { userId, groupPermissionId },
+    });
+
+    // Rebuild cached permissions
+    return this.buildUserPermissions(userId);
+  }
+
+  /** Remove a GroupPermission from a user */
+  async removeGroupFromUser(userId: string, groupPermissionId: string) {
+    await this.prisma.userGroupPermission.deleteMany({
+      where: { userId, groupPermissionId },
+    });
+
+    // Rebuild cached permissions
+    return this.buildUserPermissions(userId);
+  }
+
+  /** List all GroupPermissions */
+  async findAll(activeOnly = false) {
+    return this.prisma.groupPermission.findMany({
+      where: activeOnly ? { isActive: true } : undefined,
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  /** Get all default groups (system groups) */
   async getRoleDefaults() {
-    const rolePerms = await this.prisma.rolePermission.findMany({
-      include: { permission: { select: { code: true, module: true } } },
-      orderBy: [{ role: 'asc' }],
+    const systemGroups = await this.prisma.groupPermission.findMany({
+      where: { isSystem: true, isActive: true },
+      select: { id: true, name: true, permissions: true },
     });
 
-    const grouped: Record<string, string[]> = {};
-    for (const rp of rolePerms) {
-      if (!grouped[rp.role]) grouped[rp.role] = [];
-      grouped[rp.role].push(rp.permission.code);
-    }
-    return grouped;
+    return systemGroups.map((g) => ({
+      id: g.id,
+      name: g.name,
+      permissions: g.permissions,
+    }));
   }
 
+  /** Get user's permissions with details */
   async getUserPermissions(userId: string) {
     const cachedCodes = await this.getCachedPermissions(userId);
-    const customItems = await this.prisma.userPermissionItem.findMany({
-      where: { userPermission: { userId } },
-      include: { permission: { select: { code: true } } },
+
+    // Fetch user's groups
+    const userGroups = await this.prisma.userGroupPermission.findMany({
+      where: { userId },
+      include: {
+        groupPermission: {
+          select: { id: true, name: true, permissions: true },
+        },
+      },
     });
+
+    // Fetch additional permissions
+    const userPerm = await this.prisma.userPermission.findUnique({
+      where: { userId },
+      select: { additionalPermissions: true },
+    });
+
     return {
       userId,
-      permissions: cachedCodes,
-      customOverrides: customItems.map((i) => ({
-        code: i.permission.code,
-        granted: i.granted,
+      effectivePermissions: cachedCodes,
+      groups: userGroups.map((ug) => ({
+        id: ug.groupPermission.id,
+        name: ug.groupPermission.name,
+        permissions: ug.groupPermission.permissions,
       })),
+      additionalPermissions: userPerm?.additionalPermissions || [],
     };
   }
 }

@@ -7,8 +7,8 @@ export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
   @MessagePattern('permissions.findAll')
-  async findAll(@Payload() data: { module?: string }) {
-    return this.permissionsService.findAll(data.module);
+  async findAll(@Payload() data: { activeOnly?: boolean }) {
+    return this.permissionsService.findAll(data.activeOnly);
   }
 
   @MessagePattern('permissions.roleDefaults')
