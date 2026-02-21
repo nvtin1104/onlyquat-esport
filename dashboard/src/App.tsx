@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { AuthInitializer } from './components/AuthInitializer';
 import { DashboardLayout } from './components/layout/DashboardLayout';
-import { ToastContainer } from './components/ui/Toast';
+import { Toaster } from './components/ui/sonner';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { OverviewPage } from './pages/OverviewPage';
@@ -50,7 +50,7 @@ export function App() {
         {/* Global fallback for unmatched public routes */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <ToastContainer />
+      <Toaster />
     </AuthInitializer>
   );
 }
