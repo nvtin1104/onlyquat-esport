@@ -63,10 +63,10 @@ export const useUsersStore = create<UsersState>((set, get) => ({
             const { page, limit } = get();
             const result = await getUsers({ page, limit, ...params });
             set({
-                users: result.users,
-                total: result.total,
-                page: result.page,
-                limit: result.limit,
+                users: result.data,
+                total: result.meta.total,
+                page: result.meta.page,
+                limit: result.meta.limit,
                 isLoading: false,
             });
         } catch (err: any) {

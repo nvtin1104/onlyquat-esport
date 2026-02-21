@@ -79,12 +79,19 @@ export interface AdminUser {
   updatedAt: string;
 }
 
-export interface UsersListResponse {
-  users: AdminUser[];
+export interface PaginatedMeta {
   total: number;
   page: number;
   limit: number;
+  totalPages?: number;
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginatedMeta;
+}
+
+export type UsersListResponse = PaginatedResponse<AdminUser>;
 
 
 export interface PointTransaction {

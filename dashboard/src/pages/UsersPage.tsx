@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/ui/Pagination';
 import { UsersTable } from '@/components/users/UsersTable';
 import { ChangeRoleDialog } from '@/components/users/ChangeRoleDialog';
 import { BanUserDialog } from '@/components/users/BanUserDialog';
@@ -152,28 +153,16 @@ export function UsersPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-xs text-text-dim">
-            Trang {page} / {totalPages} ({total} người dùng)
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+          <span className="text-sm text-text-dim">
+            Hiển thị trang <span className="text-text-primary font-medium">{page}</span> trong tổng số{' '}
+            <span className="text-text-primary font-medium">{totalPages}</span> ({total} người dùng)
           </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="p-1.5 rounded-sm border border-border-subtle text-text-secondary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              disabled={page >= totalPages}
-              onClick={() => setPage(page + 1)}
-              className="p-1.5 rounded-sm border border-border-subtle text-text-secondary hover:bg-bg-elevated disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
         </div>
       )}
 
