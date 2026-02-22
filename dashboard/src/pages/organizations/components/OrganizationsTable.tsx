@@ -26,10 +26,22 @@ interface OrganizationsTableProps {
 }
 
 const ROLE_CONFIG: Record<OrganizationType, { label: string; className: string }> = {
-    ORGANIZER: { label: 'Nhà tổ chức', className: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
-    SPONSOR: { label: 'Nhà tài trợ', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
-    CLUB: { label: 'Câu lạc bộ', className: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
-    AGENCY: { label: 'Đại lý', className: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+    ORGANIZER: {
+        label: 'Nhà tổ chức',
+        className: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30',
+    },
+    SPONSOR: {
+        label: 'Nhà tài trợ',
+        className: 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/30',
+    },
+    CLUB: {
+        label: 'Câu lạc bộ',
+        className: 'bg-teal-100 text-teal-700 border-teal-300 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30',
+    },
+    AGENCY: {
+        label: 'Đại lý',
+        className: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30',
+    },
 };
 
 function RoleBadges({ roles }: { roles: OrganizationType[] }) {

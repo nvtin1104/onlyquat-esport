@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Building2, Pencil, X, Check } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Building2, Pencil, X, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { UserPicker, type UserPickerValue } from '@/components/shared/UserPicker';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useOrganizationsStore } from '@/stores/organizationsStore';
@@ -11,14 +12,28 @@ import { getRegions } from '@/lib/regions.api';
 import { cn } from '@/lib/utils';
 import type { AdminRegion, OrganizationType } from '@/types/admin';
 
+// ─── Styles ─────────────────────────────────────────────────────────────────
+
 const inputClass =
     'w-full bg-bg-elevated border border-border-subtle rounded-sm px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-accent-acid transition-colors';
 
 const ROLE_CONFIG: Record<OrganizationType, { label: string; className: string }> = {
-    ORGANIZER: { label: 'Nhà tổ chức', className: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
-    SPONSOR: { label: 'Nhà tài trợ', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
-    CLUB: { label: 'Câu lạc bộ', className: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
-    AGENCY: { label: 'Đại lý', className: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+    ORGANIZER: {
+        label: 'Nhà tổ chức',
+        className: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30',
+    },
+    SPONSOR: {
+        label: 'Nhà tài trợ',
+        className: 'bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/30',
+    },
+    CLUB: {
+        label: 'Câu lạc bộ',
+        className: 'bg-teal-100 text-teal-700 border-teal-300 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30',
+    },
+    AGENCY: {
+        label: 'Đại lý',
+        className: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30',
+    },
 };
 
 const ROLE_OPTIONS: { value: OrganizationType; label: string; hint: string }[] = [
@@ -28,6 +43,41 @@ const ROLE_OPTIONS: { value: OrganizationType; label: string; hint: string }[] =
     { value: 'AGENCY', label: 'Đại lý', hint: 'Đại lý dịch vụ' },
 ];
 
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+
+function DetailSkeleton() {
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+            {/* Left card */}
+            <div className="lg:col-span-1 bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col items-center gap-4">
+                <div className="w-20 h-20 rounded-sm bg-border-subtle" />
+                <div className="w-32 h-4 rounded-sm bg-border-subtle" />
+                <div className="w-20 h-3 rounded-sm bg-border-subtle/70" />
+                <div className="flex gap-2 mt-1">
+                    <div className="h-5 w-20 rounded-sm bg-border-subtle" />
+                    <div className="h-5 w-16 rounded-sm bg-border-subtle" />
+                </div>
+                <div className="w-full h-8 rounded-sm bg-border-subtle mt-2" />
+                <div className="w-full h-8 rounded-sm bg-border-subtle/60" />
+            </div>
+            {/* Right card */}
+            <div className="lg:col-span-2 bg-bg-surface border border-border-subtle rounded-sm p-6 space-y-4">
+                <div className="h-3 w-32 rounded-sm bg-border-subtle" />
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex justify-between items-center py-3 border-b border-border-subtle">
+                        <div className="h-2.5 w-20 rounded-sm bg-border-subtle" />
+                        <div className="h-3 w-36 rounded-sm bg-border-subtle/60" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
+
+// ─── Detail row ───────────────────────────────────────────────────────────────
+
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <div className="flex items-start justify-between py-3 border-b border-border-subtle last:border-0">
@@ -36,6 +86,8 @@ function DetailRow({ label, children }: { label: string; children: React.ReactNo
         </div>
     );
 }
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function OrganizationDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -65,12 +117,14 @@ export function OrganizationDetailPage() {
     const [editDescriptionVi, setEditDescriptionVi] = useState('');
     const [editRoles, setEditRoles] = useState<OrganizationType[]>([]);
     const [editRegionId, setEditRegionId] = useState('');
+    const [editOwner, setEditOwner] = useState<UserPickerValue | null>(null);
+    const [editManager, setEditManager] = useState<UserPickerValue | null>(null);
 
     useEffect(() => {
         if (id) fetchOrgById(id);
         getRegions({ limit: 100 })
             .then((res) => setRegions(res.data))
-            .catch(() => {});
+            .catch(() => { });
         return () => clearSelectedOrg();
     }, [id]);
 
@@ -85,6 +139,10 @@ export function OrganizationDetailPage() {
             setEditDescriptionVi(org.descriptionI18n?.vi ?? '');
             setEditRoles([...org.roles]);
             setEditRegionId(org.regionId ?? '');
+            setEditOwner(org.owner ? { id: org.ownerId, username: org.owner.username, avatar: org.owner.avatar } : null);
+            setEditManager(
+                org.manager ? { id: org.managerId!, username: org.manager.username, avatar: org.manager.avatar } : null,
+            );
         }
     }, [org]);
 
@@ -96,10 +154,9 @@ export function OrganizationDetailPage() {
 
     async function handleSave() {
         if (!org) return;
-        if (editRoles.length === 0) {
-            toast.error('Chọn ít nhất một vai trò');
-            return;
-        }
+        if (editRoles.length === 0) { toast.error('Chọn ít nhất một vai trò'); return; }
+        if (!editOwner) { toast.error('Chủ sở hữu không được để trống'); return; }
+
         const descriptionI18n: Record<string, string> = {};
         if (editDescriptionEn.trim()) descriptionI18n.en = editDescriptionEn.trim();
         if (editDescriptionVi.trim()) descriptionI18n.vi = editDescriptionVi.trim();
@@ -114,6 +171,8 @@ export function OrganizationDetailPage() {
                 descriptionI18n: Object.keys(descriptionI18n).length > 0 ? descriptionI18n : undefined,
                 roles: editRoles,
                 regionId: editRegionId || undefined,
+                ownerId: editOwner.id,
+                managerId: editManager?.id ?? null,
             });
             toast.success('Đã cập nhật tổ chức');
             setEditMode(false);
@@ -146,12 +205,25 @@ export function OrganizationDetailPage() {
         setEditDescriptionVi(org.descriptionI18n?.vi ?? '');
         setEditRoles([...org.roles]);
         setEditRegionId(org.regionId ?? '');
+        setEditOwner(org.owner ? { id: org.ownerId, username: org.owner.username, avatar: org.owner.avatar } : null);
+        setEditManager(org.manager ? { id: org.managerId!, username: org.manager.username, avatar: org.manager.avatar } : null);
     }
 
+    // ─── Loading skeleton ──────────────────────────────────────────────────────
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-6 h-6 animate-spin text-accent-acid" />
+            <div>
+                <div className="flex items-center gap-3 mb-6">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/organizations')}
+                        className="text-text-dim hover:text-text-primary transition-colors cursor-pointer"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </button>
+                    <PageHeader title="Chi tiết tổ chức" description="Đang tải..." />
+                </div>
+                <DetailSkeleton />
             </div>
         );
     }
@@ -182,7 +254,7 @@ export function OrganizationDetailPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Logo / summary card */}
+                {/* ── Logo / summary card ─────────────────────────────────── */}
                 <div className="lg:col-span-1 bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col items-center text-center gap-3">
                     {org.logo ? (
                         <img
@@ -205,15 +277,10 @@ export function OrganizationDetailPage() {
                         )}
                     </div>
 
-                    {/* Role badges */}
                     <div className="flex flex-wrap gap-1 justify-center">
                         {org.roles.map((r) => {
                             const cfg = ROLE_CONFIG[r];
-                            return (
-                                <Badge key={r} className={cfg.className}>
-                                    {cfg.label}
-                                </Badge>
-                            );
+                            return <Badge key={r} className={cfg.className}>{cfg.label}</Badge>;
                         })}
                     </div>
 
@@ -269,12 +336,15 @@ export function OrganizationDetailPage() {
                     </div>
                 </div>
 
-                {/* Details / Edit form */}
+                {/* ── Details / Edit form ─────────────────────────────────── */}
                 <div className="lg:col-span-2 bg-bg-surface border border-border-subtle rounded-sm p-6">
-                    <p className="font-mono text-xs text-text-dim uppercase tracking-wide mb-4">Thông tin tổ chức</p>
+                    <p className="font-mono text-xs text-text-dim uppercase tracking-wide mb-4">
+                        Thông tin tổ chức
+                    </p>
 
                     {editMode ? (
                         <div className="space-y-4">
+                            {/* Name */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">
                                     Tên tổ chức <span className="text-danger">*</span>
@@ -287,6 +357,7 @@ export function OrganizationDetailPage() {
                                 />
                             </div>
 
+                            {/* Short name */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Tên viết tắt</label>
                                 <input
@@ -297,6 +368,7 @@ export function OrganizationDetailPage() {
                                 />
                             </div>
 
+                            {/* Logo */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo URL</label>
                                 <input
@@ -308,6 +380,7 @@ export function OrganizationDetailPage() {
                                 />
                             </div>
 
+                            {/* Website */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Website</label>
                                 <input
@@ -319,6 +392,7 @@ export function OrganizationDetailPage() {
                                 />
                             </div>
 
+                            {/* Description */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả</label>
                                 <textarea
@@ -329,26 +403,28 @@ export function OrganizationDetailPage() {
                                 />
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả tiếng Anh</label>
-                                <textarea
-                                    className={cn(inputClass, 'resize-none')}
-                                    rows={3}
-                                    value={editDescriptionEn}
-                                    onChange={(e) => setEditDescriptionEn(e.target.value)}
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả EN</label>
+                                    <textarea
+                                        className={cn(inputClass, 'resize-none')}
+                                        rows={2}
+                                        value={editDescriptionEn}
+                                        onChange={(e) => setEditDescriptionEn(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả VI</label>
+                                    <textarea
+                                        className={cn(inputClass, 'resize-none')}
+                                        rows={2}
+                                        value={editDescriptionVi}
+                                        onChange={(e) => setEditDescriptionVi(e.target.value)}
+                                    />
+                                </div>
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả tiếng Việt</label>
-                                <textarea
-                                    className={cn(inputClass, 'resize-none')}
-                                    rows={3}
-                                    value={editDescriptionVi}
-                                    onChange={(e) => setEditDescriptionVi(e.target.value)}
-                                />
-                            </div>
-
+                            {/* Roles */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">
                                     Vai trò <span className="text-danger">*</span>
@@ -376,6 +452,7 @@ export function OrganizationDetailPage() {
                                 </div>
                             </div>
 
+                            {/* Region */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Khu vực</label>
                                 <select
@@ -391,6 +468,22 @@ export function OrganizationDetailPage() {
                                     ))}
                                 </select>
                             </div>
+
+                            {/* Owner — required */}
+                            <UserPicker
+                                label="Chủ sở hữu *"
+                                value={editOwner}
+                                onChange={setEditOwner}
+                                nullable={false}
+                            />
+
+                            {/* Manager — optional */}
+                            <UserPicker
+                                label="Quản lý"
+                                value={editManager}
+                                onChange={setEditManager}
+                                nullable
+                            />
                         </div>
                     ) : (
                         <>
@@ -430,11 +523,7 @@ export function OrganizationDetailPage() {
                                 <div className="flex flex-wrap gap-1 justify-end">
                                     {org.roles.map((r) => {
                                         const cfg = ROLE_CONFIG[r];
-                                        return (
-                                            <Badge key={r} className={cfg.className}>
-                                                {cfg.label}
-                                            </Badge>
-                                        );
+                                        return <Badge key={r} className={cfg.className}>{cfg.label}</Badge>;
                                     })}
                                 </div>
                             </DetailRow>
@@ -444,7 +533,7 @@ export function OrganizationDetailPage() {
                                 </span>
                             </DetailRow>
                             <DetailRow label="Chủ sở hữu">
-                                <span className="text-sm text-text-secondary">
+                                <span className="text-sm text-text-secondary font-medium">
                                     {org.owner?.username ?? org.ownerId}
                                 </span>
                             </DetailRow>

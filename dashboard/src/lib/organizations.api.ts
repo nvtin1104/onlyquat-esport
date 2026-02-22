@@ -22,6 +22,8 @@ export interface CreateOrgDto {
 
 export interface UpdateOrgDto extends Partial<Omit<CreateOrgDto, 'roles'>> {
     roles?: string[];
+    ownerId?: string;
+    managerId?: string | null;
 }
 
 export async function getOrganizations(params: GetOrgsParams = {}): Promise<OrganizationsListResponse> {
