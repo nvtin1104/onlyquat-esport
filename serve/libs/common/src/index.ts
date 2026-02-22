@@ -29,4 +29,5 @@ export type {
   UserGroupPermission,
   Region,
   Organization,
+  FileUpload,
 } from '../generated/prisma/client';

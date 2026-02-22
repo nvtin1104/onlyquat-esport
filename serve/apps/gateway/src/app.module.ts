@@ -10,12 +10,15 @@ import {
   AcceptLanguageResolver,
 } from 'nestjs-i18n';
 import * as path from 'path';
+import { PrismaModule } from '@app/common';
 import { AppController } from './app.controller';
 import { AuthController } from './auth/auth.controller';
 import { UsersController } from './users/users.controller';
 import { AdminPermissionsController } from './admin/permissions.controller';
 import { RegionsController } from './regions/regions.controller';
 import { OrganizationsController } from './organizations/organizations.controller';
+import { UploadsController } from './uploads/uploads.controller';
+import { UploadsService } from './uploads/uploads.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PermissionsGuard } from './guards/permissions.guard';
 import { RpcToHttpExceptionFilter } from './filters/rpc-exception.filter';
@@ -23,6 +26,7 @@ import { TranslateResponseInterceptor } from './interceptors/translate-response.
 
 @Module({
   imports: [
+    PrismaModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -63,10 +67,11 @@ import { TranslateResponseInterceptor } from './interceptors/translate-response.
       },
     ]),
   ],
-  controllers: [AppController, AuthController, UsersController, AdminPermissionsController, RegionsController, OrganizationsController],
+  controllers: [AppController, AuthController, UsersController, AdminPermissionsController, RegionsController, OrganizationsController, UploadsController],
   providers: [
     JwtStrategy,
     PermissionsGuard,
+    UploadsService,
     {
       provide: APP_FILTER,
       useClass: RpcToHttpExceptionFilter,

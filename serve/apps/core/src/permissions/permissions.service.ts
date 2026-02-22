@@ -17,9 +17,15 @@ export class PermissionsService {
     });
     if (!user) throw new Error('User not found');
 
-    // ROOT users bypass - return all permissions
+    // ROOT users get all permissions — also persist so getCachedPermissions stays fresh
     if (user.role.includes(UserRole.ROOT)) {
-      return getAllPermissionCodes();
+      const allCodes = getAllPermissionCodes();
+      await this.prisma.userPermission.upsert({
+        where: { userId },
+        update: { cachedCodes: allCodes },
+        create: { userId, cachedCodes: allCodes, additionalPermissions: [] },
+      });
+      return allCodes;
     }
 
     // 1. Fetch user's GroupPermissions

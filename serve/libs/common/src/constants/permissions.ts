@@ -76,6 +76,11 @@ export const PERMISSIONS = {
   ORGANIZATION_DELETE: 'organization:delete',
   ORGANIZATION_MANAGE: 'organization:manage',
 
+  // UPLOAD
+  UPLOAD_VIEW: 'upload:view',
+  UPLOAD_DELETE: 'upload:delete',
+  UPLOAD_MANAGE: 'upload:manage',
+
   // SYSTEM
   SYSTEM_SETTINGS: 'system:settings',
   SYSTEM_LOGS: 'system:logs',
@@ -154,6 +159,11 @@ export const PERMISSION_METADATA: PermissionDefinition[] = [
   { code: 'organization:update', module: 'organization', action: 'update', name: 'Sửa tổ chức',             description: 'Chỉnh sửa thông tin tổ chức' },
   { code: 'organization:delete', module: 'organization', action: 'delete', name: 'Xoá tổ chức',             description: 'Xoá tổ chức' },
   { code: 'organization:manage', module: 'organization', action: 'manage', name: 'Quản lý tổ chức (Full)',  description: 'Toàn quyền tổ chức' },
+
+  // UPLOAD
+  { code: 'upload:view',   module: 'upload', action: 'view',   name: 'Xem file upload',           description: 'Xem danh sách file đã upload' },
+  { code: 'upload:delete', module: 'upload', action: 'delete', name: 'Xoá file upload',            description: 'Xoá file khỏi R2 và DB' },
+  { code: 'upload:manage', module: 'upload', action: 'manage', name: 'Quản lý file upload (Full)', description: 'Toàn quyền quản lý file upload' },
 
   // SYSTEM
   { code: 'system:settings', module: 'system', action: 'settings', name: 'Cấu hình hệ thống', description: 'Thay đổi settings' },
