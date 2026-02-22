@@ -25,6 +25,7 @@ import { RegionDetailPage } from './pages/regions/detail';
 import { OrganizationsPage } from './pages/organizations/list';
 import { OrganizationCreatePage } from './pages/organizations/create';
 import { OrganizationDetailPage } from './pages/organizations/detail';
+import { UploadsPage } from './pages/uploads/list';
 
 export function App() {
   return (
@@ -54,6 +55,7 @@ export function App() {
             <Route path="organizations" element={<OrganizationsPage />} />
             <Route path="organizations/create" element={<OrganizationCreatePage />} />
             <Route path="organizations/:id" element={<OrganizationDetailPage />} />
+            <Route path="uploads" element={<UploadsPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

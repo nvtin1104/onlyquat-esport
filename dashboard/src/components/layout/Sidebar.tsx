@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Coins,
   Gamepad2,
+  ImageIcon,
   KeyRound,
   LayoutDashboard,
   MapPin,
@@ -76,6 +77,13 @@ const navGroups: NavGroup[] = [
       { icon: Star, label: 'Đánh giá', to: '/ratings', badge: '23' },
       { icon: Gamepad2, label: 'Minigame', to: '/minigame' },
       { icon: Coins, label: 'Điểm thưởng', to: '/points' },
+    ],
+  },
+  {
+    label: 'Media',
+    defaultOpen: true,
+    items: [
+      { icon: ImageIcon, label: 'Uploads', to: '/uploads' },
     ],
   },
   {
