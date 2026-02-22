@@ -5,6 +5,9 @@ export * from './database/prisma.service';
 // Permission constants
 export * from './constants/permissions';
 
+// Shared types
+export * from './types/pagination';
+
 // Shared filters
 export * from './filters';
 

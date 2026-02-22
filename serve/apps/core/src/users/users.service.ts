@@ -86,9 +86,9 @@ export class UsersService {
   async findAll(
     page = 1,
     limit = 20,
-  ): Promise<{ users: SafeUser[]; total: number; page: number; limit: number }> {
+  ): Promise<{ data: SafeUser[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
     const skip = (page - 1) * limit;
-    const [users, total] = await Promise.all([
+    const [data, total] = await Promise.all([
       this.prisma.user.findMany({
         skip,
         take: limit,
@@ -96,7 +96,8 @@ export class UsersService {
       }),
       this.prisma.user.count(),
     ]);
-    return { users, total, page, limit };
+    const totalPages = Math.ceil(total / limit);
+    return { data, meta: { total, page, limit, totalPages } };
   }
 
   async findById(userId: string): Promise<SafeUser> {
