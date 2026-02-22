@@ -160,14 +160,15 @@ model Region {
 }
 
 model Organization {
-  id          String             @id @default(uuid())
-  name        String             @unique
-  shortName   String?
-  logo        String?
-  website     String?
-  description String?
-  mediaLinks  Json               @default("[]")
-  roles       OrganizationType[]
+  id              String             @id @default(uuid())
+  name            String             @unique
+  shortName       String?
+  logo            String?
+  website         String?
+  description     String?
+  descriptionI18n Json               @default("{}")
+  mediaLinks      Json               @default("[]")
+  roles           OrganizationType[]
 
   ownerId   String
   owner     User    @relation("OrgOwner", fields: [ownerId], references: [id])

@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, PlayerTier, TeamMemberRole, UserRole, UserStatus } from '../generated/prisma/client';
+import { PrismaClient, PlayerTier, TeamMemberRole, UserRole, UserStatus, OrganizationType } from '../generated/prisma/client';
 import { seedPermissions } from './seeds/permissions.seed';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
@@ -83,7 +83,7 @@ async function main() {
         name: 'Team Alpha',
         tag: 'ALP',
         logoUrl: 'https://api.dicebear.com/9.x/identicon/svg?seed=alpha',
-        region: 'VN',
+        regionTag: 'VN',
       },
     }),
     prisma.team.upsert({
@@ -94,7 +94,7 @@ async function main() {
         name: 'Phoenix Rising',
         tag: 'PHX',
         logoUrl: 'https://api.dicebear.com/9.x/identicon/svg?seed=phoenix',
-        region: 'VN',
+        regionTag: 'VN',
       },
     }),
     prisma.team.upsert({
@@ -105,7 +105,7 @@ async function main() {
         name: 'Shadow Legion',
         tag: 'SHL',
         logoUrl: 'https://api.dicebear.com/9.x/identicon/svg?seed=shadow',
-        region: 'VN',
+        regionTag: 'VN',
       },
     }),
   ]);
@@ -413,6 +413,169 @@ async function main() {
     await prisma.rating.create({ data });
   }
   console.log(`  Created ${ratingsData.length} ratings`);
+
+  // ─── Regions ────────────────────────────────────────────────────────
+  const regions = await Promise.all([
+    prisma.region.upsert({
+      where: { code: 'HN' },
+      update: {},
+      create: {
+        name: 'Hà Nội',
+        code: 'HN',
+        logo: '/images/regions/hanoi.svg',
+      },
+    }),
+    prisma.region.upsert({
+      where: { code: 'HCM' },
+      update: {},
+      create: {
+        name: 'Hồ Chí Minh',
+        code: 'HCM',
+        logo: '/images/regions/hochiminh.svg',
+      },
+    }),
+    prisma.region.upsert({
+      where: { code: 'DN' },
+      update: {},
+      create: {
+        name: 'Đà Nẵng',
+        code: 'DN',
+        logo: '/images/regions/danang.svg',
+      },
+    }),
+    prisma.region.upsert({
+      where: { code: 'VN' },
+      update: {},
+      create: {
+        name: 'Vietnam',
+        code: 'VN',
+        logo: '/images/regions/vietnam.svg',
+      },
+    }),
+    prisma.region.upsert({
+      where: { code: 'SEA' },
+      update: {},
+      create: {
+        name: 'Southeast Asia',
+        code: 'SEA',
+        logo: '/images/regions/sea.svg',
+      },
+    }),
+  ]);
+
+  const [regionHN, regionHCM, regionDN, regionVN] = regions;
+  console.log(`  Created ${regions.length} regions`);
+
+  // ─── Organizations ───────────────────────────────────────────────────
+  // Re-fetch admin user for ownerId
+  const adminUser = await prisma.user.findUnique({ where: { email: 'admin@onlyquat.com' } });
+  if (!adminUser) throw new Error('Admin user not found — run seed again');
+
+  const orgs = await Promise.all([
+    prisma.organization.upsert({
+      where: { name: 'GAM Esports' },
+      update: {},
+      create: {
+        name: 'GAM Esports',
+        shortName: 'GAM',
+        logo: 'https://api.dicebear.com/9.x/initials/svg?seed=GAM',
+        website: 'https://gamesports.vn',
+        description: 'Câu lạc bộ esports hàng đầu Việt Nam, nổi tiếng ở đấu trường Liên Minh Huyền Thoại.',
+        descriptionI18n: {
+          en: "Vietnam's premier esports organization, renowned in the League of Legends competitive scene.",
+          vi: 'Câu lạc bộ esports hàng đầu Việt Nam, nổi tiếng ở đấu trường Liên Minh Huyền Thoại.',
+        },
+        roles: [OrganizationType.ORGANIZER, OrganizationType.CLUB],
+        mediaLinks: [
+          { url: 'https://www.facebook.com/GAMesports', description: 'Facebook' },
+          { url: 'https://www.youtube.com/@GAMesports', description: 'YouTube' },
+        ],
+        ownerId: adminUser.id,
+        regionId: regionHCM.id,
+      },
+    }),
+    prisma.organization.upsert({
+      where: { name: 'Team Flash' },
+      update: {},
+      create: {
+        name: 'Team Flash',
+        shortName: 'Flash',
+        logo: 'https://api.dicebear.com/9.x/initials/svg?seed=Flash',
+        website: 'https://teamflash.vn',
+        description: 'Tổ chức esports đa bộ môn lớn nhất Việt Nam, vô địch nhiều giải đấu quốc tế.',
+        descriptionI18n: {
+          en: "Vietnam's largest multi-title esports organization with multiple international championship titles.",
+          vi: 'Tổ chức esports đa bộ môn lớn nhất Việt Nam, vô địch nhiều giải đấu quốc tế.',
+        },
+        roles: [OrganizationType.ORGANIZER, OrganizationType.CLUB],
+        mediaLinks: [
+          { url: 'https://www.facebook.com/teamflashvn', description: 'Facebook' },
+        ],
+        ownerId: adminUser.id,
+        regionId: regionHN.id,
+      },
+    }),
+    prisma.organization.upsert({
+      where: { name: 'Saigon Buffalo' },
+      update: {},
+      create: {
+        name: 'Saigon Buffalo',
+        shortName: 'SGB',
+        logo: 'https://api.dicebear.com/9.x/initials/svg?seed=SGB',
+        website: 'https://saigonbuffalo.com',
+        description: 'Đội tuyển LMHT đại diện Việt Nam tại giải đấu quốc tế LCS.',
+        descriptionI18n: {
+          en: 'Vietnamese League of Legends team competing in the international LCS championship.',
+          vi: 'Đội tuyển LMHT đại diện Việt Nam tại giải đấu quốc tế LCS.',
+        },
+        roles: [OrganizationType.CLUB],
+        mediaLinks: [
+          { url: 'https://www.facebook.com/saigonbuffalo', description: 'Facebook' },
+        ],
+        ownerId: adminUser.id,
+        regionId: regionHCM.id,
+      },
+    }),
+    prisma.organization.upsert({
+      where: { name: 'Vietnam Pro Esports' },
+      update: {},
+      create: {
+        name: 'Vietnam Pro Esports',
+        shortName: 'VPE',
+        logo: 'https://api.dicebear.com/9.x/initials/svg?seed=VPE',
+        website: 'https://vpe.vn',
+        description: 'Đơn vị tổ chức giải đấu esports chuyên nghiệp tại Việt Nam.',
+        descriptionI18n: {
+          en: 'Professional esports tournament organizer in Vietnam, hosting premier domestic competitions.',
+          vi: 'Đơn vị tổ chức giải đấu esports chuyên nghiệp tại Việt Nam.',
+        },
+        roles: [OrganizationType.ORGANIZER],
+        mediaLinks: [],
+        ownerId: adminUser.id,
+        regionId: regionVN.id,
+      },
+    }),
+    prisma.organization.upsert({
+      where: { name: 'Da Nang Storm' },
+      update: {},
+      create: {
+        name: 'Da Nang Storm',
+        shortName: 'DNS',
+        logo: 'https://api.dicebear.com/9.x/initials/svg?seed=DNS',
+        description: 'Tổ chức esports khu vực miền Trung, đại diện cho Đà Nẵng tại các giải đấu toàn quốc.',
+        descriptionI18n: {
+          en: 'Central Vietnam esports organization representing Da Nang in national competitions.',
+          vi: 'Tổ chức esports khu vực miền Trung, đại diện cho Đà Nẵng tại các giải đấu toàn quốc.',
+        },
+        roles: [OrganizationType.CLUB, OrganizationType.ORGANIZER],
+        mediaLinks: [],
+        ownerId: adminUser.id,
+        regionId: regionDN.id,
+      },
+    }),
+  ]);
+
+  console.log(`  Created ${orgs.length} organizations`);
 
   // ─── Permissions ────────────────────────────────────────────────────
   await seedPermissions(prisma);
