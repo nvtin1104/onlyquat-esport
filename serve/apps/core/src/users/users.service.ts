@@ -26,9 +26,7 @@ export class UsersService {
     const hasAdminRole = roles.some((role) => adminRoles.includes(role));
 
     if (hasAdminRole && accountType !== 0) {
-      throw new BadRequestException(
-        'Users with ROOT, ADMIN, or STAFF roles must have accountType = 0',
-      );
+      throw new BadRequestException('errors.ADMIN_ROLE_ACCOUNT_TYPE_MISMATCH');
     }
   }
 
@@ -37,7 +35,7 @@ export class UsersService {
       where: { email: createUserDto.email },
     });
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('errors.EMAIL_ALREADY_EXISTS');
     }
 
     return this.prisma.user.create({
@@ -57,14 +55,14 @@ export class UsersService {
       where: { email: adminCreateUserDto.email },
     });
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('errors.EMAIL_ALREADY_EXISTS');
     }
 
     const existingUsername = await this.prisma.user.findFirst({
       where: { username: adminCreateUserDto.username },
     });
     if (existingUsername) {
-      throw new ConflictException('Username already exists');
+      throw new ConflictException('errors.USERNAME_ALREADY_EXISTS');
     }
 
     // Validate accountType for admin roles
@@ -107,7 +105,7 @@ export class UsersService {
       omit: { password: true },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('errors.USER_NOT_FOUND');
     }
     return user;
   }
@@ -129,7 +127,7 @@ export class UsersService {
   async update(userId: string, updateUserDto: UpdateUserDto): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('errors.USER_NOT_FOUND');
     }
     return this.prisma.user.update({
       where: { id: userId },
@@ -141,13 +139,13 @@ export class UsersService {
   async delete(userId: string): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('errors.USER_NOT_FOUND');
     }
     await this.prisma.user.update({
       where: { id: userId },
       data: { status: UserStatus.UNACTIVE },
     });
-    return { message: 'User deactivated successfully' };
+    return { message: 'errors.USER_DEACTIVATED' };
   }
 
   async changePassword(
@@ -156,7 +154,7 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('errors.USER_NOT_FOUND');
     }
 
     const isOldPasswordValid = await bcrypt.compare(
@@ -164,7 +162,7 @@ export class UsersService {
       user.password,
     );
     if (!isOldPasswordValid) {
-      throw new UnauthorizedException('Old password is incorrect');
+      throw new UnauthorizedException('errors.OLD_PASSWORD_INCORRECT');
     }
 
     const hashedPassword = await bcrypt.hash(
@@ -176,7 +174,7 @@ export class UsersService {
       data: { password: hashedPassword },
     });
 
-    return { message: 'Password changed successfully' };
+    return { message: 'errors.PASSWORD_CHANGED' };
   }
 
   async updateRole(
@@ -185,7 +183,7 @@ export class UsersService {
   ): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('errors.USER_NOT_FOUND');
     }
 
     // Validate accountType for admin roles

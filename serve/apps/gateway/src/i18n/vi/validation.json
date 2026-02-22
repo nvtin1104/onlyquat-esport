@@ -1,0 +1,22 @@
+{
+  "IS_EMAIL": "$property phải là địa chỉ email hợp lệ",
+  "IS_NOT_EMPTY": "$property không được để trống",
+  "IS_STRING": "$property phải là chuỗi ký tự",
+  "MIN_LENGTH": "$property phải có ít nhất $constraint1 ký tự",
+  "MAX_LENGTH": "$property phải có tối đa $constraint1 ký tự",
+  "IS_ENUM": "$property phải là giá trị hợp lệ",
+  "IS_ARRAY": "$property phải là mảng",
+  "ARRAY_MIN_SIZE": "$property phải có ít nhất $constraint1 phần tử",
+  "IS_INT": "$property phải là số nguyên",
+  "MIN": "$property không được nhỏ hơn $constraint1",
+  "MAX": "$property không được lớn hơn $constraint1",
+  "IS_UUID": "$property phải là UUID hợp lệ",
+  "IS_DATE_STRING": "$property phải là chuỗi ngày ISO 8601 hợp lệ",
+  "IS_NUMBER": "$property phải là số",
+  "IS_BOOLEAN": "$property phải là giá trị boolean",
+  "IS_URL": "$property phải là URL hợp lệ",
+  "IS_OPTIONAL": "$property là tùy chọn",
+  "IS_POSITIVE": "$property phải là số dương",
+  "IS_NEGATIVE": "$property phải là số âm",
+  "LENGTH": "$property phải có từ $constraint1 đến $constraint2 ký tự"
+}

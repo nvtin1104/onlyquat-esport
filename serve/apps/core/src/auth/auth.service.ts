@@ -28,7 +28,7 @@ export class AuthService {
   async register(createUserDto: CreateUserDto): Promise<TokenResponseDto> {
     const existingUser = await this.usersService.findByEmail(createUserDto.email);
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('errors.EMAIL_ALREADY_EXISTS');
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, this.SALT_ROUNDS);
@@ -60,20 +60,20 @@ export class AuthService {
     const user = await this.usersService.findByEmailWithPassword(loginDto.email);
     if (!user) {
       this.logger.warn(`Login failed: User not found - ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('errors.INVALID_CREDENTIALS');
     }
     this.logger.debug(`User found: ${user.email} (ID: ${user.id})`);
 
     // Step 2: Verify password
     if (!user.password) {
       this.logger.error(`Login failed: No password set for user - ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('errors.INVALID_CREDENTIALS');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       this.logger.warn(`Login failed: Invalid password - ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('errors.INVALID_CREDENTIALS');
     }
     this.logger.debug(`Password verified for: ${user.email}`);
 
@@ -110,27 +110,27 @@ export class AuthService {
     const user = await this.usersService.findByEmailWithPassword(loginDto.email);
     if (!user) {
       this.logger.warn(`Admin login failed: User not found - ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('errors.INVALID_CREDENTIALS');
     }
     this.logger.debug(`User found: ${user.email} (ID: ${user.id})`);
 
     // Step 2: Check account type
     if (user.accountType !== 0) {
       this.logger.warn(`Admin login failed: Invalid account type - ${loginDto.email} (type: ${user.accountType})`);
-      throw new ForbiddenException('Access denied: admin only');
+      throw new ForbiddenException('errors.ACCESS_DENIED_ADMIN_ONLY');
     }
     this.logger.debug(`Account type valid: ${user.accountType}`);
 
     // Step 3: Verify password
     if (!user.password) {
       this.logger.error(`Admin login failed: No password set for user - ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('errors.INVALID_CREDENTIALS');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       this.logger.warn(`Admin login failed: Invalid password - ${loginDto.email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('errors.INVALID_CREDENTIALS');
     }
     this.logger.debug(`Password verified for: ${user.email}`);
 
@@ -181,7 +181,7 @@ export class AuthService {
 
       return { accessToken };
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('errors.INVALID_REFRESH_TOKEN');
     }
   }
 

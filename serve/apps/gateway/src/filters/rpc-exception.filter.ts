@@ -5,23 +5,31 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  Injectable,
 } from '@nestjs/common';
+import { I18nService, I18nContext } from 'nestjs-i18n';
 
 /**
  * Global gateway filter that maps microservice errors to proper HTTP responses.
+ * Supports i18n translation — services throw translation keys (e.g. 'errors.USER_NOT_FOUND')
+ * and this filter translates them based on the request language.
  *
  * Flow:
  *   Microservice throws HttpException
  *   → AllExceptionsToRpcFilter wraps it as RpcException({ statusCode, message, error })
  *   → NATS serialises it
  *   → Gateway receives plain object via firstValueFrom()
- *   → This filter extracts statusCode/message and sends correct HTTP response
+ *   → This filter extracts statusCode/message, translates keys, sends HTTP response
  */
+@Injectable()
 @Catch()
 export class RpcToHttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(RpcToHttpExceptionFilter.name);
 
+  constructor(private readonly i18n: I18nService) {}
+
   catch(exception: any, host: ArgumentsHost) {
+    const lang = I18nContext.current(host)?.lang ?? 'en';
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<{ status(code: number): { json(body: any): void } }>();
 
@@ -29,15 +37,30 @@ export class RpcToHttpExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const body = exception.getResponse();
-      return response.status(status).json(
-        typeof body === 'string' ? { statusCode: status, message: body } : body,
-      );
+
+      if (typeof body === 'string') {
+        return response.status(status).json({
+          statusCode: status,
+          message: this.translate(body, lang),
+        });
+      }
+
+      if (typeof body === 'object' && body !== null) {
+        const msg = (body as any)?.message;
+        return response.status(status).json({
+          ...body,
+          statusCode: status,
+          message: this.translateMessage(msg, lang),
+        });
+      }
+
+      return response.status(status).json(body);
     }
 
     // ── RPC error from microservice (serialised by AllExceptionsToRpcFilter) ──
     const rpcData = this.extractRpcData(exception);
     const status = rpcData.statusCode;
-    const message = rpcData.message;
+    const message = this.translateMessage(rpcData.message, lang);
     const error = rpcData.error;
 
     if (status !== HttpStatus.INTERNAL_SERVER_ERROR) {
@@ -50,14 +73,41 @@ export class RpcToHttpExceptionFilter implements ExceptionFilter {
 
     // ── Truly unexpected — log full details ────────────────────────────
     this.logger.error(
-      `Unhandled exception: ${JSON.stringify(message)}`,
+      `Unhandled exception: ${JSON.stringify(rpcData.message)}`,
       exception?.stack ?? JSON.stringify(exception),
     );
 
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Internal server error',
+      message: this.translate('errors.INTERNAL_SERVER_ERROR', lang),
     });
+  }
+
+  // ────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Translate a single message string.
+   * If it looks like a translation key (contains '.'), attempt translation.
+   * Falls back to the original string if translation fails or key not found.
+   */
+  private translate(message: string, lang: string): string {
+    if (!message || !message.includes('.')) return message;
+    try {
+      const translated = this.i18n.translate(message as any, { lang }) as string;
+      return translated ?? message;
+    } catch {
+      return message;
+    }
+  }
+
+  private translateMessage(message: string | string[], lang: string): string | string[] {
+    if (Array.isArray(message)) {
+      return message.map((m) => this.translate(m, lang));
+    }
+    if (typeof message === 'string') {
+      return this.translate(message, lang);
+    }
+    return message;
   }
 
   // ────────────────────────────────────────────────────────────────────────
@@ -77,7 +127,7 @@ export class RpcToHttpExceptionFilter implements ExceptionFilter {
   } {
     const defaultResult = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR as number,
-      message: 'Internal server error' as string | string[],
+      message: 'errors.INTERNAL_SERVER_ERROR' as string | string[],
       error: 'InternalServerError',
     };
 

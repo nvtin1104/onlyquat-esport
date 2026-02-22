@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { I18nValidationPipe } from 'nestjs-i18n';
 import { AppModule } from './app.module';
-import { RpcToHttpExceptionFilter } from './filters/rpc-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,12 +12,12 @@ async function bootstrap() {
       'http://localhost:3000', // client (Next.js)
     ],
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept-Language'],
     credentials: true,
   });
 
-  app.useGlobalFilters(new RpcToHttpExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  // I18nValidationPipe translates class-validator messages using nestjs-i18n
+  app.useGlobalPipes(new I18nValidationPipe({ whitelist: true, transform: true }));
 
   // ─── Swagger ─────────────────────────────────────────────────────────────
   const config = new DocumentBuilder()
@@ -28,6 +27,10 @@ async function bootstrap() {
 
 ### Authentication
 All protected endpoints require a JWT Bearer token obtained from \`/auth/login\`.
+
+### Internationalization
+Pass \`Accept-Language: vi\` header (or \`?lang=vi\` query param) for Vietnamese responses.
+Supported languages: \`en\` (default), \`vi\`.
 
 ### Permission System
 Permissions follow the format \`module:action\`:

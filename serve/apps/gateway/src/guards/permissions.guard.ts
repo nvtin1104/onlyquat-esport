@@ -21,7 +21,7 @@ export class PermissionsGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
     if (!user?.permissions) {
-      throw new ForbiddenException('No permissions found in token');
+      throw new ForbiddenException('errors.NO_PERMISSIONS_IN_TOKEN');
     }
 
     // ROOT users bypass all permission checks
@@ -41,7 +41,7 @@ export class PermissionsGuard implements CanActivate {
 
     if (!hasAll) {
       throw new ForbiddenException({
-        message: 'Insufficient permissions',
+        message: 'errors.INSUFFICIENT_PERMISSIONS',
         required,
       });
     }

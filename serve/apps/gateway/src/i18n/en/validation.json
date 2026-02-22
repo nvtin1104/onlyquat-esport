@@ -1,0 +1,22 @@
+{
+  "IS_EMAIL": "$property must be a valid email address",
+  "IS_NOT_EMPTY": "$property should not be empty",
+  "IS_STRING": "$property must be a string",
+  "MIN_LENGTH": "$property must be at least $constraint1 characters long",
+  "MAX_LENGTH": "$property must be at most $constraint1 characters long",
+  "IS_ENUM": "$property must be a valid enum value",
+  "IS_ARRAY": "$property must be an array",
+  "ARRAY_MIN_SIZE": "$property must contain at least $constraint1 element(s)",
+  "IS_INT": "$property must be an integer number",
+  "MIN": "$property must not be less than $constraint1",
+  "MAX": "$property must not be greater than $constraint1",
+  "IS_UUID": "$property must be a UUID",
+  "IS_DATE_STRING": "$property must be a valid ISO 8601 date string",
+  "IS_NUMBER": "$property must be a number",
+  "IS_BOOLEAN": "$property must be a boolean value",
+  "IS_URL": "$property must be a valid URL",
+  "IS_OPTIONAL": "$property is optional",
+  "IS_POSITIVE": "$property must be a positive number",
+  "IS_NEGATIVE": "$property must be a negative number",
+  "LENGTH": "$property must be between $constraint1 and $constraint2 characters"
+}

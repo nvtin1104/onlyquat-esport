@@ -12,7 +12,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/gateway/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/gateway/tsconfig.app.json"
+        "tsConfigPath": "apps/gateway/tsconfig.app.json",
+        "assets": [{"include": "i18n/**/*", "outDir": "dist/apps/gateway/apps/gateway/src", "watchAssets": true}]
       }
     },
     "core": {

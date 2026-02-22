@@ -74,7 +74,7 @@ export class PermissionsService {
   /** Grant extra permission to a specific user */
   async grantCustom(userId: string, permissionCode: string): Promise<string[]> {
     if (!isValidPermissionCode(permissionCode)) {
-      throw new BadRequestException(`Invalid permission code: ${permissionCode}`);
+      throw new BadRequestException('errors.INVALID_PERMISSION_CODE');
     }
 
     const userPerm = await this.prisma.userPermission.upsert({
@@ -124,9 +124,7 @@ export class PermissionsService {
     // Validate all permission codes
     const invalid = data.permissions.filter((p) => !isValidPermissionCode(p));
     if (invalid.length > 0) {
-      throw new BadRequestException(
-        `Invalid permission codes: ${invalid.join(', ')}`,
-      );
+      throw new BadRequestException('errors.INVALID_PERMISSION_CODES');
     }
 
     return this.prisma.groupPermission.create({
@@ -159,9 +157,7 @@ export class PermissionsService {
     if (data.permissions) {
       const invalid = data.permissions.filter((p) => !isValidPermissionCode(p));
       if (invalid.length > 0) {
-        throw new BadRequestException(
-          `Invalid permission codes: ${invalid.join(', ')}`,
-        );
+        throw new BadRequestException('errors.INVALID_PERMISSION_CODES');
       }
     }
 
@@ -178,7 +174,7 @@ export class PermissionsService {
     });
     if (!group) throw new Error('GroupPermission not found');
     if (group.isSystem) {
-      throw new ForbiddenException('System groups cannot be deleted');
+      throw new ForbiddenException('errors.SYSTEM_GROUP_CANNOT_DELETE');
     }
     return this.prisma.groupPermission.delete({ where: { id } });
   }

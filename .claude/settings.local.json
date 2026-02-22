@@ -36,7 +36,8 @@
       "Bash(while read dir)",
       "Bash(do echo \"$dir\")",
       "Bash(done)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(echo All checks done: $?:*)"
     ]
   },
   "environment": {

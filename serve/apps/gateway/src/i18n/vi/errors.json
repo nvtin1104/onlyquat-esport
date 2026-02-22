@@ -1,0 +1,18 @@
+{
+  "EMAIL_ALREADY_EXISTS": "Email đã tồn tại",
+  "USERNAME_ALREADY_EXISTS": "Tên đăng nhập đã tồn tại",
+  "INVALID_CREDENTIALS": "Thông tin đăng nhập không hợp lệ",
+  "ACCESS_DENIED_ADMIN_ONLY": "Truy cập bị từ chối: chỉ dành cho tài khoản quản trị",
+  "USER_NOT_FOUND": "Không tìm thấy người dùng",
+  "ADMIN_ROLE_ACCOUNT_TYPE_MISMATCH": "Người dùng với vai trò ROOT, ADMIN hoặc STAFF phải có loại tài khoản 0",
+  "INVALID_REFRESH_TOKEN": "Refresh token không hợp lệ hoặc đã hết hạn",
+  "OLD_PASSWORD_INCORRECT": "Mật khẩu cũ không đúng",
+  "NO_PERMISSIONS_IN_TOKEN": "Không tìm thấy quyền trong token",
+  "INSUFFICIENT_PERMISSIONS": "Không đủ quyền truy cập",
+  "SYSTEM_GROUP_CANNOT_DELETE": "Không thể xóa nhóm quyền hệ thống",
+  "INVALID_PERMISSION_CODE": "Mã quyền không hợp lệ",
+  "INVALID_PERMISSION_CODES": "Các mã quyền không hợp lệ",
+  "INTERNAL_SERVER_ERROR": "Lỗi máy chủ nội bộ",
+  "USER_DEACTIVATED": "Người dùng đã được vô hiệu hóa thành công",
+  "PASSWORD_CHANGED": "Đổi mật khẩu thành công"
+}
