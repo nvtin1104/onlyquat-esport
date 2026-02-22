@@ -110,3 +110,37 @@ export interface KPIData {
   label: string;
   liveCount?: number;
 }
+
+export type OrganizationType = 'ORGANIZER' | 'SPONSOR' | 'CLUB' | 'AGENCY';
+
+export interface AdminRegion {
+  id: string;
+  name: string;
+  code: string;
+  logo?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminOrganization {
+  id: string;
+  name: string;
+  shortName?: string | null;
+  logo?: string | null;
+  website?: string | null;
+  description?: string | null;
+  descriptionI18n: Record<string, string>;
+  mediaLinks: Array<{ url: string; description?: string }>;
+  roles: OrganizationType[];
+  ownerId: string;
+  owner?: { id: string; username: string; avatar?: string | null };
+  managerId?: string | null;
+  manager?: { id: string; username: string; avatar?: string | null } | null;
+  regionId?: string | null;
+  region?: AdminRegion | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RegionsListResponse = PaginatedResponse<AdminRegion>;
+export type OrganizationsListResponse = PaginatedResponse<AdminOrganization>;

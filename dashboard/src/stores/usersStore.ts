@@ -24,10 +24,13 @@ interface UsersState {
     isSubmitting: boolean;
     error: string | null;
 
-    // Filters
+    // Filters (kept in store for controlled inputs, sent to API on fetch)
     search: string;
     roleFilter: string;
     statusFilter: string;
+
+    // Internal debounce timer
+    _searchTimer: ReturnType<typeof setTimeout> | null;
 
     // Actions
     fetchUsers: (params?: GetUsersParams) => Promise<void>;
@@ -56,12 +59,20 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     search: '',
     roleFilter: '',
     statusFilter: '',
+    _searchTimer: null,
 
     fetchUsers: async (params) => {
         set({ isLoading: true, error: null });
         try {
-            const { page, limit } = get();
-            const result = await getUsers({ page, limit, ...params });
+            const { page, limit, search, roleFilter, statusFilter } = get();
+            const result = await getUsers({
+                page,
+                limit,
+                search: search || undefined,
+                role: roleFilter || undefined,
+                status: statusFilter || undefined,
+                ...params,
+            });
             set({
                 users: result.data,
                 total: result.meta.total,
@@ -156,10 +167,35 @@ export const useUsersStore = create<UsersState>((set, get) => ({
         }
     },
 
-    setSearch: (v) => set({ search: v }),
-    setRoleFilter: (v) => set({ roleFilter: v }),
-    setStatusFilter: (v) => set({ statusFilter: v }),
-    setPage: (p) => set({ page: p }),
+    // Debounced search: update the search value immediately for the input,
+    // but wait 400ms before triggering an API call
+    setSearch: (v) => {
+        const prev = get()._searchTimer;
+        if (prev) clearTimeout(prev);
+
+        const timer = setTimeout(() => {
+            get().fetchUsers({ page: 1 });
+        }, 400);
+
+        set({ search: v, page: 1, _searchTimer: timer });
+    },
+
+    // Filters are applied immediately
+    setRoleFilter: (v) => {
+        set({ roleFilter: v, page: 1 });
+        get().fetchUsers({ page: 1, role: v || undefined });
+    },
+
+    setStatusFilter: (v) => {
+        set({ statusFilter: v, page: 1 });
+        get().fetchUsers({ page: 1, status: v || undefined });
+    },
+
+    setPage: (p) => {
+        set({ page: p });
+        get().fetchUsers({ page: p });
+    },
+
     clearSelectedUser: () => set({ selectedUser: null }),
     clearError: () => set({ error: null }),
 }));

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useState, useEffect } from 'react';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
@@ -12,15 +12,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
-import { updateRoleSchema, type UpdateRoleFormValues } from '@/lib/schemas/user.schema';
-import type { AdminUser, UserRole } from '@/types/admin';
-
-const ALL_ROLES: { value: UserRole; label: string; description: string }[] = [
-  { value: 'ROOT', label: 'Root', description: 'Toàn quyền hệ thống' },
-  { value: 'ADMIN', label: 'Admin', description: 'Quản trị viên' },
-  { value: 'STAFF', label: 'Staff', description: 'Nhân viên' },
-  { value: 'USER', label: 'User', description: 'Người dùng thường' },
-];
+import { updateRoleSchema, type UpdateRoleFormValues, PUBLIC_ROLES, ADMIN_ROLES } from '@/lib/schemas/user.schema';
+import type { AdminUser } from '@/types/admin';
 
 interface ChangeRoleDialogProps {
   user: AdminUser | null;
@@ -37,28 +30,51 @@ export function ChangeRoleDialog({
   onClose,
   onConfirm,
 }: ChangeRoleDialogProps) {
+  // Detect initial account type from user's current roles
+  const detectAccountType = (roles: string[]): 0 | 1 => {
+    const adminRoles = ['ROOT', 'ADMIN', 'STAFF'];
+    return roles.some((r) => adminRoles.includes(r)) ? 0 : 1;
+  };
+
+  const [accountType, setAccountType] = useState<0 | 1>(1);
+
   const {
     control,
     handleSubmit,
     reset,
-    watch,
+    setValue,
     formState: { errors },
   } = useForm<UpdateRoleFormValues>({
     resolver: zodResolver(updateRoleSchema),
     defaultValues: { roles: [] },
   });
 
-  const selectedRoles = watch('roles');
+  const selectedRoles = useWatch({ control, name: 'roles' });
 
   useEffect(() => {
-    if (user) reset({ roles: user.role });
-    else reset({ roles: [] });
+    if (user) {
+      const type = detectAccountType(user.role);
+      setAccountType(type);
+      reset({ roles: user.role });
+    } else {
+      setAccountType(1);
+      reset({ roles: [] });
+    }
   }, [user, reset]);
+
+  function handleAccountTypeChange(type: 0 | 1) {
+    setAccountType(type);
+    // Reset roles to sensible defaults when switching type
+    setValue('roles', type === 1 ? ['USER'] : ['STAFF']);
+  }
 
   async function onSubmit(data: UpdateRoleFormValues) {
     if (!user) return;
     await onConfirm(user.id, data);
   }
+
+  const availableRoles = accountType === 0 ? ADMIN_ROLES : PUBLIC_ROLES;
+  const isAdminType = accountType === 0;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
@@ -73,6 +89,35 @@ export function ChangeRoleDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Account Type selector — first */}
+          <div>
+            <label className="font-mono text-xs text-text-dim uppercase mb-2 block">
+              Loại tài khoản
+            </label>
+            <div className="flex gap-3">
+              {([
+                { value: 1 as const, label: 'Public', hint: 'Người dùng / tuyển thủ / tổ chức...' },
+                { value: 0 as const, label: 'Admin', hint: 'Quản trị nội bộ hệ thống' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => handleAccountTypeChange(opt.value)}
+                  className={cn(
+                    'flex-1 flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors cursor-pointer',
+                    accountType === opt.value
+                      ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
+                      : 'border-border-subtle hover:border-border-hover text-text-secondary',
+                  )}
+                >
+                  <span className="text-sm font-medium">{opt.label}</span>
+                  <span className="text-[11px] text-text-dim">{opt.hint}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Role selector — changes based on account type */}
           <Controller
             name="roles"
             control={control}
@@ -80,23 +125,28 @@ export function ChangeRoleDialog({
               <div>
                 <label className="font-mono text-xs text-text-dim uppercase mb-2 block">
                   Chọn role
+                  {isAdminType && (
+                    <span className="normal-case ml-2 text-text-dim italic font-normal">(chỉ chọn 1)</span>
+                  )}
                 </label>
                 <div className="space-y-2">
-                  {ALL_ROLES.map((r) => {
+                  {availableRoles.map((r) => {
                     const checked = field.value.includes(r.value);
                     return (
                       <button
                         key={r.value}
                         type="button"
                         onClick={() => {
-                          if (checked) {
-                            field.onChange(field.value.filter((v) => v !== r.value));
+                          if (isAdminType) {
+                            field.onChange([r.value]);
                           } else {
-                            field.onChange([...field.value, r.value]);
+                            checked
+                              ? field.onChange(field.value.filter((v) => v !== r.value))
+                              : field.onChange([...field.value, r.value]);
                           }
                         }}
                         className={cn(
-                          'w-full flex items-center justify-between px-3 py-2.5 rounded-sm border text-left transition-colors',
+                          'w-full flex items-center justify-between px-3 py-2.5 rounded-sm border text-left transition-colors cursor-pointer',
                           checked
                             ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
                             : 'border-border-subtle hover:border-border-hover text-text-secondary',
@@ -104,7 +154,7 @@ export function ChangeRoleDialog({
                       >
                         <div>
                           <span className="font-medium text-sm">{r.label}</span>
-                          <span className="text-xs text-text-dim ml-2">{r.description}</span>
+                          <span className="text-xs text-text-dim ml-2">{r.hint}</span>
                         </div>
                         {checked && (
                           <Badge className="bg-accent-acid/10 text-accent-acid border-accent-acid/30 text-[10px]">
@@ -123,7 +173,7 @@ export function ChangeRoleDialog({
           />
 
           <DialogFooter>
-            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+            <Button type="button" variant="outline" size="sm" onClick={onClose} className="cursor-pointer">
               Huỷ
             </Button>
             <Button
@@ -131,6 +181,7 @@ export function ChangeRoleDialog({
               variant="primary"
               size="sm"
               disabled={isLoading || selectedRoles.length === 0}
+              className="cursor-pointer"
             >
               {isLoading ? 'Đang lưu...' : 'Xác nhận'}
             </Button>

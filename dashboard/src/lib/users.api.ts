@@ -10,11 +10,14 @@ export interface GetUsersParams {
     status?: string;
 }
 
-// GET /users — list with pagination
+// GET /users — list with pagination + search/filter
 export async function getUsers(params: GetUsersParams = {}): Promise<UsersListResponse> {
     const query = new URLSearchParams();
     if (params.page) query.set('page', String(params.page));
     if (params.limit) query.set('limit', String(params.limit));
+    if (params.search?.trim()) query.set('search', params.search.trim());
+    if (params.role) query.set('role', params.role);
+    if (params.status) query.set('status', params.status);
     const res = await api.get<UsersListResponse>(`/users?${query.toString()}`);
     return res.data;
 }

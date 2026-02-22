@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
 import { UsersTable } from './components/UsersTable';
+import { UsersSkeleton } from './components/UsersSkeleton';
 import { ChangeRoleDialog } from './components/ChangeRoleDialog';
 import { BanUserDialog } from './components/BanUserDialog';
 import { useUsersStore } from '@/stores/usersStore';
@@ -18,6 +19,10 @@ const ROLE_OPTIONS = [
   { value: 'ROOT', label: 'Root' },
   { value: 'ADMIN', label: 'Admin' },
   { value: 'STAFF', label: 'Staff' },
+  { value: 'ORGANIZER', label: 'Organizer' },
+  { value: 'CREATOR', label: 'Creator' },
+  { value: 'PARTNER', label: 'Partner' },
+  { value: 'PLAYER', label: 'Player' },
   { value: 'USER', label: 'User' },
 ];
 
@@ -54,21 +59,10 @@ export function UsersPage() {
   const [changeRoleTarget, setChangeRoleTarget] = useState<AdminUser | null>(null);
   const [banTarget, setBanTarget] = useState<AdminUser | null>(null);
 
-  // Client-side filtering on top of server data
-  const filtered = users
-    .filter((u) =>
-      search
-        ? u.username.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()) ||
-        (u.name ?? '').toLowerCase().includes(search.toLowerCase())
-        : true,
-    )
-    .filter((u) => (roleFilter ? u.role.includes(roleFilter as any) : true))
-    .filter((u) => (statusFilter ? u.status === statusFilter : true));
-
+  // Initial load
   useEffect(() => {
-    fetchUsers({ page, limit });
-  }, [page]);
+    fetchUsers({ page: 1 });
+  }, []);
 
   async function handleUpdateRole(userId: string, data: UpdateRoleFormValues) {
     await updateRole(userId, data);
@@ -92,6 +86,7 @@ export function UsersPage() {
             variant="primary"
             size="sm"
             onClick={() => navigate('/users/create')}
+            className="cursor-pointer"
           >
             <PlusCircle className="w-4 h-4 mr-2" />
             Tạo người dùng
@@ -102,7 +97,7 @@ export function UsersPage() {
       {error && (
         <div className="mb-4 px-3 py-2 bg-danger/10 border border-danger/30 rounded-sm text-danger text-sm flex items-center justify-between">
           <span>{error}</span>
-          <button type="button" onClick={clearError} className="text-danger/70 hover:text-danger text-xs ml-4">
+          <button type="button" onClick={clearError} className="text-danger/70 hover:text-danger text-xs ml-4 cursor-pointer">
             ✕
           </button>
         </div>
@@ -111,7 +106,7 @@ export function UsersPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <SearchInput
-          placeholder="Tìm kiếm username, email, tên..."
+          placeholder="Tìm username, email, tên..."
           value={search}
           onChange={setSearch}
           className="sm:w-72"
@@ -131,20 +126,19 @@ export function UsersPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => fetchUsers({ page: 1, limit })}
-          className="sm:ml-auto"
+          onClick={() => fetchUsers({ page: 1 })}
+          className="sm:ml-auto cursor-pointer"
         >
           Làm mới
         </Button>
       </div>
 
+      {/* Table or Skeleton */}
       {isLoading ? (
-        <div className="flex items-center justify-center h-48 text-text-dim">
-          Đang tải...
-        </div>
+        <UsersSkeleton rows={limit} />
       ) : (
         <UsersTable
-          users={filtered}
+          users={users}
           onChangeRole={setChangeRoleTarget}
           onBan={setBanTarget}
           onViewDetail={(u) => navigate(`/users/${u.id}`)}
@@ -155,8 +149,7 @@ export function UsersPage() {
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
           <span className="text-sm text-text-dim">
-            Hiển thị trang <span className="text-text-primary font-medium">{page}</span> trong tổng số{' '}
-            <span className="text-text-primary font-medium">{totalPages}</span> ({total} người dùng)
+            Trang <span className="text-text-primary font-medium">{page}</span> / <span className="text-text-primary font-medium">{totalPages}</span> — {total} người dùng
           </span>
           <Pagination
             currentPage={page}
