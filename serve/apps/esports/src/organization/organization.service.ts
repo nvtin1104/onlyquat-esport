@@ -47,12 +47,13 @@ export class OrganizationService {
   }
 
   async create(dto: CreateOrganizationDto): Promise<Organization> {
-    const { ownerId, managerId, regionId, mediaLinks, roles, ...rest } = dto;
+    const { ownerId, managerId, regionId, mediaLinks, descriptionI18n, roles, ...rest } = dto;
     return this.prisma.organization.create({
       data: {
         ...rest,
         roles,
         mediaLinks: mediaLinks ?? [],
+        descriptionI18n: descriptionI18n ?? {},
         owner: { connect: { id: ownerId } },
         ...(managerId && { manager: { connect: { id: managerId } } }),
         ...(regionId && { region: { connect: { id: regionId } } }),
@@ -61,12 +62,13 @@ export class OrganizationService {
   }
 
   async update(id: string, dto: UpdateOrganizationDto): Promise<Organization> {
-    const { managerId, regionId, mediaLinks, ...rest } = dto;
+    const { managerId, regionId, mediaLinks, descriptionI18n, ...rest } = dto;
     return this.prisma.organization.update({
       where: { id },
       data: {
         ...rest,
         ...(mediaLinks !== undefined && { mediaLinks }),
+        ...(descriptionI18n !== undefined && { descriptionI18n }),
         ...(managerId !== undefined && {
           manager: managerId ? { connect: { id: managerId } } : { disconnect: true },
         }),
