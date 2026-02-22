@@ -1,4 +1,5 @@
 import {
+  Building2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -6,6 +7,7 @@ import {
   Gamepad2,
   KeyRound,
   LayoutDashboard,
+  MapPin,
   PlusCircle,
   Settings,
   Shield,
@@ -49,6 +51,14 @@ const navGroups: NavGroup[] = [
     label: 'Tổng quan',
     defaultOpen: true,
     items: [{ icon: LayoutDashboard, label: 'Bảng điều khiển', to: '/' }],
+  },
+  {
+    label: 'Thông tin cơ bản',
+    defaultOpen: true,
+    items: [
+      { icon: Building2, label: 'Tổ chức', to: '/organizations' },
+      { icon: MapPin, label: 'Khu vực', to: '/regions' },
+    ],
   },
   {
     label: 'Thi đấu',

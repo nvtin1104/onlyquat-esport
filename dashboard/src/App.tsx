@@ -19,6 +19,12 @@ import { UserPermissionsPage } from './pages/users/permissions';
 import { UserPermissionDetailPage } from './pages/users/permission-detail';
 import { SettingsPage } from './pages/settings/index';
 import { NotFoundPage } from './pages/not-found';
+import { RegionsPage } from './pages/regions/list';
+import { RegionCreatePage } from './pages/regions/create';
+import { RegionDetailPage } from './pages/regions/detail';
+import { OrganizationsPage } from './pages/organizations/list';
+import { OrganizationCreatePage } from './pages/organizations/create';
+import { OrganizationDetailPage } from './pages/organizations/detail';
 
 export function App() {
   return (
@@ -42,6 +48,12 @@ export function App() {
             <Route path="users/:id" element={<UserDetailPage />} />
             <Route path="users/:id/permissions" element={<UserPermissionDetailPage />} />
             <Route path="permissions/groups" element={<PermissionGroupsPage />} />
+            <Route path="regions" element={<RegionsPage />} />
+            <Route path="regions/create" element={<RegionCreatePage />} />
+            <Route path="regions/:id" element={<RegionDetailPage />} />
+            <Route path="organizations" element={<OrganizationsPage />} />
+            <Route path="organizations/create" element={<OrganizationCreatePage />} />
+            <Route path="organizations/:id" element={<OrganizationDetailPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
