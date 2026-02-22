@@ -14,12 +14,18 @@ import type { UserRole, UserStatus, AdminUser } from '@/types/admin';
 import type { UpdateRoleFormValues } from '@/lib/schemas/user.schema';
 
 const ROLE_LABEL: Record<UserRole, string> = {
-    ROOT: 'Root', ADMIN: 'Admin', STAFF: 'Staff', USER: 'User',
+    ROOT: 'Root', ADMIN: 'Admin', STAFF: 'Staff',
+    ORGANIZER: 'Organizer', CREATOR: 'Creator', PARTNER: 'Partner', PLAYER: 'Player',
+    USER: 'User',
 };
 const ROLE_CLASS: Record<UserRole, string> = {
     ROOT: 'bg-danger/10 text-danger border-danger/30',
     ADMIN: 'bg-accent-acid/10 text-accent-acid border-accent-acid/30',
     STAFF: 'bg-info/10 text-info border-info/30',
+    ORGANIZER: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    CREATOR: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+    PARTNER: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+    PLAYER: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
     USER: 'bg-bg-elevated text-text-dim border-border-subtle',
 };
 const STATUS_CLASS: Record<UserStatus, string> = {

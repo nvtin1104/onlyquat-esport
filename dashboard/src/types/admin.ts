@@ -64,7 +64,7 @@ export interface AdminRating {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-export type UserRole = 'ROOT' | 'ADMIN' | 'STAFF' | 'USER';
+export type UserRole = 'ROOT' | 'ADMIN' | 'STAFF' | 'ORGANIZER' | 'CREATOR' | 'PARTNER' | 'PLAYER' | 'USER';
 export type UserStatus = 'ACTIVE' | 'UNACTIVE' | 'BANNED';
 
 export interface AdminUser {

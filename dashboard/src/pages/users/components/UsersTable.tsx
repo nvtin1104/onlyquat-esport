@@ -31,6 +31,10 @@ const ROLE_CONFIG: Record<UserRole, { label: string; className: string }> = {
   ROOT: { label: 'Root', className: 'bg-danger/10 text-danger border-danger/30' },
   ADMIN: { label: 'Admin', className: 'bg-accent-acid/10 text-accent-acid border-accent-acid/30' },
   STAFF: { label: 'Staff', className: 'bg-info/10 text-info border-info/30' },
+  ORGANIZER: { label: 'Organizer', className: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
+  CREATOR: { label: 'Creator', className: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+  PARTNER: { label: 'Partner', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
+  PLAYER: { label: 'Player', className: 'bg-teal-500/10 text-teal-400 border-teal-500/30' },
   USER: { label: 'User', className: 'bg-bg-elevated text-text-dim border-border-subtle' },
 };
 

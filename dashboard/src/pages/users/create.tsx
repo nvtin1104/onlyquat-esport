@@ -1,20 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
-import { createUserSchema, type CreateUserFormValues } from '@/lib/schemas/user.schema';
+import { createUserSchema, type CreateUserFormValues, PUBLIC_ROLES, ADMIN_ROLES } from '@/lib/schemas/user.schema';
 import { useUsersStore } from '@/stores/usersStore';
-import type { UserRole } from '@/types/admin';
-
-const ALL_ROLES: { value: UserRole; label: string; hint: string }[] = [
-    { value: 'ROOT', label: 'Root', hint: 'Toàn quyền hệ thống' },
-    { value: 'ADMIN', label: 'Admin', hint: 'Quản trị viên' },
-    { value: 'STAFF', label: 'Staff', hint: 'Nhân viên' },
-    { value: 'USER', label: 'User', hint: 'Người dùng thường' },
-];
 
 function FormField({
     label,
@@ -50,6 +42,7 @@ export function UserCreatePage() {
         register,
         handleSubmit,
         control,
+        setValue,
         formState: { errors },
     } = useForm<CreateUserFormValues>({
         resolver: zodResolver(createUserSchema),
@@ -57,12 +50,21 @@ export function UserCreatePage() {
             email: '',
             username: '',
             password: '',
-            confirmPassword: '',
             name: '',
             roles: ['USER'],
             accountType: 1,
         },
     });
+
+    // Watch accountType to conditionally render different role sets
+    const accountType = useWatch({ control, name: 'accountType' });
+    const currentRoles = useWatch({ control, name: 'roles' });
+
+    // When account type switches, reset roles to sensible defaults
+    function handleAccountTypeChange(type: 0 | 1, onChange: (v: 0 | 1) => void) {
+        onChange(type);
+        setValue('roles', type === 1 ? ['USER'] : ['STAFF']);
+    }
 
     async function onSubmit(data: CreateUserFormValues) {
         clearError();
@@ -74,20 +76,23 @@ export function UserCreatePage() {
         }
     }
 
+    const availableRoles = accountType === 0 ? ADMIN_ROLES : PUBLIC_ROLES;
+    const isAdminType = accountType === 0;
+
     return (
         <div>
             <div className="flex items-center gap-3 mb-6">
                 <button
                     type="button"
                     onClick={() => navigate('/users')}
-                    className="text-text-dim hover:text-text-primary transition-colors"
+                    className="text-text-dim hover:text-text-primary transition-colors cursor-pointer"
                 >
                     <ArrowLeft className="w-4 h-4" />
                 </button>
                 <PageHeader title="Tạo người dùng" description="Thêm tài khoản người dùng mới" />
             </div>
 
-            <div >
+            <div>
                 <div className="bg-bg-surface border border-border-subtle rounded-sm p-6">
                     {error && (
                         <div className="mb-4 px-3 py-2 bg-danger/10 border border-danger/30 rounded-sm text-danger text-sm">
@@ -126,46 +131,82 @@ export function UserCreatePage() {
                             />
                         </FormField>
 
-                        {/* Password */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField label="Mật khẩu" required error={errors.password?.message}>
-                                <input
-                                    type="password"
-                                    className={inputClass}
-                                    placeholder="••••••••"
-                                    {...register('password')}
-                                />
-                            </FormField>
-                            <FormField label="Xác nhận MK" required error={errors.confirmPassword?.message}>
-                                <input
-                                    type="password"
-                                    className={inputClass}
-                                    placeholder="••••••••"
-                                    {...register('confirmPassword')}
-                                />
-                            </FormField>
-                        </div>
+                        {/* Password — no confirm needed */}
+                        <FormField label="Mật khẩu" required error={errors.password?.message}>
+                            <input
+                                type="password"
+                                className={inputClass}
+                                placeholder="••••••••"
+                                {...register('password')}
+                            />
+                        </FormField>
 
-                        {/* Roles */}
+                        {/* Account type — FIRST before roles */}
+                        <Controller
+                            name="accountType"
+                            control={control}
+                            render={({ field }) => (
+                                <FormField label="Loại tài khoản" required>
+                                    <div className="flex gap-3">
+                                        {([
+                                            { value: 1 as const, label: 'Public', hint: 'Người dùng / tuyển thủ / tổ chức...' },
+                                            { value: 0 as const, label: 'Admin', hint: 'Quản trị nội bộ hệ thống' },
+                                        ] as const).map((opt) => (
+                                            <button
+                                                key={opt.value}
+                                                type="button"
+                                                onClick={() => handleAccountTypeChange(opt.value, field.onChange)}
+                                                className={cn(
+                                                    'flex-1 flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors cursor-pointer',
+                                                    field.value === opt.value
+                                                        ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
+                                                        : 'border-border-subtle hover:border-border-hover text-text-secondary',
+                                                )}
+                                            >
+                                                <span className="text-sm font-medium">{opt.label}</span>
+                                                <span className="text-[11px] text-text-dim">{opt.hint}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </FormField>
+                            )}
+                        />
+
+                        {/* Roles — conditional based on accountType */}
                         <Controller
                             name="roles"
                             control={control}
                             render={({ field }) => (
-                                <FormField label="Role" required error={errors.roles?.message}>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {ALL_ROLES.map((r) => {
+                                <FormField
+                                    label="Role"
+                                    required
+                                    error={errors.roles?.message}
+                                >
+                                    {isAdminType && (
+                                        <p className="text-[11px] text-text-dim mb-2 italic">
+                                            Tài khoản Admin chỉ được chọn 1 role.
+                                        </p>
+                                    )}
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        {availableRoles.map((r) => {
                                             const checked = field.value.includes(r.value);
                                             return (
                                                 <button
                                                     key={r.value}
                                                     type="button"
-                                                    onClick={() =>
-                                                        checked
-                                                            ? field.onChange(field.value.filter((v) => v !== r.value))
-                                                            : field.onChange([...field.value, r.value])
-                                                    }
+                                                    onClick={() => {
+                                                        if (isAdminType) {
+                                                            // Admin: single select
+                                                            field.onChange([r.value]);
+                                                        } else {
+                                                            // Public: multi select (toggle)
+                                                            checked
+                                                                ? field.onChange(field.value.filter((v) => v !== r.value))
+                                                                : field.onChange([...field.value, r.value]);
+                                                        }
+                                                    }}
                                                     className={cn(
-                                                        'flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors',
+                                                        'flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors cursor-pointer',
                                                         checked
                                                             ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
                                                             : 'border-border-subtle hover:border-border-hover text-text-secondary',
@@ -181,37 +222,6 @@ export function UserCreatePage() {
                             )}
                         />
 
-                        {/* Account type */}
-                        <Controller
-                            name="accountType"
-                            control={control}
-                            render={({ field }) => (
-                                <FormField label="Loại tài khoản" required>
-                                    <div className="flex gap-3">
-                                        {[
-                                            { value: 1 as const, label: 'Public', hint: 'Tài khoản người dùng thường' },
-                                            { value: 0 as const, label: 'Admin', hint: 'Tài khoản quản trị (accountType=0)' },
-                                        ].map((opt) => (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                onClick={() => field.onChange(opt.value)}
-                                                className={cn(
-                                                    'flex-1 flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors',
-                                                    field.value === opt.value
-                                                        ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
-                                                        : 'border-border-subtle hover:border-border-hover text-text-secondary',
-                                                )}
-                                            >
-                                                <span className="text-sm font-medium">{opt.label}</span>
-                                                <span className="text-[11px] text-text-dim">{opt.hint}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </FormField>
-                            )}
-                        />
-
                         {/* Submit */}
                         <div className="flex gap-3 pt-2">
                             <Button
@@ -219,10 +229,11 @@ export function UserCreatePage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => navigate('/users')}
+                                className="cursor-pointer"
                             >
                                 Huỷ
                             </Button>
-                            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+                            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting} className="cursor-pointer">
                                 {isSubmitting ? (
                                     <span className="flex items-center gap-2">
                                         <Loader2 className="w-3.5 h-3.5 animate-spin" />

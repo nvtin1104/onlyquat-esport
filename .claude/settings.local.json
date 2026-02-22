@@ -37,7 +37,8 @@
       "Bash(do echo \"$dir\")",
       "Bash(done)",
       "Bash(python3:*)",
-      "Bash(echo All checks done: $?:*)"
+      "Bash(echo All checks done: $?:*)",
+      "Bash(cd /c/project/onlyquat-esport/serve && pnpm run prisma:migrate 2>&1)"
     ]
   },
   "environment": {

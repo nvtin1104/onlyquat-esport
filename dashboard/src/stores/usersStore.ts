@@ -89,8 +89,7 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     createUser: async (data: CreateUserFormValues) => {
         set({ isSubmitting: true, error: null });
         try {
-            const { confirmPassword: _, ...dto } = data;
-            const user = await adminCreateUser(dto);
+            const user = await adminCreateUser(data);
             set((state) => ({
                 users: [user, ...state.users],
                 total: state.total + 1,
