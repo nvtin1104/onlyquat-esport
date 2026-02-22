@@ -13,8 +13,8 @@ export class UsersController {
   }
 
   @MessagePattern('user.findAll')
-  async findAll(@Payload() data: { page?: number; limit?: number }) {
-    return this.usersService.findAll(data.page, data.limit);
+  async findAll(@Payload() data: { page?: number; limit?: number; search?: string; role?: string; status?: string }) {
+    return this.usersService.findAll(data.page, data.limit, data.search, data.role, data.status);
   }
 
   @MessagePattern('user.findById')

@@ -64,13 +64,19 @@ export class UsersController {
   @Auth(PERMISSIONS.USER_VIEW)
   @ApiOperation({ summary: 'List all users — requires user:view' })
   async findAll(
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('status') status?: string,
   ) {
     return firstValueFrom(
       this.identityClient.send('user.findAll', {
         page: page ? Number(page) : 1,
         limit: limit ? Number(limit) : 20,
+        search: search || undefined,
+        role: role || undefined,
+        status: status || undefined,
       }),
     );
   }

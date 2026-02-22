@@ -86,17 +86,79 @@ export class UsersService {
   async findAll(
     page = 1,
     limit = 20,
+    search?: string,
+    role?: string,
+    status?: string,
   ): Promise<{ data: SafeUser[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
     const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
-      this.prisma.user.findMany({
-        skip,
-        take: limit,
-        omit: { password: true },
-      }),
-      this.prisma.user.count(),
+    const params: any[] = [];
+
+    // Build WHERE conditions dynamically
+    const conditions: string[] = [];
+
+    // Accent-insensitive search using unaccent() extension
+    // unaccent('Nguyên') matches 'Nguyễn', 'Nguyen', etc.
+    if (search?.trim()) {
+      const term = search.trim();
+      params.push(`%${term}%`);
+      const p = params.length;
+      conditions.push(`(
+        unaccent(u.username) ILIKE unaccent($${p}) OR
+        unaccent(u.email)    ILIKE unaccent($${p}) OR
+        unaccent(COALESCE(u.name, '')) ILIKE unaccent($${p})
+      )`);
+    }
+
+    // Role filter — check PostgreSQL array contains
+    if (role?.trim()) {
+      params.push(role.trim());
+      conditions.push(`$${params.length}::text = ANY(u.role::text[])`);
+    }
+
+    // Status filter
+    if (status?.trim()) {
+      params.push(status.trim());
+      conditions.push(`u.status::text = $${params.length}`);
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    // Data query — all columns except password
+    const dataParams = [...params, limit, skip];
+    const limitP = dataParams.length - 1;
+    const offsetP = dataParams.length;
+
+    const dataQuery = `
+      SELECT
+        u.id, u.email, u.username, u.name, u."accountType",
+        array_to_json(u.role)::text AS role,
+        u.status::text AS status,
+        u.avatar, u."ggId", u.bio,
+        u."suspendedAt", u."suspendedUntil", u."suspensionReason",
+        u."createdAt", u."updatedAt"
+      FROM users u
+      ${whereClause}
+      ORDER BY u."createdAt" DESC
+      LIMIT $${limitP} OFFSET $${offsetP}
+    `;
+
+    // Count query — reuse same WHERE
+    const countQuery = `SELECT COUNT(*)::int AS count FROM users u ${whereClause}`;
+
+    const [rows, countRows] = await Promise.all([
+      this.prisma.$queryRawUnsafe<any[]>(dataQuery, ...dataParams),
+      this.prisma.$queryRawUnsafe<{ count: number }[]>(countQuery, ...params),
     ]);
+
+    // Parse role from JSON string back to array (raw queries return JSON as string)
+    const data: SafeUser[] = rows.map((row) => ({
+      ...row,
+      role: typeof row.role === 'string' ? JSON.parse(row.role) : (row.role ?? []),
+    }));
+
+    const total = Number(countRows[0]?.count ?? 0);
     const totalPages = Math.ceil(total / limit);
+
     return { data, meta: { total, page, limit, totalPages } };
   }
 
