@@ -8,3 +8,5 @@ export { DataCard } from './DataCard';
 export { SearchInput } from './SearchInput';
 export { RatingNumber } from './RatingNumber';
 export { StatBar } from './StatBar';
+export { UserPicker } from './UserPicker';
+export type { UserPickerProps, UserPickerValue } from './UserPicker';

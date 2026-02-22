@@ -75,6 +75,7 @@ export interface AdminUser {
   role: UserRole[];
   status: UserStatus;
   accountType: number;
+  avatar: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -144,3 +145,21 @@ export interface AdminOrganization {
 
 export type RegionsListResponse = PaginatedResponse<AdminRegion>;
 export type OrganizationsListResponse = PaginatedResponse<AdminOrganization>;
+
+// ─── File Uploads ────────────────────────────────────────────────────────────
+export interface AdminFileUpload {
+  id: string;
+  key: string;
+  url: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  folder: string;
+  uploadedById: string | null;
+  createdAt: string;
+}
+
+export interface FileUploadsListResponse {
+  data: AdminFileUpload[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+}
