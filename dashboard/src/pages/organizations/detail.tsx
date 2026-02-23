@@ -305,7 +305,7 @@ export function OrganizationDetailPage() {
 
                         <div className="flex items-center gap-2 mt-1 text-sm text-text-secondary">
                             {org.shortName && (
-                                <span className="font-medium text-text-primary px-1.5 py-0.5 rounded-sm bg-bg-elevated border border-border-subtletext-xs">
+                                <span className="font-medium text-accent-acid px-2 py-0.5 rounded-sm bg-accent-acid/10 border border-accent-acid/20 text-xs shadow-sm">
                                     {org.shortName}
                                 </span>
                             )}
