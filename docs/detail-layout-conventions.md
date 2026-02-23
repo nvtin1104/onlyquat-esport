@@ -22,7 +22,9 @@ A detail page consists of 3 main structural areas:
 3. **Details & Edit Form (Bottom block):**
    - Rendered directly below the Hero Card as a standard full-width block or a `max-w-4xl` centered wrapper, depending on content density.
    - **View Mode:** Renders a list of `DetailRow` components displaying the remainder of the entity's data. Wait to use grids exclusively when there is too much data.
-   - **Edit Mode:** The view mode is swapped out for the input form fields. The form inputs should use responsive grids (e.g. `grid-cols-1 md:grid-cols-2`) for better screen utilization. 
+   - **Edit Mode:**
+     - The view mode is swapped out for the input form fields. The form inputs should use responsive grids (e.g. `grid-cols-1 md:grid-cols-2`) for better screen utilization.
+     - **Validation & State:** All detail edit forms **MUST** use `react-hook-form` coupled with `@hookform/resolvers/zod`. Do not use standalone `useState` hooks for form fields. Map inputs using `register` or `Controller` and display inline errors (e.g., `errors.fieldName?.message`) below each input.
    - **Save Actions:** While placing Save/Cancel in the top hero is acceptable, an additional sticky `Save/Cancel` action bar at the bottom of the form is highly recommended for long forms.
 
 ## Design Goals

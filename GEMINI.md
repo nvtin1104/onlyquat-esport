@@ -162,6 +162,7 @@ All endpoints that return a list of paginated results **MUST** standardize on th
 
 ### Frontend UI Components
 
+- **Forms & Validation:** All interactive forms (especially edit/create pages) **MUST** use `react-hook-form` coupled with `@hookform/resolvers/zod` instead of plain React state (`useState`). Validation schemas should be defined in `src/lib/schemas/*.schema.ts`.
 - **Toast Notifications:** Use `toast` from `sonner` via `src/components/ui/sonner.tsx`. We have transitioned away from the custom Zustand store.
 - **Icons:** Use `lucide-react` for all iconography.
 - **Styling:** Use standard Tailwind utility classes. For complex class merges, use the `cn()` utility from `src/lib/utils.ts`.

@@ -12,6 +12,10 @@ import { Button } from '@/components/ui/Button';
 import { useOrganizationsStore } from '@/stores/organizationsStore';
 import { getRegions } from '@/lib/regions.api';
 import { cn } from '@/lib/utils';
+import { z } from 'zod';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { updateOrganizationSchema, type UpdateOrganizationFormData } from '@/lib/schemas/organization.schema';
 import type { AdminRegion, OrganizationType } from '@/types/admin';
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
@@ -134,16 +138,32 @@ export function OrganizationDetailPage() {
     const [regions, setRegions] = useState<AdminRegion[]>([]);
     const [editMode, setEditMode] = useState(false);
 
-    // Edit form state
-    const [editName, setEditName] = useState('');
-    const [editShortName, setEditShortName] = useState('');
-    const [editLogo, setEditLogo] = useState('');
-    const [editWebsite, setEditWebsite] = useState('');
-    const [editDescription, setEditDescription] = useState('');
-    const [editDescriptionEn, setEditDescriptionEn] = useState('');
-    const [editDescriptionVi, setEditDescriptionVi] = useState('');
-    const [editRoles, setEditRoles] = useState<OrganizationType[]>([]);
-    const [editRegionId, setEditRegionId] = useState('');
+    // Form setup
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        setValue,
+        watch,
+        formState: { errors }
+    } = useForm<UpdateOrganizationFormData>({
+        resolver: zodResolver(updateOrganizationSchema),
+        defaultValues: {
+            name: '',
+            shortName: '',
+            logo: '',
+            website: '',
+            description: '',
+            descriptionI18n: { en: '', vi: '' },
+            roles: [],
+            regionId: '',
+            ownerId: '',
+            managerId: null,
+        }
+    });
+
+    // Helper states for complex inputs (we will sync these with useForm)
     const [editOwner, setEditOwner] = useState<UserPickerValue | null>(null);
     const [editManager, setEditManager] = useState<UserPickerValue | null>(null);
 
@@ -156,50 +176,49 @@ export function OrganizationDetailPage() {
     }, [id]);
 
     useEffect(() => {
-        if (org) {
-            setEditName(org.name);
-            setEditShortName(org.shortName ?? '');
-            setEditLogo(org.logo ?? '');
-            setEditWebsite(org.website ?? '');
-            setEditDescription(org.description ?? '');
-            setEditDescriptionEn(org.descriptionI18n?.en ?? '');
-            setEditDescriptionVi(org.descriptionI18n?.vi ?? '');
-            setEditRoles([...org.roles]);
-            setEditRegionId(org.regionId ?? '');
+        if (org && editMode) {
+            reset({
+                name: org.name,
+                shortName: org.shortName ?? '',
+                logo: org.logo ?? '',
+                website: org.website ?? '',
+                description: org.description ?? '',
+                descriptionI18n: {
+                    en: org.descriptionI18n?.en ?? '',
+                    vi: org.descriptionI18n?.vi ?? '',
+                },
+                roles: [...org.roles],
+                regionId: org.regionId ?? '',
+                ownerId: org.ownerId,
+                managerId: org.managerId ?? null,
+            });
             setEditOwner(org.owner ? { id: org.ownerId, username: org.owner.username, avatar: org.owner.avatar } : null);
             setEditManager(
                 org.manager ? { id: org.managerId!, username: org.manager.username, avatar: org.manager.avatar } : null,
             );
         }
-    }, [org]);
+    }, [org, editMode, reset]);
 
-    function toggleRole(role: OrganizationType) {
-        setEditRoles((prev) =>
-            prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
-        );
-    }
-
-    async function handleSave() {
+    async function onSubmit(data: UpdateOrganizationFormData) {
         if (!org) return;
-        if (editRoles.length === 0) { toast.error('Chọn ít nhất một vai trò'); return; }
-        if (!editOwner) { toast.error('Chủ sở hữu không được để trống'); return; }
 
+        // Clean up empty strings and structured data
         const descriptionI18n: Record<string, string> = {};
-        if (editDescriptionEn.trim()) descriptionI18n.en = editDescriptionEn.trim();
-        if (editDescriptionVi.trim()) descriptionI18n.vi = editDescriptionVi.trim();
+        if (data.descriptionI18n?.en?.trim()) descriptionI18n.en = data.descriptionI18n.en.trim();
+        if (data.descriptionI18n?.vi?.trim()) descriptionI18n.vi = data.descriptionI18n.vi.trim();
 
         try {
             await updateOrg(org.id, {
-                name: editName.trim() || undefined,
-                shortName: editShortName.trim() || undefined,
-                logo: editLogo.trim() || undefined,
-                website: editWebsite.trim() || undefined,
-                description: editDescription.trim() || undefined,
+                name: data.name.trim() || undefined,
+                shortName: data.shortName?.trim() || undefined,
+                logo: data.logo?.trim() || undefined,
+                website: data.website?.trim() || undefined,
+                description: data.description?.trim() || undefined,
                 descriptionI18n: Object.keys(descriptionI18n).length > 0 ? descriptionI18n : undefined,
-                roles: editRoles,
-                regionId: editRegionId || undefined,
-                ownerId: editOwner.id,
-                managerId: editManager?.id ?? null,
+                roles: data.roles as OrganizationType[],
+                regionId: data.regionId || undefined,
+                ownerId: data.ownerId,
+                managerId: data.managerId ?? null,
             });
             toast.success('Đã cập nhật tổ chức');
             setEditMode(false);
@@ -221,19 +240,8 @@ export function OrganizationDetailPage() {
     }
 
     function cancelEdit() {
-        if (!org) return;
         setEditMode(false);
-        setEditName(org.name);
-        setEditShortName(org.shortName ?? '');
-        setEditLogo(org.logo ?? '');
-        setEditWebsite(org.website ?? '');
-        setEditDescription(org.description ?? '');
-        setEditDescriptionEn(org.descriptionI18n?.en ?? '');
-        setEditDescriptionVi(org.descriptionI18n?.vi ?? '');
-        setEditRoles([...org.roles]);
-        setEditRegionId(org.regionId ?? '');
-        setEditOwner(org.owner ? { id: org.ownerId, username: org.owner.username, avatar: org.owner.avatar } : null);
-        setEditManager(org.manager ? { id: org.managerId!, username: org.manager.username, avatar: org.manager.avatar } : null);
+        reset();
     }
 
     // ─── Loading skeleton ──────────────────────────────────────────────────────
@@ -280,7 +288,7 @@ export function OrganizationDetailPage() {
                 <PageHeader title="Chi tiết tổ chức" description={`ID: ${org.id}`} />
             </div>
 
-            <div className="flex flex-col gap-6 max-w-6xl mx-auto">
+            <div className="flex flex-col gap-6">
                 {/* ── Horizontal Hero Card ─────────────────────────────────── */}
                 <div className="relative overflow-hidden bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
                     {/* Subtle gradient background decoration */}
@@ -342,7 +350,7 @@ export function OrganizationDetailPage() {
                                     size="sm"
                                     className="flex-1 cursor-pointer"
                                     disabled={isSubmitting}
-                                    onClick={handleSave}
+                                    onClick={handleSubmit(onSubmit)}
                                 >
                                     {isSubmitting ? (
                                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -382,10 +390,10 @@ export function OrganizationDetailPage() {
                                 </label>
                                 <input
                                     type="text"
-                                    className={inputClass}
-                                    value={editName}
-                                    onChange={(e) => setEditName(e.target.value)}
+                                    className={cn(inputClass, errors.name && 'border-danger focus:border-danger')}
+                                    {...register('name')}
                                 />
+                                {errors.name && <p className="text-xs text-danger">{errors.name.message}</p>}
                             </div>
 
                             {/* Short name */}
@@ -393,23 +401,30 @@ export function OrganizationDetailPage() {
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Tên viết tắt</label>
                                 <input
                                     type="text"
-                                    className={inputClass}
-                                    value={editShortName}
-                                    onChange={(e) => setEditShortName(e.target.value)}
+                                    className={cn(inputClass, errors.shortName && 'border-danger focus:border-danger')}
+                                    {...register('shortName')}
                                 />
+                                {errors.shortName && <p className="text-xs text-danger">{errors.shortName.message}</p>}
                             </div>
 
                             {/* Logo */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo</label>
-                                <ImageUpload
-                                    value={editLogo}
-                                    onChange={setEditLogo}
-                                    folder="logos"
-                                    shape="circle"
-                                    size="lg"
-                                    hint="PNG, JPG · tối đa 10 MB"
+                                <Controller
+                                    name="logo"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <ImageUpload
+                                            value={field.value ?? ''}
+                                            onChange={field.onChange}
+                                            folder="logos"
+                                            shape="circle"
+                                            size="lg"
+                                            hint="PNG, JPG · tối đa 10 MB"
+                                        />
+                                    )}
                                 />
+                                {errors.logo && <p className="text-xs text-danger">{errors.logo.message}</p>}
                             </div>
 
                             {/* Website */}
@@ -417,37 +432,56 @@ export function OrganizationDetailPage() {
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Website</label>
                                 <input
                                     type="url"
-                                    className={inputClass}
+                                    className={cn(inputClass, errors.website && 'border-danger focus:border-danger')}
                                     placeholder="https://example.com"
-                                    value={editWebsite}
-                                    onChange={(e) => setEditWebsite(e.target.value)}
+                                    {...register('website')}
                                 />
+                                {errors.website && <p className="text-xs text-danger">{errors.website.message}</p>}
                             </div>
 
                             {/* Description */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả</label>
-                                <RichTextEditor
-                                    value={editDescription}
-                                    onChange={setEditDescription}
+                                <Controller
+                                    name="description"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value ?? ''}
+                                            onChange={field.onChange}
+                                        />
+                                    )}
                                 />
+                                {errors.description && <p className="text-xs text-danger">{errors.description.message}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả EN</label>
-                                    <RichTextEditor
-                                        value={editDescriptionEn}
-                                        onChange={setEditDescriptionEn}
-                                        minHeight="100px"
+                                    <Controller
+                                        name="descriptionI18n.en"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <RichTextEditor
+                                                value={field.value ?? ''}
+                                                onChange={field.onChange}
+                                                minHeight="100px"
+                                            />
+                                        )}
                                     />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả VI</label>
-                                    <RichTextEditor
-                                        value={editDescriptionVi}
-                                        onChange={setEditDescriptionVi}
-                                        minHeight="100px"
+                                    <Controller
+                                        name="descriptionI18n.vi"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <RichTextEditor
+                                                value={field.value ?? ''}
+                                                onChange={field.onChange}
+                                                minHeight="100px"
+                                            />
+                                        )}
                                     />
                                 </div>
                             </div>
@@ -457,36 +491,49 @@ export function OrganizationDetailPage() {
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">
                                     Vai trò <span className="text-danger">*</span>
                                 </label>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    {ROLE_OPTIONS.map((r) => {
-                                        const checked = editRoles.includes(r.value);
-                                        return (
-                                            <button
-                                                key={r.value}
-                                                type="button"
-                                                onClick={() => toggleRole(r.value)}
-                                                className={cn(
-                                                    'flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors cursor-pointer',
-                                                    checked
-                                                        ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
-                                                        : 'border-border-subtle hover:border-border-hover text-text-secondary',
-                                                )}
-                                            >
-                                                <span className="text-sm font-medium">{r.label}</span>
-                                                <span className="text-[11px] text-text-dim">{r.hint}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
+                                <Controller
+                                    name="roles"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <>
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                                {ROLE_OPTIONS.map((r) => {
+                                                    const checked = field.value.includes(r.value);
+                                                    return (
+                                                        <button
+                                                            key={r.value}
+                                                            type="button"
+                                                            onClick={(_) => {
+                                                                const newVal = checked
+                                                                    ? field.value.filter((v: string) => v !== r.value)
+                                                                    : [...field.value, r.value];
+                                                                field.onChange(newVal);
+                                                            }}
+                                                            className={cn(
+                                                                'flex flex-col items-start px-3 py-2 rounded-sm border text-left transition-colors cursor-pointer',
+                                                                checked
+                                                                    ? 'border-accent-acid/50 bg-accent-acid/5 text-text-primary'
+                                                                    : 'border-border-subtle hover:border-border-hover text-text-secondary',
+                                                            )}
+                                                        >
+                                                            <span className="text-sm font-medium">{r.label}</span>
+                                                            <span className="text-[11px] text-text-dim">{r.hint}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            {errors.roles && <p className="text-xs text-danger">{errors.roles.message}</p>}
+                                        </>
+                                    )}
+                                />
                             </div>
 
                             {/* Region */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Khu vực</label>
                                 <select
-                                    className={inputClass}
-                                    value={editRegionId}
-                                    onChange={(e) => setEditRegionId(e.target.value)}
+                                    className={cn(inputClass, errors.regionId && 'border-danger focus:border-danger')}
+                                    {...register('regionId')}
                                 >
                                     <option value="">-- Không chọn --</option>
                                     {regions.map((r) => (
@@ -495,22 +542,47 @@ export function OrganizationDetailPage() {
                                         </option>
                                     ))}
                                 </select>
+                                {errors.regionId && <p className="text-xs text-danger">{errors.regionId.message}</p>}
                             </div>
 
                             {/* Owner — required */}
-                            <UserPicker
-                                label="Chủ sở hữu *"
-                                value={editOwner}
-                                onChange={setEditOwner}
-                                nullable={false}
+                            <Controller
+                                name="ownerId"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="space-y-1.5">
+                                        <UserPicker
+                                            label="Chủ sở hữu *"
+                                            value={editOwner}
+                                            onChange={(val) => {
+                                                setEditOwner(val);
+                                                field.onChange(val?.id ?? '');
+                                            }}
+                                            nullable={false}
+                                        />
+                                        {errors.ownerId && <p className="text-xs text-danger">{errors.ownerId.message}</p>}
+                                    </div>
+                                )}
                             />
 
                             {/* Manager — optional */}
-                            <UserPicker
-                                label="Quản lý"
-                                value={editManager}
-                                onChange={setEditManager}
-                                nullable
+                            <Controller
+                                name="managerId"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="space-y-1.5">
+                                        <UserPicker
+                                            label="Quản lý"
+                                            value={editManager}
+                                            onChange={(val) => {
+                                                setEditManager(val);
+                                                field.onChange(val?.id ?? null);
+                                            }}
+                                            nullable
+                                        />
+                                        {errors.managerId && <p className="text-xs text-danger">{errors.managerId.message}</p>}
+                                    </div>
+                                )}
                             />
                         </div>
                     ) : (
