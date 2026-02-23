@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
-import { ExternalLink, MoreHorizontal, Building2 } from 'lucide-react';
+import { ExternalLink, MoreHorizontal } from 'lucide-react';
 import {
     Table,
     TableHeader,
@@ -43,6 +44,21 @@ const ROLE_CONFIG: Record<OrganizationType, { label: string; className: string }
         className: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30',
     },
 };
+
+function OrgLogo({ src, name }: { src?: string | null; name: string }) {
+    const [error, setError] = useState(false);
+    return (
+        <div className="w-8 h-8 rounded-full bg-bg-elevated overflow-hidden flex items-center justify-center shrink-0">
+            {src && !error ? (
+                <img src={src} alt={name} onError={() => setError(true)} className="w-full h-full object-cover" />
+            ) : (
+                <span className="font-mono font-medium text-xs text-text-dim uppercase select-none">
+                    {name.charAt(0)}
+                </span>
+            )}
+        </div>
+    );
+}
 
 function RoleBadges({ roles }: { roles: OrganizationType[] }) {
     return (
@@ -91,17 +107,7 @@ export function OrganizationsTable({ organizations, onViewDetail, onDelete }: Or
                                     {/* Org info */}
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            {org.logo ? (
-                                                <img
-                                                    src={org.logo}
-                                                    alt={org.name}
-                                                    className="w-8 h-8 rounded-sm object-cover border border-border-subtle shrink-0"
-                                                />
-                                            ) : (
-                                                <div className="w-8 h-8 rounded-sm border border-border-subtle bg-bg-elevated flex items-center justify-center shrink-0">
-                                                    <Building2 className="w-4 h-4 text-text-dim" />
-                                                </div>
-                                            )}
+                                            <OrgLogo src={org.logo} name={org.name} />
                                             <div>
                                                 <p className="font-medium text-text-primary">{org.name}</p>
                                                 {org.shortName && (

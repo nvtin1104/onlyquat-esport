@@ -11,5 +11,5 @@ export class UpdateOrganizationDto {
   roles?: OrganizationType[];
   managerId?: string;
   regionId?: string;
-  // ownerId intentionally excluded — ownership transfer is a separate concern
+  ownerId?: string;
 }

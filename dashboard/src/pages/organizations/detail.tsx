@@ -4,7 +4,9 @@ import { ArrowLeft, AlertCircle, Building2, Pencil, X, Check, Loader2 } from 'lu
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 import { UserPicker, type UserPickerValue } from '@/components/shared/UserPicker';
+import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useOrganizationsStore } from '@/stores/organizationsStore';
@@ -83,6 +85,31 @@ function DetailRow({ label, children }: { label: string; children: React.ReactNo
         <div className="flex items-start justify-between py-3 border-b border-border-subtle last:border-0">
             <span className="text-xs text-text-dim font-mono uppercase tracking-wide shrink-0">{label}</span>
             <div className="text-right max-w-xs ml-4">{children}</div>
+        </div>
+    );
+}
+
+// ─── OrgLogo ──────────────────────────────────────────────────────────────────
+
+const orgLogoSizeMap = {
+    sm: 'w-8 h-8',
+    lg: 'w-16 h-16',
+    xl: 'w-20 h-20',
+} as const;
+
+function OrgLogo({ src, name, size = 'xl' }: { src?: string | null; name: string; size?: keyof typeof orgLogoSizeMap }) {
+    const [error, setError] = useState(false);
+    const wrap = orgLogoSizeMap[size];
+    const textSize = size === 'sm' ? 'text-xs' : size === 'lg' ? 'text-base' : 'text-xl';
+    return (
+        <div className={cn('rounded-full bg-bg-elevated overflow-hidden flex items-center justify-center shrink-0', wrap)}>
+            {src && !error ? (
+                <img src={src} alt={name} onError={() => setError(true)} className="w-full h-full object-cover" />
+            ) : (
+                <span className={cn('font-mono font-medium text-text-dim uppercase select-none', textSize)}>
+                    {name.charAt(0)}
+                </span>
+            )}
         </div>
     );
 }
@@ -253,38 +280,42 @@ export function OrganizationDetailPage() {
                 <PageHeader title="Chi tiết tổ chức" description={`ID: ${org.id}`} />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* ── Logo / summary card ─────────────────────────────────── */}
-                <div className="lg:col-span-1 bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col items-center text-center gap-3">
-                    {org.logo ? (
-                        <img
-                            src={org.logo}
-                            alt={org.name}
-                            className="w-20 h-20 rounded-sm object-cover border border-border-subtle"
-                        />
-                    ) : (
-                        <div className="w-20 h-20 rounded-sm border border-border-subtle bg-bg-elevated flex items-center justify-center">
-                            <Building2 className="w-8 h-8 text-text-dim" />
+            <div className="flex flex-col gap-6 max-w-6xl mx-auto">
+                {/* ── Horizontal Hero Card ─────────────────────────────────── */}
+                <div className="relative overflow-hidden bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
+                    {/* Subtle gradient background decoration */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-accent-acid/10 to-transparent pointer-events-none opacity-50 dark:opacity-20" />
+
+                    {/* Left: Logo */}
+                    <OrgLogo src={org.logo} name={org.name} size="xl" />
+
+                    {/* Middle: Info */}
+                    <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left z-10">
+                        <h1 className="font-bold text-text-primary text-2xl tracking-tight">
+                            {org.name}
+                        </h1>
+
+                        <div className="flex items-center gap-2 mt-1 text-sm text-text-secondary">
+                            {org.shortName && (
+                                <span className="font-medium text-text-primary px-1.5 py-0.5 rounded-sm bg-bg-elevated border border-border-subtletext-xs">
+                                    {org.shortName}
+                                </span>
+                            )}
+                            {org.region && (
+                                <span>Khu vực: {org.region.name}</span>
+                            )}
                         </div>
-                    )}
-                    <div>
-                        <p className="font-semibold text-text-primary text-lg">{org.name}</p>
-                        {org.shortName && (
-                            <p className="text-text-secondary text-sm">{org.shortName}</p>
-                        )}
-                        {org.region && (
-                            <p className="text-text-dim text-xs mt-1">{org.region.name}</p>
-                        )}
+
+                        <div className="flex flex-wrap gap-1 mt-3 justify-center md:justify-start">
+                            {org.roles.map((r) => {
+                                const cfg = ROLE_CONFIG[r];
+                                return <Badge key={r} className={cfg.className}>{cfg.label}</Badge>;
+                            })}
+                        </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-1 justify-center">
-                        {org.roles.map((r) => {
-                            const cfg = ROLE_CONFIG[r];
-                            return <Badge key={r} className={cfg.className}>{cfg.label}</Badge>;
-                        })}
-                    </div>
-
-                    <div className="w-full space-y-2 mt-2">
+                    {/* Right: Actions */}
+                    <div className="flex flex-col gap-2 shrink-0 z-10 w-full md:w-40 mt-4 md:mt-0">
                         {!editMode ? (
                             <Button
                                 variant="outline"
@@ -337,7 +368,7 @@ export function OrganizationDetailPage() {
                 </div>
 
                 {/* ── Details / Edit form ─────────────────────────────────── */}
-                <div className="lg:col-span-2 bg-bg-surface border border-border-subtle rounded-sm p-6">
+                <div className="bg-bg-surface border border-border-subtle rounded-sm p-6 w-full">
                     <p className="font-mono text-xs text-text-dim uppercase tracking-wide mb-4">
                         Thông tin tổ chức
                     </p>
@@ -370,13 +401,14 @@ export function OrganizationDetailPage() {
 
                             {/* Logo */}
                             <div className="space-y-1.5">
-                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo URL</label>
-                                <input
-                                    type="url"
-                                    className={inputClass}
-                                    placeholder="https://example.com/logo.png"
+                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo</label>
+                                <ImageUpload
                                     value={editLogo}
-                                    onChange={(e) => setEditLogo(e.target.value)}
+                                    onChange={setEditLogo}
+                                    folder="logos"
+                                    shape="circle"
+                                    size="lg"
+                                    hint="PNG, JPG · tối đa 10 MB"
                                 />
                             </div>
 
@@ -395,31 +427,27 @@ export function OrganizationDetailPage() {
                             {/* Description */}
                             <div className="space-y-1.5">
                                 <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả</label>
-                                <textarea
-                                    className={cn(inputClass, 'resize-none')}
-                                    rows={3}
+                                <RichTextEditor
                                     value={editDescription}
-                                    onChange={(e) => setEditDescription(e.target.value)}
+                                    onChange={setEditDescription}
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả EN</label>
-                                    <textarea
-                                        className={cn(inputClass, 'resize-none')}
-                                        rows={2}
+                                    <RichTextEditor
                                         value={editDescriptionEn}
-                                        onChange={(e) => setEditDescriptionEn(e.target.value)}
+                                        onChange={setEditDescriptionEn}
+                                        minHeight="100px"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Mô tả VI</label>
-                                    <textarea
-                                        className={cn(inputClass, 'resize-none')}
-                                        rows={2}
+                                    <RichTextEditor
                                         value={editDescriptionVi}
-                                        onChange={(e) => setEditDescriptionVi(e.target.value)}
+                                        onChange={setEditDescriptionVi}
+                                        minHeight="100px"
                                     />
                                 </div>
                             </div>

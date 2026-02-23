@@ -8,7 +8,7 @@ const OWNER_SELECT = { id: true, username: true, avatar: true };
 
 @Injectable()
 export class OrganizationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAll(page = 1, limit = 20, role?: OrganizationType, regionId?: string) {
     const skip = (page - 1) * limit;
@@ -58,15 +58,23 @@ export class OrganizationService {
         ...(managerId && { manager: { connect: { id: managerId } } }),
         ...(regionId && { region: { connect: { id: regionId } } }),
       },
+      include: {
+        region: true,
+        owner: { select: OWNER_SELECT },
+        manager: { select: OWNER_SELECT },
+        teams: true,
+        tournaments: true,
+      },
     });
   }
 
   async update(id: string, dto: UpdateOrganizationDto): Promise<Organization> {
-    const { managerId, regionId, mediaLinks, descriptionI18n, ...rest } = dto;
+    const { managerId, regionId, mediaLinks, descriptionI18n, ownerId, ...rest } = dto;
     return this.prisma.organization.update({
       where: { id },
       data: {
         ...rest,
+        ...(ownerId && { owner: { connect: { id: ownerId } } }),
         ...(mediaLinks !== undefined && { mediaLinks }),
         ...(descriptionI18n !== undefined && { descriptionI18n }),
         ...(managerId !== undefined && {
@@ -75,6 +83,13 @@ export class OrganizationService {
         ...(regionId !== undefined && {
           region: regionId ? { connect: { id: regionId } } : { disconnect: true },
         }),
+      },
+      include: {
+        region: true,
+        owner: { select: OWNER_SELECT },
+        manager: { select: OWNER_SELECT },
+        teams: true,
+        tournaments: true,
       },
     });
   }
