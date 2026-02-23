@@ -57,7 +57,16 @@ const navGroups: NavGroup[] = [
     label: 'Thông tin cơ bản',
     defaultOpen: true,
     items: [
-      { icon: Building2, label: 'Tổ chức', to: '/organizations' },
+      {
+        icon: Building2,
+        label: 'Tổ chức',
+        to: '/organizations',
+        children: [
+          { icon: Building2, label: 'Danh sách tổ chức', to: '/organizations' },
+          { icon: Shield, label: 'Đội tuyển', to: '/teams' },
+          { icon: Users, label: 'Tuyển thủ', to: '/players' },
+        ],
+      },
       { icon: MapPin, label: 'Khu vực', to: '/regions' },
     ],
   },
@@ -65,8 +74,6 @@ const navGroups: NavGroup[] = [
     label: 'Thi đấu',
     defaultOpen: true,
     items: [
-      { icon: Shield, label: 'Đội tuyển', to: '/teams' },
-      { icon: Users, label: 'Tuyển thủ', to: '/players' },
       { icon: Swords, label: 'Trận đấu', to: '/matches' },
     ],
   },

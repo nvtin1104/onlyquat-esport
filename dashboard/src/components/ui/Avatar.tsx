@@ -1,4 +1,4 @@
-import { forwardRef, useState, type HTMLAttributes } from 'react';
+import { forwardRef, useState, useCallback, type HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 type AvatarSize = 'sm' | 'md' | 'lg';
@@ -9,6 +9,41 @@ const sizeClasses: Record<AvatarSize, string> = {
   lg: 'w-12 h-12 text-base',
 };
 
+const R2_PUBLIC_URL = (import.meta.env.VITE_R2_PUBLIC_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+
+/** Extract key from either a full URL or a raw path */
+function extractKey(src: string): string {
+  try {
+    const url = new URL(src);
+    return url.pathname.replace(/^\//, '');
+  } catch {
+    return src.replace(/^\//, '');
+  }
+}
+
+/**
+ * 3-step fallback:
+ *   0 → stored src as-is
+ *   1 → extract path from src, prepend VITE_R2_PUBLIC_URL
+ *   2 → null (show initials)
+ */
+function useAvatarSrc(src: string | undefined) {
+  const [step, setStep] = useState(0);
+  const onError = useCallback(() => setStep((s) => s + 1), []);
+
+  const resolvedSrc = (() => {
+    if (!src) return null;
+    if (step === 0) return src;
+    if (step === 1 && R2_PUBLIC_URL) {
+      const key = extractKey(src);
+      return key ? `${R2_PUBLIC_URL}/${key}` : null;
+    }
+    return null;
+  })();
+
+  return { resolvedSrc, onError };
+}
+
 interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
   src?: string;
   alt: string;
@@ -18,7 +53,7 @@ interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
 
 const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, src, alt, fallback, size = 'md', ...props }, ref) => {
-    const [imgError, setImgError] = useState(false);
+    const { resolvedSrc, onError } = useAvatarSrc(src);
 
     return (
       <div
@@ -30,12 +65,12 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
         )}
         {...props}
       >
-        {src && !imgError ? (
+        {resolvedSrc ? (
           <img
-            src={src}
+            src={resolvedSrc}
             alt={alt}
             className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
+            onError={onError}
           />
         ) : (
           <span className="font-mono font-medium text-text-dim uppercase select-none">

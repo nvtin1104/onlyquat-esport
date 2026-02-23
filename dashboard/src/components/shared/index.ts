@@ -10,3 +10,8 @@ export { RatingNumber } from './RatingNumber';
 export { StatBar } from './StatBar';
 export { UserPicker } from './UserPicker';
 export type { UserPickerProps, UserPickerValue } from './UserPicker';
+export { ImageUpload } from './ImageUpload';
+export { AvatarPicker } from './AvatarPicker';
+export type { AvatarPickerProps } from './AvatarPicker';
+export { RichTextEditor } from './RichTextEditor';
+export type { RichTextEditorProps } from './RichTextEditor';
