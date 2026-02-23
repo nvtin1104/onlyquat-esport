@@ -76,6 +76,7 @@ export class UsersService {
         password: hashedPassword,
         username: adminCreateUserDto.username,
         name: adminCreateUserDto.name,
+        avatar: adminCreateUserDto.avatar ?? null,
         role: adminCreateUserDto.roles,
         accountType: adminCreateUserDto.accountType,
       },

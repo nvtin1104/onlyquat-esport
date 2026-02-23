@@ -100,7 +100,7 @@ export function UsersTable({ users, onChangeRole, onBan, onViewDetail }: UsersTa
                 {/* User info */}
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar alt={user.username} fallback={user.username} size="sm" />
+                    <Avatar src={user.avatar ?? undefined} alt={user.username} fallback={user.username} size="sm" />
                     <div>
                       <p className="font-medium text-text-primary">{user.username}</p>
                       <p className="text-xs text-text-dim">{user.email}</p>

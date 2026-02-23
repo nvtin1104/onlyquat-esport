@@ -148,7 +148,7 @@ export function UserPermissionDetailPage() {
                     {/* User Profile Summary */}
                     <div className="bg-bg-surface border border-border-subtle rounded-sm p-5 flex items-center justify-between shadow-sm">
                         <div className="flex items-center gap-4">
-                            <Avatar alt={user?.username || 'user'} fallback={user?.username || '?'} size="lg" />
+                            <Avatar src={user?.avatar ?? undefined} alt={user?.username || 'user'} fallback={user?.username || '?'} size="lg" />
                             <div>
                                 <h2 className="text-xl font-bold text-text-primary">{user?.username || 'Loading...'}</h2>
                                 <div className="flex gap-2 mt-1">

@@ -37,6 +37,7 @@ export async function adminCreateUser(
         username: dto.username,
         password: dto.password,
         name: dto.name || undefined,
+        avatar: dto.avatar || undefined,
         roles: dto.roles,
         accountType: dto.accountType,
     });

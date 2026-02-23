@@ -37,6 +37,11 @@ export class AdminCreateUserDto {
   @IsOptional()
   name?: string;
 
+  @ApiProperty({ example: 'https://...r2.dev/avatars/uuid.png', required: false })
+  @IsString({ message: i18nValidationMessage('validation.IS_STRING') })
+  @IsOptional()
+  avatar?: string;
+
   @ApiProperty({ enum: UserRole, isArray: true, example: [UserRole.USER] })
   @IsArray({ message: i18nValidationMessage('validation.IS_ARRAY') })
   @ArrayMinSize(1, { message: i18nValidationMessage('validation.ARRAY_MIN_SIZE') })

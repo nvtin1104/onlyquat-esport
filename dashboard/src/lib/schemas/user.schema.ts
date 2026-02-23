@@ -27,6 +27,7 @@ export const createUserSchema = z.object({
         .regex(/^[a-zA-Z0-9_]+$/, 'Chỉ được dùng chữ cái, số và dấu _'),
     password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
     name: z.string().max(64, 'Tên tối đa 64 ký tự').optional().or(z.literal('')),
+    avatar: z.string().url().optional().or(z.literal('')),
     roles: z.array(z.enum(ALL_ROLES)).min(1, 'Phải chọn ít nhất 1 role'),
     accountType: z.union([z.literal(0), z.literal(1)]),
 });

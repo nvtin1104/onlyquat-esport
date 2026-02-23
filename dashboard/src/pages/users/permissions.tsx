@@ -256,7 +256,7 @@ export function UserPermissionsPage() {
                                             : 'border-transparent hover:bg-bg-elevated'
                                     )}
                                 >
-                                    <Avatar alt={user.username || 'user'} fallback={user.username || '?'} size="sm" />
+                                    <Avatar src={user.avatar ?? undefined} alt={user.username || 'user'} fallback={user.username || '?'} size="sm" />
                                     <div className="min-w-0">
                                         <p className="text-sm font-medium truncate text-text-primary">{user.username}</p>
                                         <p className="text-[10px] text-text-dim truncate">{user.email}</p>
@@ -288,7 +288,7 @@ export function UserPermissionsPage() {
                             {/* User Header */}
                             <div className="bg-bg-surface border border-border-subtle rounded-sm p-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
                                 <div className="flex items-center gap-4">
-                                    <Avatar alt={selectedUser?.username || 'user'} fallback={selectedUser?.username || '?'} size="lg" />
+                                    <Avatar src={selectedUser?.avatar ?? undefined} alt={selectedUser?.username || 'user'} fallback={selectedUser?.username || '?'} size="lg" />
                                     <div>
                                         <h2 className="text-xl font-bold text-text-primary leading-none">{selectedUser?.username}</h2>
                                         <div className="flex gap-2 mt-1.5">

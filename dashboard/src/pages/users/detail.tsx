@@ -109,7 +109,7 @@ export function UserDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Profile card */}
                 <div className="lg:col-span-1 bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col items-center text-center gap-3">
-                    <Avatar alt={user.username} fallback={user.username} size="lg" />
+                    <Avatar src={user.avatar ?? undefined} alt={user.username} fallback={user.username} size="lg" />
                     <div>
                         <p className="font-semibold text-text-primary text-lg">{user.username}</p>
                         {user.name && <p className="text-text-secondary text-sm">{user.name}</p>}

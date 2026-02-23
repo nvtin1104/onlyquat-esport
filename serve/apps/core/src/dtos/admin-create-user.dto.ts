@@ -19,6 +19,10 @@ export class AdminCreateUserDto {
     @IsOptional()
     name?: string;
 
+    @IsString()
+    @IsOptional()
+    avatar?: string;
+
     @IsArray()
     @ArrayMinSize(1)
     @IsEnum(UserRole, { each: true })

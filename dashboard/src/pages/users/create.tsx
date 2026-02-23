@@ -3,6 +3,7 @@ import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { AvatarPicker } from '@/components/shared/AvatarPicker';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { createUserSchema, type CreateUserFormValues, PUBLIC_ROLES, ADMIN_ROLES } from '@/lib/schemas/user.schema';
@@ -51,6 +52,7 @@ export function UserCreatePage() {
             username: '',
             password: '',
             name: '',
+            avatar: '',
             roles: ['USER'],
             accountType: 1,
         },
@@ -101,6 +103,22 @@ export function UserCreatePage() {
                     )}
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Avatar */}
+                        <Controller
+                            name="avatar"
+                            control={control}
+                            render={({ field }) => (
+                                <div className="flex justify-center pb-2">
+                                    <AvatarPicker
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        label="Ảnh đại diện"
+                                        size="lg"
+                                    />
+                                </div>
+                            )}
+                        />
+
                         {/* Email */}
                         <FormField label="Email" required error={errors.email?.message}>
                             <input
