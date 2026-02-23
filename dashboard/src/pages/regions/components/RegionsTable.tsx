@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
-import { ExternalLink, MoreHorizontal, MapPin } from 'lucide-react';
+import { ExternalLink, MoreHorizontal } from 'lucide-react';
 import {
     Table,
     TableHeader,
@@ -17,6 +18,21 @@ import {
 } from '@/components/ui/DropdownMenu';
 import { cn } from '@/lib/utils';
 import type { AdminRegion } from '@/types/admin';
+
+function RegionLogo({ src, name }: { src?: string | null; name: string }) {
+    const [error, setError] = useState(false);
+    return (
+        <div className="w-8 h-8 rounded-full bg-bg-elevated overflow-hidden flex items-center justify-center shrink-0">
+            {src && !error ? (
+                <img src={src} alt={name} onError={() => setError(true)} className="w-full h-full object-cover" />
+            ) : (
+                <span className="font-mono font-medium text-xs text-text-dim uppercase select-none">
+                    {name.charAt(0)}
+                </span>
+            )}
+        </div>
+    );
+}
 
 interface RegionsTableProps {
     regions: AdminRegion[];
@@ -65,17 +81,7 @@ export function RegionsTable({ regions, onViewDetail, onDelete }: RegionsTablePr
 
                                     {/* Logo */}
                                     <TableCell className="hidden sm:table-cell">
-                                        {region.logo ? (
-                                            <img
-                                                src={region.logo}
-                                                alt={region.name}
-                                                className="w-8 h-8 rounded-sm object-cover border border-border-subtle"
-                                            />
-                                        ) : (
-                                            <div className="w-8 h-8 rounded-sm border border-border-subtle bg-bg-elevated flex items-center justify-center">
-                                                <MapPin className="w-4 h-4 text-text-dim" />
-                                            </div>
-                                        )}
+                                        <RegionLogo src={region.logo} name={region.name} />
                                     </TableCell>
 
                                     {/* Created at */}

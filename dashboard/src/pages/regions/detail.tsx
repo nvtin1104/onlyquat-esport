@@ -4,11 +4,33 @@ import { ArrowLeft, Loader2, AlertCircle, MapPin, Pencil, X, Check } from 'lucid
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 import { Button } from '@/components/ui/Button';
 import { useRegionsStore } from '@/stores/regionsStore';
 
 const inputClass =
     'w-full bg-bg-elevated border border-border-subtle rounded-sm px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-accent-acid transition-colors';
+
+const regionLogoSizeMap = {
+    sm: { wrap: 'w-8 h-8', text: 'text-xs' },
+    xl: { wrap: 'w-20 h-20', text: 'text-xl' },
+} as const;
+
+function RegionLogo({ src, name, size = 'xl' }: { src?: string | null; name: string; size?: keyof typeof regionLogoSizeMap }) {
+    const [error, setError] = useState(false);
+    const { wrap, text } = regionLogoSizeMap[size];
+    return (
+        <div className={`${wrap} rounded-full bg-bg-elevated overflow-hidden flex items-center justify-center shrink-0`}>
+            {src && !error ? (
+                <img src={src} alt={name} onError={() => setError(true)} className="w-full h-full object-cover" />
+            ) : (
+                <span className={`font-mono font-medium text-text-dim uppercase select-none ${text}`}>
+                    {name.charAt(0)}
+                </span>
+            )}
+        </div>
+    );
+}
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
     return (
@@ -104,17 +126,7 @@ export function RegionDetailPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Logo card */}
                 <div className="lg:col-span-1 bg-bg-surface border border-border-subtle rounded-sm p-6 flex flex-col items-center text-center gap-3">
-                    {region.logo ? (
-                        <img
-                            src={region.logo}
-                            alt={region.name}
-                            className="w-20 h-20 rounded-sm object-cover border border-border-subtle"
-                        />
-                    ) : (
-                        <div className="w-20 h-20 rounded-sm border border-border-subtle bg-bg-elevated flex items-center justify-center">
-                            <MapPin className="w-8 h-8 text-text-dim" />
-                        </div>
-                    )}
+                    <RegionLogo src={region.logo} name={region.name} />
                     <div>
                         <p className="font-semibold text-text-primary text-lg">{region.name}</p>
                         <span className="inline-flex items-center font-mono text-[11px] px-2 py-0.5 rounded-sm border bg-bg-elevated text-text-dim border-border-subtle mt-1">
@@ -196,13 +208,14 @@ export function RegionDetailPage() {
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo URL</label>
-                                <input
-                                    type="url"
-                                    className={inputClass}
-                                    placeholder="https://example.com/logo.png"
+                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo</label>
+                                <ImageUpload
                                     value={editLogo}
-                                    onChange={(e) => setEditLogo(e.target.value)}
+                                    onChange={setEditLogo}
+                                    folder="logos"
+                                    shape="circle"
+                                    size="lg"
+                                    hint="PNG, JPG · tối đa 10 MB"
                                 />
                             </div>
                             <p className="text-[11px] text-text-dim italic">Mã khu vực không thể thay đổi sau khi tạo.</p>
@@ -219,18 +232,7 @@ export function RegionDetailPage() {
                                 <span className="font-mono text-sm text-text-primary">{region.code}</span>
                             </DetailRow>
                             <DetailRow label="Logo">
-                                {region.logo ? (
-                                    <a
-                                        href={region.logo}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs text-accent-acid hover:underline break-all"
-                                    >
-                                        {region.logo}
-                                    </a>
-                                ) : (
-                                    <span className="text-sm text-text-dim">—</span>
-                                )}
+                                <RegionLogo src={region.logo} name={region.name} />
                             </DetailRow>
                             <DetailRow label="Ngày tạo">
                                 <span className="text-xs text-text-dim">

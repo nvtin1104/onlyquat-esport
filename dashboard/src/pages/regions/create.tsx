@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ImageUpload } from '@/components/shared/ImageUpload';
 import { Button } from '@/components/ui/Button';
 import { useRegionsStore } from '@/stores/regionsStore';
 
@@ -115,13 +116,14 @@ export function RegionCreatePage() {
                         />
                     </FormField>
 
-                    <FormField label="Logo URL">
-                        <input
-                            type="url"
-                            className={inputClass}
-                            placeholder="https://example.com/logo.png"
+                    <FormField label="Logo">
+                        <ImageUpload
                             value={logo}
-                            onChange={(e) => setLogo(e.target.value)}
+                            onChange={setLogo}
+                            folder="logos"
+                            shape="circle"
+                            size="lg"
+                            hint="PNG, JPG · tối đa 10 MB"
                         />
                     </FormField>
 
