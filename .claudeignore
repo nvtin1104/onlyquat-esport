@@ -1,0 +1,11 @@
+# Sensitive files — Claude Code cannot read or modify these
+
+# Environment variables (secrets)
+.env
+**/.env
+.env.*
+**/.env.*
+
+# Exclude .env.example so docs remain readable
+!.env.example
+!**/.env.example
