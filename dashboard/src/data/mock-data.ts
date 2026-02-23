@@ -13,9 +13,9 @@ export const mockPlayers: AdminPlayer[] = [
 ];
 
 export const mockTeams: AdminTeam[] = [
-  { id: 't1', name: 'Team Alpha', tag: 'ALP', slug: 'team-alpha', logoUrl: '/logos/alpha.webp', orgName: 'Alpha Esports', region: 'VN', playerCount: 5, avgRating: 9.0, isActive: true },
-  { id: 't2', name: 'Phoenix Rising', tag: 'PHX', slug: 'phoenix-rising', logoUrl: '/logos/phoenix.webp', orgName: 'Phoenix Org', region: 'VN', playerCount: 5, avgRating: 8.6, isActive: true },
-  { id: 't3', name: 'Orca Gaming', tag: 'ORC', slug: 'orca-gaming', logoUrl: '/logos/orca.webp', orgName: null, region: 'SEA', playerCount: 4, avgRating: 8.8, isActive: true },
+  { id: 't1', name: 'Team Alpha', slug: 'team-alpha', logo: '/logos/alpha.webp', region: { id: 'r1', name: 'Vietnam', code: 'VN' }, createdAt: '2026-01-01T00:00:00', updatedAt: '2026-01-01T00:00:00', tag: 'ALP', mediaLinks: [] },
+  { id: 't2', name: 'Phoenix Rising', slug: 'phoenix-rising', logo: '/logos/phoenix.webp', region: { id: 'r1', name: 'Vietnam', code: 'VN' }, createdAt: '2026-01-01T00:00:00', updatedAt: '2026-01-01T00:00:00', tag: 'PHX', mediaLinks: [] },
+  { id: 't3', name: 'Orca Gaming', slug: 'orca-gaming', logo: '/logos/orca.webp', region: { id: 'r2', name: 'Southeast Asia', code: 'SEA' }, createdAt: '2026-01-01T00:00:00', updatedAt: '2026-01-01T00:00:00', tag: 'ORC', mediaLinks: [] },
 ];
 
 export const mockMatches: AdminMatch[] = [

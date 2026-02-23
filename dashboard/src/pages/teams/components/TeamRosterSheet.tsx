@@ -37,9 +37,9 @@ export function TeamRosterSheet({ team, open, onClose }: TeamRosterSheetProps) {
             <SheetHeader>
               <div className="flex items-center gap-3 pr-8">
                 <Avatar
-                  src={team.logoUrl}
+                  src={team.logo ?? undefined}
                   alt={team.name}
-                  fallback={team.tag}
+                  fallback={team.tag ?? team.name}
                   size="lg"
                   className="w-12 h-12"
                 />
@@ -55,16 +55,16 @@ export function TeamRosterSheet({ team, open, onClose }: TeamRosterSheetProps) {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-text-dim font-body">To chuc</span>
                 <span className="text-text-primary font-body">
-                  {team.orgName ?? '—'}
+                  {team.organization?.name ?? '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-text-dim font-body">Khu vuc</span>
-                <Badge variant="info">{team.region}</Badge>
+                <Badge variant="info">{team.region?.code ?? '—'}</Badge>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-text-dim font-body">Rating TB</span>
-                <RatingNumber value={team.avgRating} size="sm" />
+                <span className="text-text-dim font-body text-xs">—</span>
               </div>
             </div>
 

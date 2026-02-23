@@ -1,92 +1,113 @@
-import { useState } from 'react';
-import { mockTeams } from '@/data/mock-data';
-import type { AdminTeam } from '@/types/admin';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PlusCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { SearchInput } from '@/components/shared/SearchInput';
-import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/ui/Pagination';
 import { TeamsTable } from './components/TeamsTable';
-import { TeamRosterSheet } from './components/TeamRosterSheet';
-import { Plus } from 'lucide-react';
+import { useTeamsStore } from '@/stores/teamsStore';
+import type { AdminTeam } from '@/types/admin';
 
 export function TeamsPage() {
-  const [search, setSearch] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState<AdminTeam | null>(null);
-  const [rosterOpen, setRosterOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const {
+    teams,
+    total,
+    page,
+    limit,
+    isLoading,
+    error,
+    fetchTeams,
+    removeTeam,
+    setPage,
+    clearError,
+  } = useTeamsStore();
 
-  const filtered = mockTeams.filter((t) => {
-    const q = search.toLowerCase();
-    return (
-      t.name.toLowerCase().includes(q) ||
-      t.tag.toLowerCase().includes(q) ||
-      (t.orgName?.toLowerCase().includes(q) ?? false) ||
-      t.region.toLowerCase().includes(q)
-    );
-  });
+  useEffect(() => {
+    fetchTeams({ page: 1 });
+  }, []);
 
-  function handleViewRoster(team: AdminTeam) {
-    setSelectedTeam(team);
-    setRosterOpen(true);
+  async function handleDelete(team: AdminTeam) {
+    if (!window.confirm(`Bạn có chắc muốn xóa đội tuyển "${team.name}" không?`)) return;
+    try {
+      await removeTeam(team.id);
+      toast.success(`Đã xóa đội tuyển "${team.name}"`);
+    } catch (err: any) {
+      toast.error(err.message ?? 'Xóa đội tuyển thất bại');
+    }
   }
 
-  function handleDelete(id: string) {
-    setDeleteId(id);
-  }
-
-  function handleConfirmDelete() {
-    console.log('Delete team:', deleteId);
-    setDeleteId(null);
-  }
+  const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div>
       <PageHeader
-        title="Doi tuyen"
-        description={`Quan ly ${mockTeams.length} doi tuyen`}
+        title="Đội tuyển"
+        description={`Tổng cộng ${total} đội tuyển`}
         actions={
-          <Button variant="primary" size="md">
-            <Plus className="w-4 h-4" />
-            + Them doi tuyen
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => navigate('/teams/create')}
+            className="cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Tạo đội tuyển
           </Button>
         }
       />
 
-      <div className="mb-4">
-        <SearchInput
-          placeholder="Tim kiem doi tuyen..."
-          value={search}
-          onChange={setSearch}
-          className="max-w-sm"
-        />
+      {error && (
+        <div className="mb-4 px-3 py-2 bg-danger/10 border border-danger/30 rounded-sm text-danger text-sm flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={clearError}
+            className="text-danger/70 hover:text-danger text-xs ml-4 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fetchTeams({ page: 1 })}
+          disabled={isLoading}
+          className="cursor-pointer"
+        >
+          Làm mới
+        </Button>
       </div>
 
-      <div className="bg-bg-card border border-border-subtle rounded-sm overflow-hidden">
+      {isLoading ? (
+        <div className="flex items-center justify-center h-48">
+          <Loader2 className="w-6 h-6 animate-spin text-accent-acid" />
+        </div>
+      ) : (
         <TeamsTable
-          teams={filtered}
-          onViewRoster={handleViewRoster}
+          teams={teams}
+          onViewDetail={(team) => navigate(`/teams/${team.id}`)}
           onDelete={handleDelete}
         />
-      </div>
+      )}
 
-      <TeamRosterSheet
-        team={selectedTeam}
-        open={rosterOpen}
-        onClose={() => {
-          setRosterOpen(false);
-          setSelectedTeam(null);
-        }}
-      />
-
-      <ConfirmDialog
-        open={deleteId !== null}
-        title="Xoa doi tuyen"
-        description="Ban co chac chan muon xoa doi tuyen nay? Hanh dong nay khong the hoan tac."
-        confirmText="Xoa"
-        variant="destructive"
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteId(null)}
-      />
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
+          <span className="text-sm text-text-dim">
+            Trang <span className="text-text-primary font-medium">{page}</span> /{' '}
+            <span className="text-text-primary font-medium">{totalPages}</span> — {total} đội tuyển
+          </span>
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
     </div>
   );
 }

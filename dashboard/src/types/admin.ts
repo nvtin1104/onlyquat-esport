@@ -20,18 +20,39 @@ export interface AdminPlayer {
   isActive: boolean;
 }
 
+export interface AdminGame {
+  id: string;
+  name: string;
+  shortName: string;
+  logo: string;
+  website?: string | null;
+  mediaLinks: Array<{ url: string; label?: string }>;
+  roles: string[];
+  organizationId?: string | null;
+  organization?: { id: string; name: string; logo?: string | null } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AdminTeam {
   id: string;
   name: string;
-  tag: string;
+  tag?: string | null;
   slug: string;
-  logoUrl: string;
-  orgName: string | null;
-  region: string;
-  playerCount: number;
-  avgRating: number;
-  isActive: boolean;
+  logo?: string | null;
+  website?: string | null;
+  mediaLinks: Array<{ url: string; label?: string }>;
+  description?: string | null;
+  organizationId?: string | null;
+  organization?: { id: string; name: string; logo?: string | null } | null;
+  regionId?: string | null;
+  region?: { id: string; name: string; code: string; logo?: string | null } | null;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export type GamesListResponse = PaginatedResponse<AdminGame>;
+export type TeamsListResponse = PaginatedResponse<AdminTeam>;
 
 export interface AdminMatch {
   id: string;
