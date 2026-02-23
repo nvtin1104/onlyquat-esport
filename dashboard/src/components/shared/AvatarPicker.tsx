@@ -18,18 +18,19 @@ interface LibraryModalProps {
   onOpenChange: (open: boolean) => void;
   currentValue?: string;
   onSelect: (url: string) => void;
+  folder: string;
 }
 
-function LibraryModal({ open, onOpenChange, currentValue, onSelect }: LibraryModalProps) {
+function LibraryModal({ open, onOpenChange, currentValue, onSelect, folder }: LibraryModalProps) {
   const [files, setFiles] = useState<AdminFileUpload[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setIsLoading(true);
-    getUploads({ folder: 'avatars', limit: 60 })
+    getUploads({ folder, limit: 60 })
       .then((res) => setFiles(res.data))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setIsLoading(false));
   }, [open]);
 
@@ -93,15 +94,21 @@ export interface AvatarPickerProps {
   onChange: (url: string) => void;
   name?: string;
   label?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  shape?: 'circle' | 'square';
+  folder?: string;
+  hint?: string;
 }
 
 export function AvatarPicker({
   value,
   onChange,
-  name = 'Avatar',
+  name = 'Image',
   label,
   size = 'lg',
+  shape = 'circle',
+  folder = 'avatars',
+  hint = 'PNG, JPG · tối đa 10 MB',
 }: AvatarPickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -113,7 +120,7 @@ export function AvatarPicker({
     setError(null);
     setIsUploading(true);
     try {
-      const result = await uploadFile(file, 'avatars');
+      const result = await uploadFile(file, folder);
       onChange(result.url);
     } catch {
       setError('Upload thất bại. Thử lại.');
@@ -150,6 +157,7 @@ export function AvatarPicker({
           alt={name}
           fallback={name}
           size={size}
+          shape={shape}
           className="border-2 border-border-subtle"
         />
       )}
@@ -179,7 +187,7 @@ export function AvatarPicker({
                 Kéo thả ảnh vào đây<br />
                 <span className="text-accent-acid font-medium">hoặc nhấn để chọn file</span>
               </p>
-              <p className="text-[10px] text-text-dim">PNG, JPG · tối đa 10 MB</p>
+              <p className="text-[10px] text-text-dim">{hint}</p>
             </>
           )}
         </div>
@@ -231,6 +239,7 @@ export function AvatarPicker({
         onOpenChange={setLibraryOpen}
         currentValue={value}
         onSelect={onChange}
+        folder={folder}
       />
     </div>
   );

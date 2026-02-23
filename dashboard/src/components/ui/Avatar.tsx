@@ -1,12 +1,19 @@
 import { forwardRef, useState, useCallback, type HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-type AvatarSize = 'sm' | 'md' | 'lg';
+type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
+type AvatarShape = 'circle' | 'square';
 
 const sizeClasses: Record<AvatarSize, string> = {
   sm: 'w-8 h-8 text-xs',
   md: 'w-10 h-10 text-sm',
   lg: 'w-12 h-12 text-base',
+  xl: 'w-16 h-16 text-xl',
+};
+
+const shapeClasses: Record<AvatarShape, string> = {
+  circle: 'rounded-full',
+  square: 'rounded-sm',
 };
 
 const R2_PUBLIC_URL = (import.meta.env.VITE_R2_PUBLIC_URL as string | undefined)?.replace(/\/$/, '') ?? '';
@@ -49,18 +56,20 @@ interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
   alt: string;
   fallback: string;
   size?: AvatarSize;
+  shape?: AvatarShape;
 }
 
 const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
-  ({ className, src, alt, fallback, size = 'md', ...props }, ref) => {
+  ({ className, src, alt, fallback, size = 'md', shape = 'circle', ...props }, ref) => {
     const { resolvedSrc, onError } = useAvatarSrc(src);
 
     return (
       <div
         ref={ref}
         className={cn(
-          'relative rounded-full bg-bg-elevated overflow-hidden flex items-center justify-center shrink-0',
+          'relative bg-bg-elevated overflow-hidden flex items-center justify-center shrink-0',
           sizeClasses[size],
+          shapeClasses[shape],
           className
         )}
         {...props}

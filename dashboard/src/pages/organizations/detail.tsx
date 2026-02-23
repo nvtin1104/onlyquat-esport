@@ -4,7 +4,7 @@ import { ArrowLeft, AlertCircle, Building2, Pencil, X, Check, Loader2 } from 'lu
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { ImageUpload } from '@/components/shared/ImageUpload';
+import { AvatarPicker } from '@/components/shared/AvatarPicker';
 import { UserPicker, type UserPickerValue } from '@/components/shared/UserPicker';
 import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { Badge } from '@/components/ui/Badge';
@@ -409,18 +409,19 @@ export function OrganizationDetailPage() {
 
                             {/* Logo */}
                             <div className="space-y-1.5">
-                                <label className="font-mono text-xs text-text-dim uppercase tracking-wide">Logo</label>
                                 <Controller
                                     name="logo"
                                     control={control}
                                     render={({ field }) => (
-                                        <ImageUpload
+                                        <AvatarPicker
+                                            label="Logo"
+                                            name="Logo"
                                             value={field.value ?? ''}
                                             onChange={field.onChange}
                                             folder="logos"
                                             shape="circle"
-                                            size="lg"
-                                            hint="PNG, JPG · tối đa 10 MB"
+                                            size="xl"
+                                            hint="PNG, JPG · tối đa 5 MB"
                                         />
                                     )}
                                 />
