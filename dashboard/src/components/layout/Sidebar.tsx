@@ -67,6 +67,7 @@ const navGroups: NavGroup[] = [
           { icon: Users, label: 'Tuyển thủ', to: '/players' },
         ],
       },
+      { icon: Gamepad2, label: 'Game', to: '/games' },
       { icon: MapPin, label: 'Khu vực', to: '/regions' },
     ],
   },

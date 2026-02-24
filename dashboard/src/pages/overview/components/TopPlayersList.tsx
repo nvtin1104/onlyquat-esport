@@ -35,7 +35,7 @@ export function TopPlayersList() {
                   {player.displayName}
                 </p>
                 <div className="mt-0.5">
-                  <GameBadge game={player.gameShort} />
+                  <GameBadge game={player.game?.shortName ?? ''} />
                 </div>
               </div>
 

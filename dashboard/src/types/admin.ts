@@ -4,20 +4,28 @@ export interface AdminPlayer {
   id: string;
   slug: string;
   displayName: string;
-  realName?: string;
-  nationality: string;
+  realName?: string | null;
+  nationality?: string | null;
   imageUrl: string;
-  gameId: string;
-  gameName: string;
-  gameShort: string;
-  teamId?: string;
-  teamTag?: string;
-  role: string;
+  stats: Record<string, unknown>;
+  mechanics: number;
+  tactics: number;
+  composure: number;
+  teamwork: number;
+  consistency: number;
   rating: number;
-  tier: TierKey;
   totalRatings: number;
+  tier: TierKey;
   rank: number;
   isActive: boolean;
+  isPro: boolean;
+  gameId: string;
+  game?: { id: string; name: string; shortName: string; logo: string } | null;
+  teamId?: string | null;
+  team?: { id: string; name: string; slug: string; logo?: string | null } | null;
+  userId?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AdminGame {
@@ -53,6 +61,7 @@ export interface AdminTeam {
 
 export type GamesListResponse = PaginatedResponse<AdminGame>;
 export type TeamsListResponse = PaginatedResponse<AdminTeam>;
+export type PlayersListResponse = PaginatedResponse<AdminPlayer>;
 
 export interface AdminMatch {
   id: string;
@@ -73,12 +82,11 @@ export interface AdminRating {
   userAvatar?: string;
   playerName: string;
   playerGame: string;
-  playerRole: string;
   overall: number;
-  aim: number;
-  gameIq: number;
-  clutch: number;
-  teamplay: number;
+  mechanics: number;
+  tactics: number;
+  composure: number;
+  teamwork: number;
   consistency: number;
   comment: string;
   timeAgo: string;

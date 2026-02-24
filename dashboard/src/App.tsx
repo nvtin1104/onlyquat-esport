@@ -7,7 +7,13 @@ import { LoginPage } from './pages/auth/login';
 import { OverviewPage } from './pages/overview/index';
 import { PlayersPage } from './pages/players/list';
 import { PlayerFormPage } from './pages/players/form';
+import { PlayerDetailPage } from './pages/players/detail';
 import { TeamsPage } from './pages/teams/list';
+import { TeamCreatePage } from './pages/teams/create';
+import { TeamDetailPage } from './pages/teams/detail';
+import { GamesPage } from './pages/games/list';
+import { GameCreatePage } from './pages/games/create';
+import { GameDetailPage } from './pages/games/detail';
 import { MatchesPage } from './pages/matches/list';
 import { RatingsPage } from './pages/ratings/list';
 import { PointsPage } from './pages/points/list';
@@ -38,8 +44,14 @@ export function App() {
             <Route index element={<OverviewPage />} />
             <Route path="players" element={<PlayersPage />} />
             <Route path="players/new" element={<PlayerFormPage />} />
+            <Route path="players/:id" element={<PlayerDetailPage />} />
             <Route path="players/:id/edit" element={<PlayerFormPage />} />
+            <Route path="games" element={<GamesPage />} />
+            <Route path="games/create" element={<GameCreatePage />} />
+            <Route path="games/:id" element={<GameDetailPage />} />
             <Route path="teams" element={<TeamsPage />} />
+            <Route path="teams/create" element={<TeamCreatePage />} />
+            <Route path="teams/:id" element={<TeamDetailPage />} />
             <Route path="matches" element={<MatchesPage />} />
             <Route path="ratings" element={<RatingsPage />} />
             <Route path="points" element={<PointsPage />} />

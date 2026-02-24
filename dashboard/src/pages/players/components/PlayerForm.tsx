@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { User, ImageIcon } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
@@ -10,39 +10,41 @@ import { Switch } from '@/components/ui/Switch';
 import { Textarea } from '@/components/ui/Textarea';
 import { TierBadge } from '@/components/shared/TierBadge';
 import { RatingNumber } from '@/components/shared/RatingNumber';
-import { games, gameRoles, mockTeams } from '@/data/mock-data';
+import { useGamesStore } from '@/stores/gamesStore';
+import { useTeamsStore } from '@/stores/teamsStore';
 import { cn, formatNumber } from '@/lib/utils';
 import type { AdminPlayer } from '@/types/admin';
 
 const playerSchema = z.object({
-  displayName: z.string().min(2, 'Toi thieu 2 ky tu').max(30, 'Toi da 30 ky tu'),
-  realName: z.string().max(50, 'Toi da 50 ky tu').optional(),
-  slug: z.string().regex(/^[a-z0-9-]+$/, 'Chi cho phep chu thuong, so va dau -'),
-  nationality: z.string().min(2, 'Vui long chon quoc tich'),
-  bio: z.string().max(500, 'Toi da 500 ky tu').optional(),
-  gameId: z.string().min(1, 'Vui long chon game'),
-  role: z.string().min(1, 'Vui long chon vai tro'),
+  displayName: z.string().min(2, 'Tối thiểu 2 ký tự').max(30, 'Tối đa 30 ký tự'),
+  realName: z.string().max(50, 'Tối đa 50 ký tự').optional(),
+  slug: z.string().regex(/^[a-z0-9-]+$/, 'Chỉ cho phép chữ thường, số và dấu -'),
+  nationality: z.string().min(1, 'Vui lòng chọn quốc tịch'),
+  bio: z.string().max(500, 'Tối đa 500 ký tự').optional(),
+  gameId: z.string().min(1, 'Vui lòng chọn game'),
   teamId: z.string().optional(),
+  isPro: z.boolean(),
   isActive: z.boolean(),
 });
 
-type PlayerFormValues = z.infer<typeof playerSchema>;
+export type PlayerFormValues = z.infer<typeof playerSchema>;
 
 interface PlayerFormProps {
   player?: AdminPlayer;
   onSubmit: (data: PlayerFormValues) => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
 const NATIONALITY_OPTIONS = [
-  { value: '', label: 'Chon quoc tich' },
-  { value: 'VN', label: 'Viet Nam' },
-  { value: 'KR', label: 'Han Quoc' },
-  { value: 'CN', label: 'Trung Quoc' },
-  { value: 'JP', label: 'Nhat Ban' },
-  { value: 'TH', label: 'Thai Lan' },
+  { value: '', label: 'Chọn quốc tịch' },
+  { value: 'VN', label: 'Việt Nam' },
+  { value: 'KR', label: 'Hàn Quốc' },
+  { value: 'CN', label: 'Trung Quốc' },
+  { value: 'JP', label: 'Nhật Bản' },
+  { value: 'TH', label: 'Thái Lan' },
   { value: 'PH', label: 'Philippines' },
-  { value: 'other', label: 'Khac' },
+  { value: 'other', label: 'Khác' },
 ];
 
 function slugify(str: string): string {
@@ -87,8 +89,15 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
+export function PlayerForm({ player, onSubmit, onCancel, isSubmitting }: PlayerFormProps) {
   const isEditing = !!player;
+  const { games, fetchGames } = useGamesStore();
+  const { teams, fetchTeams } = useTeamsStore();
+
+  useEffect(() => {
+    if (games.length === 0) fetchGames({ limit: 100 });
+    if (teams.length === 0) fetchTeams({ limit: 100 });
+  }, []);
 
   const {
     register,
@@ -106,17 +115,16 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
       nationality: player?.nationality ?? '',
       bio: '',
       gameId: player?.gameId ?? '',
-      role: player?.role ?? '',
       teamId: player?.teamId ?? '',
+      isPro: player?.isPro ?? true,
       isActive: player?.isActive ?? true,
     },
     mode: 'onChange',
   });
 
   const watchedDisplayName = watch('displayName');
-  const watchedGameId = watch('gameId');
 
-  // Auto-generate slug from displayName (debounced via useEffect)
+  // Tự động tạo slug từ tên hiển thị khi tạo mới
   useEffect(() => {
     if (!isEditing && watchedDisplayName) {
       const timer = setTimeout(() => {
@@ -126,30 +134,21 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
     }
   }, [watchedDisplayName, isEditing, setValue]);
 
-  // Reset role when game changes
-  useEffect(() => {
-    setValue('role', '', { shouldValidate: false });
-  }, [watchedGameId, setValue]);
-
-  const roleOptions = watchedGameId && gameRoles[watchedGameId]
-    ? gameRoles[watchedGameId].map((r) => ({ value: r, label: r }))
-    : [];
-
   const gameOptions = [
-    { value: '', label: 'Chon game' },
+    { value: '', label: 'Chọn game' },
     ...games.map((g) => ({ value: g.id, label: g.name })),
   ];
 
   const teamOptions = [
-    { value: '', label: 'Khong co doi' },
-    ...mockTeams.map((t) => ({ value: t.id, label: `${t.tag} - ${t.name}` })),
+    { value: '', label: 'Không có đội' },
+    ...teams.map((t) => ({ value: t.id, label: t.tag ? `${t.tag} - ${t.name}` : t.name })),
   ];
 
   const breadcrumb = isEditing
-    ? `Tuyen thu > ${player.displayName} > Chinh sua`
-    : 'Tuyen thu > Them moi';
+    ? `Tuyển thủ > ${player.displayName} > Chỉnh sửa`
+    : 'Tuyển thủ > Thêm mới';
 
-  const pageTitle = isEditing ? 'Chinh sua tuyen thu' : 'Them tuyen thu moi';
+  const pageTitle = isEditing ? 'Chỉnh sửa tuyển thủ' : 'Thêm tuyển thủ mới';
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -160,25 +159,25 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
           <h1 className="font-display font-bold text-2xl text-text-primary">{pageTitle}</h1>
           <div className="flex items-center gap-2">
             <Button type="button" variant="ghost" onClick={onCancel}>
-              Huy
+              Huỷ
             </Button>
             <Button
               type="submit"
               variant="primary"
-              disabled={!isValid || !isDirty}
+              disabled={!isValid || !isDirty || isSubmitting}
             >
-              Luu
+              {isSubmitting ? 'Đang lưu...' : 'Lưu'}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* 2-column layout */}
+      {/* 2 cột */}
       <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5">
-        {/* LEFT COLUMN */}
+        {/* CỘT TRÁI */}
         <div className="space-y-5">
-          <Card title="Thong tin co ban">
-            <FormField label="Ten hien thi" error={errors.displayName?.message} required>
+          <Card title="Thông tin cơ bản">
+            <FormField label="Tên hiển thị" error={errors.displayName?.message} required>
               <Input
                 {...register('displayName')}
                 placeholder="DragonSlayer99"
@@ -186,10 +185,10 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
               />
             </FormField>
 
-            <FormField label="Ten that" error={errors.realName?.message}>
+            <FormField label="Tên thật" error={errors.realName?.message}>
               <Input
                 {...register('realName')}
-                placeholder="Nguyen Van A"
+                placeholder="Nguyễn Văn A"
               />
             </FormField>
 
@@ -198,10 +197,11 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
                 {...register('slug')}
                 placeholder="dragonslayer99"
                 className={cn('font-mono', errors.slug && 'border-danger')}
+                readOnly={isEditing}
               />
             </FormField>
 
-            <FormField label="Quoc tich" error={errors.nationality?.message} required>
+            <FormField label="Quốc tịch" error={errors.nationality?.message} required>
               <Controller
                 name="nationality"
                 control={control}
@@ -216,16 +216,16 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
               />
             </FormField>
 
-            <FormField label="Tieu su" error={errors.bio?.message}>
+            <FormField label="Tiểu sử" error={errors.bio?.message}>
               <Textarea
                 {...register('bio')}
-                placeholder="Gioi thieu ngan ve tuyen thu..."
+                placeholder="Giới thiệu ngắn về tuyển thủ..."
                 rows={3}
               />
             </FormField>
           </Card>
 
-          <Card title="Thong tin thi dau">
+          <Card title="Thông tin thi đấu">
             <FormField label="Game" error={errors.gameId?.message} required>
               <Controller
                 name="gameId"
@@ -241,23 +241,7 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
               />
             </FormField>
 
-            <FormField label="Vai tro" error={errors.role?.message} required>
-              <Controller
-                name="role"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    options={[{ value: '', label: 'Chon vai tro' }, ...roleOptions]}
-                    value={field.value}
-                    onChange={field.onChange}
-                    disabled={!watchedGameId}
-                    className={cn(errors.role && 'border-danger')}
-                  />
-                )}
-              />
-            </FormField>
-
-            <FormField label="Doi tuyen" error={errors.teamId?.message}>
+            <FormField label="Đội tuyển" error={errors.teamId?.message}>
               <Controller
                 name="teamId"
                 control={control}
@@ -273,35 +257,23 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
           </Card>
         </div>
 
-        {/* RIGHT COLUMN */}
+        {/* CỘT PHẢI */}
         <div className="space-y-5">
-          <Card title="Hinh anh">
-            {/* Avatar preview */}
+          <Card title="Hình ảnh">
             <div className="flex flex-col items-center gap-3">
               <div className="w-[200px] h-[200px] rounded-sm bg-bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-2 text-text-dim">
                 <User className="w-12 h-12" />
                 <span className="font-mono text-xs">200 x 200</span>
               </div>
               <Button type="button" variant="secondary" size="sm">
-                Tai anh dai dien
-              </Button>
-            </div>
-
-            {/* Banner preview */}
-            <div className="space-y-2 mt-2">
-              <div className="w-full h-20 rounded-sm bg-bg-elevated border border-border-subtle flex flex-col items-center justify-center gap-1 text-text-dim">
-                <ImageIcon className="w-6 h-6" />
-                <span className="font-mono text-xs">Banner</span>
-              </div>
-              <Button type="button" variant="secondary" size="sm" className="w-full">
-                Tai banner
+                Tải ảnh đại diện
               </Button>
             </div>
           </Card>
 
-          <Card title="Trang thai">
+          <Card title="Trạng thái">
             <div className="flex items-center justify-between">
-              <span className="font-body text-sm text-text-secondary">Hoat dong</span>
+              <span className="font-body text-sm text-text-secondary">Hoạt động</span>
               <Controller
                 name="isActive"
                 control={control}
@@ -314,7 +286,21 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
               />
             </div>
 
-            {/* Read-only stats when editing */}
+            <div className="flex items-center justify-between">
+              <span className="font-body text-sm text-text-secondary">Chuyên nghiệp</span>
+              <Controller
+                name="isPro"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+
+            {/* Thống kê chỉ đọc khi chỉnh sửa */}
             {isEditing && player && (
               <div className="space-y-3 pt-3 border-t border-border-subtle mt-1">
                 <div className="flex items-center justify-between">
@@ -326,11 +312,11 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
                   <TierBadge tier={player.tier} size="sm" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-body text-xs text-text-dim">Xep hang</span>
+                  <span className="font-body text-xs text-text-dim">Xếp hạng</span>
                   <span className="font-mono text-sm text-text-primary">#{player.rank}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="font-body text-xs text-text-dim">Tong danh gia</span>
+                  <span className="font-body text-xs text-text-dim">Tổng đánh giá</span>
                   <span className="font-mono text-sm text-text-secondary">
                     {formatNumber(player.totalRatings)}
                   </span>
@@ -343,5 +329,3 @@ export function PlayerForm({ player, onSubmit, onCancel }: PlayerFormProps) {
     </form>
   );
 }
-
-export type { PlayerFormValues };

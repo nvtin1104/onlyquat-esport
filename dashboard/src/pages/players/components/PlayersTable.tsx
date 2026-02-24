@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   useReactTable,
   getCoreRowModel,
-  getSortedRowModel,
   getPaginationRowModel,
   flexRender,
   createColumnHelper,
-  type SortingState,
   type RowSelectionState,
 } from '@tanstack/react-table';
-import { MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, Users } from 'lucide-react';
+import { MoreHorizontal, Users } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -37,8 +35,9 @@ import type { AdminPlayer } from '@/types/admin';
 
 interface PlayersTableProps {
   data: AdminPlayer[];
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
+  isLoading?: boolean;
+  onEdit: (slug: string) => void;
+  onDelete: (slug: string) => void;
   rowSelection: RowSelectionState;
   onRowSelectionChange: (selection: RowSelectionState) => void;
 }
@@ -47,13 +46,13 @@ const columnHelper = createColumnHelper<AdminPlayer>();
 
 export function PlayersTable({
   data,
+  isLoading,
   onEdit,
   onDelete,
   rowSelection,
   onRowSelectionChange,
 }: PlayersTableProps) {
   const navigate = useNavigate();
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'rating', desc: true }]);
 
   const columns = useMemo(
     () => [
@@ -72,7 +71,6 @@ export function PlayersTable({
           />
         ),
         size: 44,
-        enableSorting: false,
       }),
       columnHelper.accessor('rank', {
         id: 'rank',
@@ -84,7 +82,7 @@ export function PlayersTable({
       }),
       columnHelper.display({
         id: 'player',
-        header: 'Tuyen thu',
+        header: 'Tuyển thủ',
         cell: ({ row }) => {
           const p = row.original;
           return (
@@ -104,54 +102,32 @@ export function PlayersTable({
             </div>
           );
         },
-        enableSorting: false,
       }),
-      columnHelper.accessor('gameShort', {
+      columnHelper.display({
         id: 'game',
         header: 'Game',
-        cell: (info) => <GameBadge game={info.getValue()} />,
-        enableSorting: false,
+        cell: ({ row }) => {
+          const g = row.original.game;
+          if (!g) return <span className="text-text-dim">—</span>;
+          return <GameBadge game={g.shortName} />;
+        },
       }),
-      columnHelper.accessor('role', {
-        id: 'role',
-        header: 'Vai tro',
-        cell: (info) => (
-          <span className="text-text-secondary text-sm">{info.getValue()}</span>
-        ),
-        enableSorting: false,
-      }),
-      columnHelper.accessor('teamTag', {
+      columnHelper.display({
         id: 'team',
-        header: 'Doi',
-        cell: (info) => {
-          const tag = info.getValue();
-          if (!tag) return <span className="text-text-dim">—</span>;
+        header: 'Đội',
+        cell: ({ row }) => {
+          const t = row.original.team;
+          if (!t) return <span className="text-text-dim">—</span>;
           return (
             <span className="font-mono text-xs px-2 py-0.5 rounded-sm bg-bg-elevated text-text-secondary border border-border-subtle">
-              {tag}
+              {t.name}
             </span>
           );
         },
-        enableSorting: false,
       }),
       columnHelper.accessor('rating', {
         id: 'rating',
-        header: ({ column }) => (
-          <button
-            type="button"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="flex items-center gap-1 font-mono text-xs text-text-dim uppercase tracking-wider hover:text-text-primary transition-colors cursor-pointer"
-          >
-            Rating
-            {column.getIsSorted() === 'asc' ? (
-              <ArrowUp className="w-3 h-3" />
-            ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown className="w-3 h-3" />
-            ) : (
-              <ArrowUpDown className="w-3 h-3" />
-            )}
-          </button>
-        ),
+        header: 'Rating',
         cell: (info) => {
           const val = info.getValue();
           const tier = info.row.original.tier;
@@ -167,37 +143,20 @@ export function PlayersTable({
         id: 'tier',
         header: 'Tier',
         cell: (info) => <TierBadge tier={info.getValue()} size="sm" />,
-        enableSorting: false,
       }),
       columnHelper.accessor('totalRatings', {
         id: 'totalRatings',
-        header: ({ column }) => (
-          <button
-            type="button"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="flex items-center gap-1 font-mono text-xs text-text-dim uppercase tracking-wider hover:text-text-primary transition-colors cursor-pointer"
-          >
-            Danh gia
-            {column.getIsSorted() === 'asc' ? (
-              <ArrowUp className="w-3 h-3" />
-            ) : column.getIsSorted() === 'desc' ? (
-              <ArrowDown className="w-3 h-3" />
-            ) : (
-              <ArrowUpDown className="w-3 h-3" />
-            )}
-          </button>
-        ),
+        header: 'Đánh giá',
         cell: (info) => (
           <span className="font-mono text-text-secondary">{formatNumber(info.getValue())}</span>
         ),
       }),
       columnHelper.accessor('isActive', {
         id: 'status',
-        header: 'Trang thai',
+        header: 'Trạng thái',
         cell: (info) => (
           <StatusBadge status={info.getValue() ? 'active' : 'inactive'} />
         ),
-        enableSorting: false,
       }),
       columnHelper.display({
         id: 'actions',
@@ -210,24 +169,23 @@ export function PlayersTable({
                 <MoreHorizontal className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={() => navigate(`/players/${p.id}/edit`)}>
+                <DropdownMenuItem onSelect={() => navigate(`/players/${p.slug}`)}>
                   Xem
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => onEdit(p.id)}>
-                  Sua
+                <DropdownMenuItem onSelect={() => onEdit(p.slug)}>
+                  Sửa
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={() => onDelete(p.id)}
+                  onSelect={() => onDelete(p.slug)}
                   className="text-danger hover:bg-danger/10"
                 >
-                  Xoa
+                  Xoá
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           );
         },
         size: 50,
-        enableSorting: false,
       }),
     ],
     [navigate, onEdit, onDelete]
@@ -236,17 +194,12 @@ export function PlayersTable({
   const table = useReactTable({
     data,
     columns,
-    state: {
-      sorting,
-      rowSelection,
-    },
-    onSortingChange: setSorting,
+    state: { rowSelection },
     onRowSelectionChange: (updater) => {
       const next = typeof updater === 'function' ? updater(rowSelection) : updater;
       onRowSelectionChange(next);
     },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: { pageSize: 20 },
@@ -260,12 +213,20 @@ export function PlayersTable({
   const fromRow = pageIndex * pageSize + 1;
   const toRow = Math.min((pageIndex + 1) * pageSize, totalRows);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-text-dim font-mono text-sm">
+        Đang tải...
+      </div>
+    );
+  }
+
   if (data.length === 0) {
     return (
       <EmptyState
         icon={Users}
-        title="Khong co tuyen thu"
-        description="Khong tim thay tuyen thu nao phu hop voi dieu kien loc."
+        title="Không có tuyển thủ"
+        description="Không tìm thấy tuyển thủ nào phù hợp với điều kiện lọc."
       />
     );
   }
@@ -308,10 +269,9 @@ export function PlayersTable({
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between px-1">
         <span className="font-mono text-sm text-text-dim">
-          Hien thi {totalRows > 0 ? fromRow : 0}–{toRow} / {totalRows}
+          Hiển thị {totalRows > 0 ? fromRow : 0}–{toRow} / {totalRows}
         </span>
         <div className="flex items-center gap-2">
           <Button
@@ -320,7 +280,7 @@ export function PlayersTable({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Truoc
+            Trước
           </Button>
           <span className="font-mono text-sm text-text-secondary">
             Trang {pageIndex + 1} / {table.getPageCount() || 1}

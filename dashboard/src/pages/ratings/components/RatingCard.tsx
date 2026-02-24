@@ -36,7 +36,7 @@ export function RatingCard({ rating, onApprove, onReject, showActions = true }: 
               {rating.playerName}
             </span>
             <span className="font-mono text-xs text-text-dim">
-              ({rating.playerGame} · {rating.playerRole})
+              ({rating.playerGame})
             </span>
           </div>
         </div>
@@ -53,11 +53,11 @@ export function RatingCard({ rating, onApprove, onReject, showActions = true }: 
 
       {/* Stat bars */}
       <div className="grid grid-cols-5 gap-4 mt-3">
-        <StatBar label="Aim" value={rating.aim} />
-        <StatBar label="IQ" value={rating.gameIq} />
-        <StatBar label="Clutch" value={rating.clutch} />
-        <StatBar label="Team" value={rating.teamplay} />
-        <StatBar label="Con" value={rating.consistency} />
+        <StatBar label="Mech" value={rating.mechanics ?? 0} />
+        <StatBar label="Tact" value={rating.tactics ?? 0} />
+        <StatBar label="Comp" value={rating.composure ?? 0} />
+        <StatBar label="Team" value={rating.teamwork ?? 0} />
+        <StatBar label="Con" value={rating.consistency ?? 0} />
       </div>
 
       {/* Comment */}

@@ -1,175 +1,152 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { RowSelectionState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { Pagination } from '@/components/ui/Pagination';
 import { PlayersToolbar } from './components/PlayersToolbar';
 import { PlayersTable } from './components/PlayersTable';
 import { BulkActionsBar } from './components/BulkActionsBar';
-import { mockPlayers } from '@/data/mock-data';
-import type { AdminPlayer } from '@/types/admin';
+import { usePlayersStore } from '@/stores/playersStore';
 
 export function PlayersPage() {
   const navigate = useNavigate();
+  const {
+    players,
+    total,
+    page,
+    limit,
+    isLoading,
+    fetchPlayers,
+    removePlayer,
+    setPage,
+  } = usePlayersStore();
 
-  // Filter state
-  const [search, setSearch] = useState('');
-  const [gameFilter, setGameFilter] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [tierFilter, setTierFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-
-  // Selection state
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-
-  // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
-  // Filtered data
-  const filteredPlayers = useMemo<AdminPlayer[]>(() => {
-    let result = [...mockPlayers];
+  useEffect(() => {
+    fetchPlayers();
+  }, []);
 
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.displayName.toLowerCase().includes(q) ||
-          (p.realName?.toLowerCase().includes(q) ?? false)
-      );
-    }
+  const selectedSlugs = Object.keys(rowSelection).filter((s) => rowSelection[s]);
+  const selectedCount = selectedSlugs.length;
 
-    if (gameFilter) {
-      result = result.filter((p) => p.gameId === gameFilter);
-    }
-
-    if (roleFilter) {
-      result = result.filter((p) => p.role === roleFilter);
-    }
-
-    if (tierFilter) {
-      result = result.filter((p) => p.tier === tierFilter);
-    }
-
-    if (statusFilter === 'active') {
-      result = result.filter((p) => p.isActive);
-    } else if (statusFilter === 'inactive') {
-      result = result.filter((p) => !p.isActive);
-    }
-
-    return result;
-  }, [search, gameFilter, roleFilter, tierFilter, statusFilter]);
-
-  const selectedIds = Object.keys(rowSelection).filter((id) => rowSelection[id]);
-  const selectedCount = selectedIds.length;
-
-  function handleEdit(id: string) {
-    navigate(`/players/${id}/edit`);
+  function handleEdit(slug: string) {
+    navigate(`/players/${slug}/edit`);
   }
 
-  function handleDeleteRequest(id: string) {
-    setDeleteTarget(id);
+  function handleDeleteRequest(slug: string) {
+    setDeleteTarget(slug);
   }
 
-  function handleDeleteConfirm() {
-    if (deleteTarget) {
-      console.log('Delete player:', deleteTarget);
+  async function handleDeleteConfirm() {
+    if (!deleteTarget) return;
+    try {
+      await removePlayer(deleteTarget);
+      toast.success('Đã xoá tuyển thủ');
+    } catch {
+      toast.error('Xoá tuyển thủ thất bại');
+    } finally {
       setDeleteTarget(null);
       setRowSelection({});
     }
   }
 
-  function handleBulkDelete() {
-    setBulkDeleteOpen(true);
-  }
-
-  function handleBulkDeleteConfirm() {
-    console.log('Bulk delete players:', selectedIds);
+  async function handleBulkDeleteConfirm() {
     setBulkDeleteOpen(false);
+    let successCount = 0;
+    for (const slug of selectedSlugs) {
+      try {
+        await removePlayer(slug);
+        successCount++;
+      } catch {
+        // tiếp tục
+      }
+    }
+    if (successCount > 0) toast.success(`Đã xoá ${successCount} tuyển thủ`);
     setRowSelection({});
   }
 
   function handleToggleStatus() {
-    console.log('Toggle status for players:', selectedIds);
-    setRowSelection({});
-  }
-
-  function handleClearSelection() {
+    toast.info('Tính năng đang phát triển');
     setRowSelection({});
   }
 
   const deletingPlayer = deleteTarget
-    ? mockPlayers.find((p) => p.id === deleteTarget)
+    ? players.find((p) => p.slug === deleteTarget)
     : null;
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="pb-20">
       <PageHeader
-        title="Tuyen thu"
-        description="Quan ly 2,547 tuyen thu"
+        title="Tuyển thủ"
+        description={`Quản lý ${total} tuyển thủ`}
         actions={
           <Link to="/players/new">
             <Button variant="primary" size="md">
               <Plus className="w-4 h-4" />
-              Them tuyen thu
+              Thêm tuyển thủ
             </Button>
           </Link>
         }
       />
 
-      <PlayersToolbar
-        search={search}
-        onSearchChange={setSearch}
-        gameFilter={gameFilter}
-        onGameFilterChange={setGameFilter}
-        roleFilter={roleFilter}
-        onRoleFilterChange={setRoleFilter}
-        tierFilter={tierFilter}
-        onTierFilterChange={setTierFilter}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-      />
+      <PlayersToolbar />
 
       <PlayersTable
-        data={filteredPlayers}
+        data={players}
+        isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDeleteRequest}
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
       />
 
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
+
       <BulkActionsBar
         selectedCount={selectedCount}
-        onDelete={handleBulkDelete}
+        onDelete={() => setBulkDeleteOpen(true)}
         onToggleStatus={handleToggleStatus}
-        onClear={handleClearSelection}
+        onClear={() => setRowSelection({})}
       />
 
-      {/* Single delete confirm */}
       <ConfirmDialog
         open={deleteTarget !== null}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
-        title="Xoa tuyen thu"
+        title="Xoá tuyển thủ"
         description={
           deletingPlayer
-            ? `Ban co chac chan muon xoa tuyen thu "${deletingPlayer.displayName}"? Hanh dong nay khong the hoan tac.`
-            : 'Ban co chac chan muon xoa tuyen thu nay?'
+            ? `Bạn có chắc chắn muốn xoá tuyển thủ "${deletingPlayer.displayName}"? Hành động này không thể hoàn tác.`
+            : 'Bạn có chắc chắn muốn xoá tuyển thủ này?'
         }
-        confirmText="Xoa"
+        confirmText="Xoá"
         variant="destructive"
       />
 
-      {/* Bulk delete confirm */}
       <ConfirmDialog
         open={bulkDeleteOpen}
         onConfirm={handleBulkDeleteConfirm}
         onCancel={() => setBulkDeleteOpen(false)}
-        title="Xoa nhieu tuyen thu"
-        description={`Ban co chac chan muon xoa ${selectedCount} tuyen thu da chon? Hanh dong nay khong the hoan tac.`}
-        confirmText="Xoa tat ca"
+        title="Xoá nhiều tuyển thủ"
+        description={`Bạn có chắc chắn muốn xoá ${selectedCount} tuyển thủ đã chọn? Hành động này không thể hoàn tác.`}
+        confirmText="Xoá tất cả"
         variant="destructive"
       />
     </div>

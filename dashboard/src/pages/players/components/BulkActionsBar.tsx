@@ -27,19 +27,19 @@ export function BulkActionsBar({
       )}
     >
       <span className="font-body text-sm text-text-secondary">
-        Da chon{' '}
+        Đã chọn{' '}
         <span className="font-medium text-text-primary">{selectedCount}</span>{' '}
-        tuyen thu
+        tuyển thủ
       </span>
       <div className="flex items-center gap-2">
         <Button variant="destructive" size="sm" onClick={onDelete}>
-          Xoa
+          Xoá
         </Button>
         <Button variant="secondary" size="sm" onClick={onToggleStatus}>
-          Doi trang thai
+          Đổi trạng thái
         </Button>
         <Button variant="ghost" size="sm" onClick={onClear}>
-          Bo chon
+          Bỏ chọn
         </Button>
       </div>
     </div>

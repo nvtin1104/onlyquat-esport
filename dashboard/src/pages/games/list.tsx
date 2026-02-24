@@ -5,37 +5,37 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Pagination } from '@/components/ui/Pagination';
-import { TeamsTable } from './components/TeamsTable';
-import { TeamsToolbar } from './components/TeamsToolbar';
-import { useTeamsStore } from '@/stores/teamsStore';
-import type { AdminTeam } from '@/types/admin';
+import { GamesTable } from './components/GamesTable';
+import { GamesToolbar } from './components/GamesToolbar';
+import { useGamesStore } from '@/stores/gamesStore';
+import type { AdminGame } from '@/types/admin';
 
-export function TeamsPage() {
+export function GamesPage() {
   const navigate = useNavigate();
   const {
-    teams,
+    games,
     total,
     page,
     limit,
     isLoading,
     error,
-    fetchTeams,
-    removeTeam,
+    fetchGames,
+    removeGame,
     setPage,
     clearError,
-  } = useTeamsStore();
+  } = useGamesStore();
 
   useEffect(() => {
-    fetchTeams({ page: 1 });
+    fetchGames({ page: 1 });
   }, []);
 
-  async function handleDelete(team: AdminTeam) {
-    if (!window.confirm(`Bạn có chắc muốn xóa đội tuyển "${team.name}" không?`)) return;
+  async function handleDelete(game: AdminGame) {
+    if (!window.confirm(`Bạn có chắc muốn xóa game "${game.name}" không?`)) return;
     try {
-      await removeTeam(team.id);
-      toast.success(`Đã xóa đội tuyển "${team.name}"`);
+      await removeGame(game.id);
+      toast.success(`Đã xóa game "${game.name}"`);
     } catch (err: any) {
-      toast.error(err.message ?? 'Xóa đội tuyển thất bại');
+      toast.error(err.message ?? 'Xóa game thất bại');
     }
   }
 
@@ -44,17 +44,17 @@ export function TeamsPage() {
   return (
     <div>
       <PageHeader
-        title="Đội tuyển"
-        description={`Tổng cộng ${total} đội tuyển`}
+        title="Game"
+        description={`Tổng cộng ${total} game`}
         actions={
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate('/teams/create')}
+            onClick={() => navigate('/games/create')}
             className="cursor-pointer"
           >
             <PlusCircle className="w-4 h-4 mr-2" />
-            Tạo đội tuyển
+            Tạo game
           </Button>
         }
       />
@@ -72,16 +72,16 @@ export function TeamsPage() {
         </div>
       )}
 
-      <TeamsToolbar />
+      <GamesToolbar />
 
       {isLoading ? (
         <div className="flex items-center justify-center h-48">
           <Loader2 className="w-6 h-6 animate-spin text-accent-acid" />
         </div>
       ) : (
-        <TeamsTable
-          teams={teams}
-          onViewDetail={(team) => navigate(`/teams/${team.id}`)}
+        <GamesTable
+          games={games}
+          onViewDetail={(game) => navigate(`/games/${game.id}`)}
           onDelete={handleDelete}
         />
       )}
@@ -90,7 +90,7 @@ export function TeamsPage() {
         <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
           <span className="text-sm text-text-dim">
             Trang <span className="text-text-primary font-medium">{page}</span> /{' '}
-            <span className="text-text-primary font-medium">{totalPages}</span> — {total} đội tuyển
+            <span className="text-text-primary font-medium">{totalPages}</span> — {total} game
           </span>
           <Pagination
             currentPage={page}

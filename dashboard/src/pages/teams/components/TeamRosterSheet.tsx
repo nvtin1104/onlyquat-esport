@@ -102,7 +102,7 @@ export function TeamRosterSheet({ team, open, onClose }: TeamRosterSheetProps) {
                         <p className="font-bold text-sm text-text-primary truncate">
                           {player.displayName}
                         </p>
-                        <p className="text-xs text-text-dim font-body">{player.role}</p>
+                        <p className="text-xs text-text-dim font-body">{player.game?.shortName ?? ''}</p>
                       </div>
                       <div className="ml-auto flex items-center gap-2 shrink-0">
                         <div className="text-right">
