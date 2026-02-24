@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, AlertCircle, Building2, Pencil, X, Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,12 +11,13 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useOrganizationsStore } from '@/stores/organizationsStore';
 import { getRegions } from '@/lib/regions.api';
+import { getTeams } from '@/lib/teams.api';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateOrganizationSchema, type UpdateOrganizationFormData } from '@/lib/schemas/organization.schema';
-import type { AdminRegion, OrganizationType } from '@/types/admin';
+import type { AdminRegion, AdminTeam, OrganizationType } from '@/types/admin';
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
@@ -138,6 +139,22 @@ export function OrganizationDetailPage() {
     const [regions, setRegions] = useState<AdminRegion[]>([]);
     const [editMode, setEditMode] = useState(false);
 
+    // Affiliated teams
+    const [affTeams, setAffTeams] = useState<AdminTeam[]>([]);
+    const [affLoading, setAffLoading] = useState(false);
+
+    const fetchAffTeams = useCallback(async (orgId: string) => {
+        setAffLoading(true);
+        try {
+            const res = await getTeams({ organizationId: orgId, limit: 50 });
+            setAffTeams(res.data);
+        } catch {
+            // silent
+        } finally {
+            setAffLoading(false);
+        }
+    }, []);
+
     // Form setup
     const {
         register,
@@ -168,7 +185,10 @@ export function OrganizationDetailPage() {
     const [editManager, setEditManager] = useState<UserPickerValue | null>(null);
 
     useEffect(() => {
-        if (id) fetchOrgById(id);
+        if (id) {
+            fetchOrgById(id);
+            fetchAffTeams(id);
+        }
         getRegions({ limit: 100 })
             .then((res) => setRegions(res.data))
             .catch(() => { });
@@ -656,6 +676,56 @@ export function OrganizationDetailPage() {
                         </>
                     )}
                 </div>
+            </div>
+
+            {/* ── Affiliated Teams ─────────────────────────────────────── */}
+            <div className="bg-bg-surface border border-border-subtle rounded-sm p-6">
+                <div className="flex items-center gap-2 mb-5">
+                    <Building2 className="w-4 h-4 text-text-dim" />
+                    <div>
+                        <h2 className="font-display font-semibold text-text-primary">Đội tuyển trực thuộc</h2>
+                        <p className="text-xs text-text-dim mt-0.5">Các đội tuyển thuộc tổ chức này</p>
+                    </div>
+                    {!affLoading && (
+                        <span className="ml-auto font-mono text-xs text-text-dim">{affTeams.length} đội</span>
+                    )}
+                </div>
+                {affLoading ? (
+                    <div className="flex items-center justify-center py-8 text-text-dim gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Đang tải...</span>
+                    </div>
+                ) : affTeams.length === 0 ? (
+                    <p className="text-center text-text-dim text-sm py-6">Chưa có đội tuyển nào thuộc tổ chức này.</p>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {affTeams.map((team) => (
+                            <button
+                                key={team.id}
+                                type="button"
+                                onClick={() => navigate(`/teams/${team.id}`)}
+                                className="group flex items-center gap-3 p-3 rounded-sm border border-border-subtle bg-bg-elevated hover:border-accent-acid/40 hover:bg-bg-elevated/80 transition-colors cursor-pointer text-left"
+                            >
+                                <div className="w-9 h-9 rounded-sm bg-bg-surface overflow-hidden shrink-0 flex items-center justify-center border border-border-subtle">
+                                    {team.logo ? (
+                                        <img src={team.logo} alt={team.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="font-mono text-xs text-text-dim uppercase">{team.name.charAt(0)}</span>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-sm text-text-primary truncate group-hover:text-accent-acid transition-colors">
+                                        {team.name}
+                                    </p>
+                                    <p className="text-xs text-text-dim">
+                                        {team.tag ? `[${team.tag}]` : '—'}
+                                        {team.region ? ` · ${team.region.code}` : ''}
+                                    </p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

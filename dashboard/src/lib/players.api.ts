@@ -1,5 +1,6 @@
 import { api } from './api';
-import type { AdminPlayer, PlayersListResponse } from '@/types/admin';
+import type { AdminPlayer, PlayersListResponse, PaginatedResponse } from '@/types/admin';
+import type { PlayerHistoryItem, AddPlayerHistoryDto } from '@/types/history';
 
 export interface GetPlayersParams {
   page?: number;
@@ -85,4 +86,24 @@ export async function updatePlayer(slug: string, dto: UpdatePlayerDto): Promise<
 export async function deletePlayer(slug: string): Promise<AdminPlayer> {
   const res = await api.delete<AdminPlayer>(`/players/${slug}`);
   return res.data;
+}
+
+export async function getPlayerHistory(
+  slug: string,
+  page = 1,
+  limit = 20,
+): Promise<PaginatedResponse<PlayerHistoryItem>> {
+  const res = await api.get<PaginatedResponse<PlayerHistoryItem>>(
+    `/players/${slug}/history?page=${page}&limit=${limit}`,
+  );
+  return res.data;
+}
+
+export async function addPlayerHistory(slug: string, dto: AddPlayerHistoryDto): Promise<PlayerHistoryItem> {
+  const res = await api.post<PlayerHistoryItem>(`/players/${slug}/history`, dto);
+  return res.data;
+}
+
+export async function deletePlayerHistory(slug: string, historyId: string): Promise<void> {
+  await api.delete(`/players/${slug}/history/${historyId}`);
 }

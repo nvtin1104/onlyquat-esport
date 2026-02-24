@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, AlertCircle, User, Pencil, X, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertCircle, User, Pencil, X, Check, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { z } from 'zod';
@@ -13,10 +13,14 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { GameBadge } from '@/components/shared/GameBadge';
 import { RatingNumber } from '@/components/shared/RatingNumber';
 import { Button } from '@/components/ui/Button';
+import { HistoryTimeline } from '@/components/shared/HistoryTimeline';
+import { AddPlayerHistoryModal } from '@/components/shared/AddHistoryModal';
 import { usePlayersStore } from '@/stores/playersStore';
 import { useGamesStore } from '@/stores/gamesStore';
 import { useTeamsStore } from '@/stores/teamsStore';
+import { getPlayerHistory, addPlayerHistory, deletePlayerHistory } from '@/lib/players.api';
 import { cn, formatNumber } from '@/lib/utils';
+import type { PlayerHistoryItem, AddPlayerHistoryDto } from '@/types/history';
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -144,6 +148,28 @@ export function PlayerDetailPage() {
 
   const [editMode, setEditMode] = useState(false);
 
+  // History state
+  const [historyItems, setHistoryItems] = useState<PlayerHistoryItem[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [showAddHistory, setShowAddHistory] = useState(false);
+
+  const fetchHistory = useCallback(async (playerSlug: string, page: number) => {
+    setHistoryLoading(true);
+    try {
+      const res = await getPlayerHistory(playerSlug, page, 10);
+      setHistoryItems(res.data);
+      setHistoryTotal(res.meta.total);
+      setHistoryTotalPages(res.meta.totalPages ?? 1);
+    } catch {
+      // silent
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -165,7 +191,10 @@ export function PlayerDetailPage() {
   });
 
   useEffect(() => {
-    if (slug) fetchPlayerBySlug(slug);
+    if (slug) {
+      fetchPlayerBySlug(slug);
+      fetchHistory(slug, 1);
+    }
     if (games.length === 0) fetchGames({ limit: 100 });
     if (teams.length === 0) fetchTeams({ limit: 100 });
     return () => clearSelectedPlayer();
@@ -221,6 +250,30 @@ export function PlayerDetailPage() {
   function cancelEdit() {
     setEditMode(false);
     reset();
+  }
+
+  async function handleAddHistory(dto: AddPlayerHistoryDto) {
+    if (!slug) return;
+    await addPlayerHistory(slug, dto);
+    toast.success('Đã thêm lịch sử');
+    fetchHistory(slug, 1);
+    setHistoryPage(1);
+  }
+
+  async function handleDeleteHistory(historyId: string) {
+    if (!slug) return;
+    try {
+      await deletePlayerHistory(slug, historyId);
+      toast.success('Đã xoá');
+      fetchHistory(slug, historyPage);
+    } catch {
+      toast.error('Không thể xoá');
+    }
+  }
+
+  function handleHistoryPageChange(page: number) {
+    setHistoryPage(page);
+    if (slug) fetchHistory(slug, page);
   }
 
   const gameOptions = [
@@ -487,16 +540,30 @@ export function PlayerDetailPage() {
               </DetailRow>
               <DetailRow label="Game">
                 {player.game ? (
-                  <GameBadge game={player.game.shortName} />
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/games/${player.game!.id}`)}
+                    className="group inline-flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer"
+                    title={`Xem game ${player.game.name}`}
+                  >
+                    <GameBadge game={player.game.shortName} />
+                    <span className="text-xs text-text-dim opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
+                  </button>
                 ) : (
                   <span className="text-sm text-text-dim">—</span>
                 )}
               </DetailRow>
               <DetailRow label="Đội tuyển">
                 {player.team ? (
-                  <span className="font-mono text-xs px-2 py-0.5 rounded-sm bg-bg-elevated text-text-secondary border border-border-subtle">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/teams/${player.team!.id}`)}
+                    className="group inline-flex items-center gap-1.5 font-mono text-xs px-2 py-0.5 rounded-sm bg-bg-elevated text-text-secondary border border-border-subtle hover:border-accent-acid/50 hover:text-accent-acid transition-colors cursor-pointer"
+                    title={`Xem đội ${player.team.name}`}
+                  >
                     {player.team.name}
-                  </span>
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
+                  </button>
                 ) : (
                   <span className="text-sm text-text-dim">—</span>
                 )}
@@ -549,6 +616,43 @@ export function PlayerDetailPage() {
             </>
           )}
         </div>
+      </div>
+
+      {/* History section */}
+      {showAddHistory && (
+        <AddPlayerHistoryModal
+          onClose={() => setShowAddHistory(false)}
+          onSubmit={handleAddHistory}
+        />
+      )}
+
+      <div className="mt-6 bg-bg-surface border border-border-subtle rounded-sm p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="font-display font-semibold text-text-primary">Lịch sử tuyển thủ</h2>
+            <p className="text-xs text-text-dim mt-0.5">Thành tích, chuyển nhượng, đổi tên hiệu, thay đổi hạng</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAddHistory(true)}
+            className="cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            Thêm
+          </Button>
+        </div>
+        <HistoryTimeline
+          items={historyItems}
+          total={historyTotal}
+          page={historyPage}
+          totalPages={historyTotalPages}
+          isLoading={historyLoading}
+          isTeam={false}
+          canDelete={true}
+          onPageChange={handleHistoryPageChange}
+          onDelete={handleDeleteHistory}
+        />
       </div>
     </div>
   );

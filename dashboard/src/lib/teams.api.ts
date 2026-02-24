@@ -1,5 +1,6 @@
 import { api } from './api';
-import type { AdminTeam, TeamsListResponse } from '@/types/admin';
+import type { AdminTeam, TeamsListResponse, PaginatedResponse } from '@/types/admin';
+import type { TeamHistoryItem, AddTeamHistoryDto } from '@/types/history';
 
 export interface GetTeamsParams {
   page?: number;
@@ -66,4 +67,24 @@ export async function updateTeam(id: string, dto: UpdateTeamDto): Promise<AdminT
 export async function deleteTeam(id: string): Promise<AdminTeam> {
   const res = await api.delete<AdminTeam>(`/teams/${id}`);
   return res.data;
+}
+
+export async function getTeamHistory(
+  teamId: string,
+  page = 1,
+  limit = 20,
+): Promise<PaginatedResponse<TeamHistoryItem>> {
+  const res = await api.get<PaginatedResponse<TeamHistoryItem>>(
+    `/teams/${teamId}/history?page=${page}&limit=${limit}`,
+  );
+  return res.data;
+}
+
+export async function addTeamHistory(teamId: string, dto: AddTeamHistoryDto): Promise<TeamHistoryItem> {
+  const res = await api.post<TeamHistoryItem>(`/teams/${teamId}/history`, dto);
+  return res.data;
+}
+
+export async function deleteTeamHistory(teamId: string, historyId: string): Promise<void> {
+  await api.delete(`/teams/${teamId}/history/${historyId}`);
 }

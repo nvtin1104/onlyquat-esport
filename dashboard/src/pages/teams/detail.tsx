@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Pencil, X, Check } from 'lucide-react';
+import { ArrowLeft, Loader2, Pencil, X, Check, Plus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ImageUpload } from '@/components/shared/ImageUpload';
+import { HistoryTimeline } from '@/components/shared/HistoryTimeline';
+import { AddTeamHistoryModal } from '@/components/shared/AddHistoryModal';
+import { TierBadge } from '@/components/shared/TierBadge';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useTeamsStore } from '@/stores/teamsStore';
 import { getRegions } from '@/lib/regions.api';
 import { getOrganizations } from '@/lib/organizations.api';
+import { getTeamHistory, addTeamHistory, deleteTeamHistory } from '@/lib/teams.api';
+import { getPlayers } from '@/lib/players.api';
 import { cn } from '@/lib/utils';
-import type { AdminRegion, AdminOrganization } from '@/types/admin';
+import type { AdminRegion, AdminOrganization, AdminPlayer } from '@/types/admin';
+import type { TeamHistoryItem, AddTeamHistoryDto } from '@/types/history';
 
 const inputClass =
   'w-full bg-bg-elevated border border-border-subtle rounded-sm px-3 py-2 text-sm text-text-primary placeholder:text-text-dim focus:outline-none focus:border-accent-acid transition-colors';
@@ -42,8 +48,50 @@ export function TeamDetailPage() {
   const [organizationId, setOrganizationId] = useState('');
   const [regionId, setRegionId] = useState('');
 
+  // History state
+  const [historyItems, setHistoryItems] = useState<TeamHistoryItem[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [showAddHistory, setShowAddHistory] = useState(false);
+
+  // Roster state
+  const [rosterPlayers, setRosterPlayers] = useState<AdminPlayer[]>([]);
+  const [rosterLoading, setRosterLoading] = useState(false);
+
+  const fetchHistory = useCallback(async (teamId: string, page: number) => {
+    setHistoryLoading(true);
+    try {
+      const res = await getTeamHistory(teamId, page, 10);
+      setHistoryItems(res.data);
+      setHistoryTotal(res.meta.total);
+      setHistoryTotalPages(res.meta.totalPages ?? 1);
+    } catch {
+      // silent
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  const fetchRoster = useCallback(async (teamId: string) => {
+    setRosterLoading(true);
+    try {
+      const res = await getPlayers({ teamId, limit: 50 });
+      setRosterPlayers(res.data);
+    } catch {
+      // silent
+    } finally {
+      setRosterLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    if (id) fetchTeamById(id);
+    if (id) {
+      fetchTeamById(id);
+      fetchHistory(id, 1);
+      fetchRoster(id);
+    }
     getRegions({ limit: 100 }).then((res) => setRegions(res.data)).catch(() => {});
     getOrganizations({ limit: 100 }).then((res) => setOrganizations(res.data)).catch(() => {});
   }, [id]);
@@ -94,6 +142,30 @@ export function TeamDetailPage() {
     clearError();
   }
 
+  async function handleAddHistory(dto: AddTeamHistoryDto) {
+    if (!id) return;
+    await addTeamHistory(id, dto);
+    toast.success('Đã thêm lịch sử');
+    fetchHistory(id, 1);
+    setHistoryPage(1);
+  }
+
+  async function handleDeleteHistory(historyId: string) {
+    if (!id) return;
+    try {
+      await deleteTeamHistory(id, historyId);
+      toast.success('Đã xoá');
+      fetchHistory(id, historyPage);
+    } catch {
+      toast.error('Không thể xoá');
+    }
+  }
+
+  function handleHistoryPageChange(page: number) {
+    setHistoryPage(page);
+    if (id) fetchHistory(id, page);
+  }
+
   if (isLoading && !selectedTeam) return <DetailSkeleton />;
 
   if (!selectedTeam && !isLoading) {
@@ -141,6 +213,13 @@ export function TeamDetailPage() {
           <span>{error}</span>
           <button type="button" onClick={clearError} className="text-danger/70 hover:text-danger text-xs ml-4 cursor-pointer">✕</button>
         </div>
+      )}
+
+      {showAddHistory && (
+        <AddTeamHistoryModal
+          onClose={() => setShowAddHistory(false)}
+          onSubmit={handleAddHistory}
+        />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -233,7 +312,21 @@ export function TeamDetailPage() {
               <InfoRow label="Tag" value={team.tag ?? '—'} />
               <InfoRow label="Website" value={team.website ?? '—'} />
               <InfoRow label="Mô tả" value={team.description ?? '—'} />
-              <InfoRow label="Tổ chức" value={team.organization?.name ?? '—'} />
+              <InfoRow label="Tổ chức">
+                {team.organization ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/organizations/${team.organization!.id}`)}
+                    className="group inline-flex items-center gap-1.5 text-sm text-text-primary hover:text-accent-acid transition-colors cursor-pointer"
+                    title={`Xem tổ chức ${team.organization.name}`}
+                  >
+                    {team.organization.name}
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-accent-acid">↗</span>
+                  </button>
+                ) : (
+                  <span className="text-sm text-text-primary">—</span>
+                )}
+              </InfoRow>
               <InfoRow label="Khu vực" value={team.region ? `${team.region.name} (${team.region.code})` : '—'} />
               <InfoRow label="Ngày tạo" value={format(new Date(team.createdAt), 'dd/MM/yyyy HH:mm')} />
               <InfoRow label="Cập nhật" value={format(new Date(team.updatedAt), 'dd/MM/yyyy HH:mm')} />
@@ -241,15 +334,93 @@ export function TeamDetailPage() {
           )}
         </div>
       </div>
+      {/* History section */}
+      <div className="mt-6 bg-bg-surface border border-border-subtle rounded-sm p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="font-display font-semibold text-text-primary">Lịch sử đội tuyển</h2>
+            <p className="text-xs text-text-dim mt-0.5">Thành tích, chuyển nhượng, đổi tên, thay đổi tổ chức</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAddHistory(true)}
+            className="cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5 mr-1.5" />
+            Thêm
+          </Button>
+        </div>
+        <HistoryTimeline
+          items={historyItems}
+          total={historyTotal}
+          page={historyPage}
+          totalPages={historyTotalPages}
+          isLoading={historyLoading}
+          isTeam={true}
+          canDelete={true}
+          onPageChange={handleHistoryPageChange}
+          onDelete={handleDeleteHistory}
+        />
+      </div>
+
+      {/* Roster section */}
+      <div className="mt-6 bg-bg-surface border border-border-subtle rounded-sm p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Users className="w-4 h-4 text-text-dim" />
+          <div>
+            <h2 className="font-display font-semibold text-text-primary">Thành viên hiện tại</h2>
+            <p className="text-xs text-text-dim mt-0.5">Tuyển thủ đang thuộc đội</p>
+          </div>
+        </div>
+        {rosterLoading ? (
+          <div className="flex items-center justify-center py-8 text-text-dim gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">Đang tải...</span>
+          </div>
+        ) : rosterPlayers.length === 0 ? (
+          <p className="text-center text-text-dim text-sm py-6">Chưa có tuyển thủ nào.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {rosterPlayers.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => navigate(`/players/${p.slug}`)}
+                className="group flex items-center gap-3 p-3 rounded-sm border border-border-subtle bg-bg-elevated hover:border-accent-acid/40 hover:bg-bg-elevated/80 transition-colors cursor-pointer text-left"
+              >
+                <div className="w-9 h-9 rounded-full bg-bg-surface overflow-hidden shrink-0 flex items-center justify-center">
+                  {p.imageUrl ? (
+                    <img src={p.imageUrl} alt={p.displayName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="font-mono text-xs text-text-dim uppercase">{p.displayName.charAt(0)}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-text-primary truncate group-hover:text-accent-acid transition-colors">
+                    {p.displayName}
+                  </p>
+                  <p className="text-xs text-text-dim">{p.game?.shortName ?? '—'}</p>
+                </div>
+                <TierBadge tier={p.tier} size="sm" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2 border-b border-border-subtle/50 last:border-0">
       <span className="font-mono text-xs text-text-dim uppercase tracking-wide shrink-0">{label}</span>
-      <span className="text-sm text-text-primary text-right">{value}</span>
+      {children ? (
+        <div className="text-right">{children}</div>
+      ) : (
+        <span className="text-sm text-text-primary text-right">{value}</span>
+      )}
     </div>
   );
 }
