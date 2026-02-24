@@ -26,6 +26,38 @@ async function main() {
   });
   console.log('  Created admin account: admin@onlyquat.com / Admin@123456');
 
+  // ─── Regions (before teams so we have regionIds) ─────────────────────
+  const regions = await Promise.all([
+    prisma.region.upsert({
+      where: { code: 'HN' },
+      update: {},
+      create: { name: 'Hà Nội', code: 'HN', logo: '/images/regions/hanoi.svg' },
+    }),
+    prisma.region.upsert({
+      where: { code: 'HCM' },
+      update: {},
+      create: { name: 'Hồ Chí Minh', code: 'HCM', logo: '/images/regions/hochiminh.svg' },
+    }),
+    prisma.region.upsert({
+      where: { code: 'DN' },
+      update: {},
+      create: { name: 'Đà Nẵng', code: 'DN', logo: '/images/regions/danang.svg' },
+    }),
+    prisma.region.upsert({
+      where: { code: 'VN' },
+      update: {},
+      create: { name: 'Vietnam', code: 'VN', logo: '/images/regions/vietnam.svg' },
+    }),
+    prisma.region.upsert({
+      where: { code: 'SEA' },
+      update: {},
+      create: { name: 'Southeast Asia', code: 'SEA', logo: '/images/regions/sea.svg' },
+    }),
+  ]);
+
+  const [regionHN, regionHCM, regionDN, regionVN] = regions;
+  console.log(`  Created ${regions.length} regions`);
+
   // ─── Games ──────────────────────────────────────────────────────────
   const games = await Promise.all([
     prisma.game.upsert({
@@ -34,7 +66,7 @@ async function main() {
       create: {
         name: 'League of Legends',
         shortName: 'LoL',
-        iconUrl: '/images/games/lol.svg',
+        logo: '/images/games/lol.svg',
         roles: ['Top', 'Jungle', 'Mid', 'ADC', 'Support'],
       },
     }),
@@ -44,7 +76,7 @@ async function main() {
       create: {
         name: 'Valorant',
         shortName: 'VAL',
-        iconUrl: '/images/games/val.svg',
+        logo: '/images/games/val.svg',
         roles: ['Duelist', 'Controller', 'Initiator', 'Sentinel'],
       },
     }),
@@ -54,7 +86,7 @@ async function main() {
       create: {
         name: 'Dota 2',
         shortName: 'Dota2',
-        iconUrl: '/images/games/dota2.svg',
+        logo: '/images/games/dota2.svg',
         roles: ['Carry', 'Mid', 'Offlane', 'Support', 'Hard Support'],
       },
     }),
@@ -64,7 +96,7 @@ async function main() {
       create: {
         name: 'Counter-Strike 2',
         shortName: 'CS2',
-        iconUrl: '/images/games/cs2.svg',
+        logo: '/images/games/cs2.svg',
         roles: ['Entry', 'AWPer', 'Lurker', 'Support', 'IGL'],
       },
     }),
@@ -82,8 +114,8 @@ async function main() {
         slug: 'team-alpha',
         name: 'Team Alpha',
         tag: 'ALP',
-        logoUrl: 'https://api.dicebear.com/9.x/identicon/svg?seed=alpha',
-        regionTag: 'VN',
+        logo: 'https://api.dicebear.com/9.x/identicon/svg?seed=alpha',
+        regionId: regionVN.id,
       },
     }),
     prisma.team.upsert({
@@ -93,8 +125,8 @@ async function main() {
         slug: 'phoenix-rising',
         name: 'Phoenix Rising',
         tag: 'PHX',
-        logoUrl: 'https://api.dicebear.com/9.x/identicon/svg?seed=phoenix',
-        regionTag: 'VN',
+        logo: 'https://api.dicebear.com/9.x/identicon/svg?seed=phoenix',
+        regionId: regionVN.id,
       },
     }),
     prisma.team.upsert({
@@ -104,8 +136,8 @@ async function main() {
         slug: 'shadow-legion',
         name: 'Shadow Legion',
         tag: 'SHL',
-        logoUrl: 'https://api.dicebear.com/9.x/identicon/svg?seed=shadow',
-        regionTag: 'VN',
+        logo: 'https://api.dicebear.com/9.x/identicon/svg?seed=shadow',
+        regionId: regionVN.id,
       },
     }),
   ]);
@@ -120,16 +152,14 @@ async function main() {
       displayName: 'DragonSlayer99',
       realName: 'Nguyễn Minh Đức',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=dragonslayer',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=dragonslayer',
       gameId: lol.id,
       teamId: alpha.id,
-      role: 'Mid',
       rating: 9.8,
-      aim: 96,
-      gameIq: 94,
-      clutch: 98,
-      teamplay: 90,
+      mechanics: 96,
+      tactics: 94,
+      composure: 98,
+      teamwork: 90,
       consistency: 95,
       totalRatings: 12450,
       tier: PlayerTier.S,
@@ -140,16 +170,14 @@ async function main() {
       displayName: 'ThunderAce',
       realName: 'Trần Hoàng Nam',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=thunderace',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=thunderace',
       gameId: val.id,
       teamId: phoenix.id,
-      role: 'Duelist',
       rating: 9.5,
-      aim: 98,
-      gameIq: 88,
-      clutch: 92,
-      teamplay: 85,
+      mechanics: 98,
+      tactics: 88,
+      composure: 92,
+      teamwork: 85,
       consistency: 91,
       totalRatings: 9830,
       tier: PlayerTier.S,
@@ -160,16 +188,14 @@ async function main() {
       displayName: 'KitsunePro',
       realName: 'Lê Thị Hương',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=kitsunepro',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=kitsunepro',
       gameId: dota2.id,
       teamId: shadow.id,
-      role: 'Carry',
       rating: 9.3,
-      aim: 89,
-      gameIq: 97,
-      clutch: 86,
-      teamplay: 92,
+      mechanics: 89,
+      tactics: 97,
+      composure: 86,
+      teamwork: 92,
       consistency: 94,
       totalRatings: 8200,
       tier: PlayerTier.S,
@@ -180,16 +206,14 @@ async function main() {
       displayName: 'SakuraWind',
       realName: 'Phạm Anh Thư',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=sakurawind',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=sakurawind',
       gameId: cs2.id,
       teamId: alpha.id,
-      role: 'AWPer',
       rating: 9.1,
-      aim: 99,
-      gameIq: 90,
-      clutch: 88,
-      teamplay: 82,
+      mechanics: 99,
+      tactics: 90,
+      composure: 88,
+      teamwork: 82,
       consistency: 87,
       totalRatings: 7650,
       tier: PlayerTier.S,
@@ -200,16 +224,14 @@ async function main() {
       displayName: 'ShadowViper',
       realName: 'Võ Quốc Huy',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=shadowviper',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=shadowviper',
       gameId: val.id,
       teamId: phoenix.id,
-      role: 'Controller',
       rating: 8.7,
-      aim: 82,
-      gameIq: 95,
-      clutch: 84,
-      teamplay: 96,
+      mechanics: 82,
+      tactics: 95,
+      composure: 84,
+      teamwork: 96,
       consistency: 90,
       totalRatings: 5420,
       tier: PlayerTier.A,
@@ -220,16 +242,14 @@ async function main() {
       displayName: 'BlazeQueen',
       realName: 'Đặng Thùy Linh',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=blazequeen',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=blazequeen',
       gameId: lol.id,
       teamId: shadow.id,
-      role: 'ADC',
       rating: 8.4,
-      aim: 93,
-      gameIq: 86,
-      clutch: 80,
-      teamplay: 88,
+      mechanics: 93,
+      tactics: 86,
+      composure: 80,
+      teamwork: 88,
       consistency: 85,
       totalRatings: 4890,
       tier: PlayerTier.A,
@@ -240,16 +260,14 @@ async function main() {
       displayName: 'IronWolf',
       realName: 'Bùi Đức Anh',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=ironwolf',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=ironwolf',
       gameId: dota2.id,
       teamId: alpha.id,
-      role: 'Offlane',
       rating: 7.9,
-      aim: 78,
-      gameIq: 88,
-      clutch: 82,
-      teamplay: 90,
+      mechanics: 78,
+      tactics: 88,
+      composure: 82,
+      teamwork: 90,
       consistency: 80,
       totalRatings: 3200,
       tier: PlayerTier.B,
@@ -260,16 +278,14 @@ async function main() {
       displayName: 'NeonRush',
       realName: 'Hoàng Văn Tùng',
       nationality: 'VN',
-      imageUrl:
-        'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=neonrush',
+      imageUrl: 'https://api.dicebear.com/9.x/bottts-neutral/svg?seed=neonrush',
       gameId: cs2.id,
       teamId: phoenix.id,
-      role: 'Entry',
       rating: 7.5,
-      aim: 90,
-      gameIq: 72,
-      clutch: 78,
-      teamplay: 75,
+      mechanics: 90,
+      tactics: 72,
+      composure: 78,
+      teamwork: 75,
       consistency: 70,
       totalRatings: 2100,
       tier: PlayerTier.B,
@@ -300,51 +316,39 @@ async function main() {
     { teamId: shadow.id, slug: 'blazequeen', role: TeamMemberRole.player },
   ];
 
-  // Delete existing team members to avoid duplicate issues on re-seed
   await prisma.teamMember.deleteMany();
-
   for (const link of memberLinks) {
     const playerId = players[link.slug].id;
-    await prisma.teamMember.create({
-      data: {
-        teamId: link.teamId,
-        playerId,
-        role: link.role,
-      },
-    });
+    await prisma.teamMember.create({ data: { teamId: link.teamId, playerId, role: link.role } });
   }
   console.log(`  Created ${memberLinks.length} team members`);
 
   // ─── Ratings ────────────────────────────────────────────────────────
-  // Delete existing ratings to avoid duplicates on re-seed
   await prisma.rating.deleteMany();
 
   const ratingsData = [
     {
       playerId: players['dragonslayer99'].id,
       userName: 'ProGamer_VN',
-      userAvatar:
-        'https://api.dicebear.com/9.x/avataaars/svg?seed=progamer',
+      userAvatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=progamer',
       overall: 9.5,
-      aim: 95,
-      gameIq: 93,
-      clutch: 97,
-      teamplay: 89,
+      mechanics: 95,
+      tactics: 93,
+      composure: 97,
+      teamwork: 89,
       consistency: 94,
-      comment:
-        'Chơi mid quá đỉnh! Mechanics cực kỳ clean, decision-making thuộc top đầu.',
+      comment: 'Chơi mid quá đỉnh! Mechanics cực kỳ clean, decision-making thuộc top đầu.',
       createdAt: new Date('2026-02-13T10:30:00Z'),
     },
     {
       playerId: players['dragonslayer99'].id,
       userName: 'EsportFan99',
-      userAvatar:
-        'https://api.dicebear.com/9.x/avataaars/svg?seed=esportfan',
+      userAvatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=esportfan',
       overall: 9.8,
-      aim: 97,
-      gameIq: 95,
-      clutch: 99,
-      teamplay: 91,
+      mechanics: 97,
+      tactics: 95,
+      composure: 99,
+      teamwork: 91,
       consistency: 96,
       comment: 'Clutch king! Không có ai carry tốt hơn ở VN lúc này.',
       createdAt: new Date('2026-02-12T15:45:00Z'),
@@ -352,43 +356,38 @@ async function main() {
     {
       playerId: players['thunderace'].id,
       userName: 'TacticalMind',
-      userAvatar:
-        'https://api.dicebear.com/9.x/avataaars/svg?seed=tactical',
+      userAvatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=tactical',
       overall: 9.3,
-      aim: 98,
-      gameIq: 87,
-      clutch: 91,
-      teamplay: 84,
+      mechanics: 98,
+      tactics: 87,
+      composure: 91,
+      teamwork: 84,
       consistency: 90,
-      comment:
-        'Aim thì không ai bàn cãi, nhưng game sense cần cải thiện thêm.',
+      comment: 'Aim thì không ai bàn cãi, nhưng game sense cần cải thiện thêm.',
       createdAt: new Date('2026-02-11T08:20:00Z'),
     },
     {
       playerId: players['kitsunepro'].id,
       userName: 'DotaLover',
-      userAvatar:
-        'https://api.dicebear.com/9.x/avataaars/svg?seed=dotalover',
+      userAvatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=dotalover',
       overall: 9.5,
-      aim: 90,
-      gameIq: 98,
-      clutch: 87,
-      teamplay: 93,
+      mechanics: 90,
+      tactics: 98,
+      composure: 87,
+      teamwork: 93,
       consistency: 95,
-      comment:
-        'IQ game cao nhất server, luôn biết cách itemize và pick đúng lúc.',
+      comment: 'IQ game cao nhất server, luôn biết cách itemize và pick đúng lúc.',
       createdAt: new Date('2026-02-10T14:10:00Z'),
     },
     {
       playerId: players['dragonslayer99'].id,
       userName: 'MidLaneKing',
-      userAvatar:
-        'https://api.dicebear.com/9.x/avataaars/svg?seed=midlane',
+      userAvatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=midlane',
       overall: 10.0,
-      aim: 96,
-      gameIq: 94,
-      clutch: 98,
-      teamplay: 90,
+      mechanics: 96,
+      tactics: 94,
+      composure: 98,
+      teamwork: 90,
       consistency: 95,
       comment: 'GOAT của VN LoL, không cần bàn thêm!',
       createdAt: new Date('2026-02-09T20:00:00Z'),
@@ -396,13 +395,12 @@ async function main() {
     {
       playerId: players['shadowviper'].id,
       userName: 'SmokeMaster',
-      userAvatar:
-        'https://api.dicebear.com/9.x/avataaars/svg?seed=smoke',
+      userAvatar: 'https://api.dicebear.com/9.x/avataaars/svg?seed=smoke',
       overall: 8.8,
-      aim: 83,
-      gameIq: 96,
-      clutch: 85,
-      teamplay: 97,
+      mechanics: 83,
+      tactics: 96,
+      composure: 85,
+      teamwork: 97,
       consistency: 91,
       comment: 'Controller tốt nhất VN, smoke timing luôn perfect.',
       createdAt: new Date('2026-02-08T11:30:00Z'),
@@ -414,60 +412,7 @@ async function main() {
   }
   console.log(`  Created ${ratingsData.length} ratings`);
 
-  // ─── Regions ────────────────────────────────────────────────────────
-  const regions = await Promise.all([
-    prisma.region.upsert({
-      where: { code: 'HN' },
-      update: {},
-      create: {
-        name: 'Hà Nội',
-        code: 'HN',
-        logo: '/images/regions/hanoi.svg',
-      },
-    }),
-    prisma.region.upsert({
-      where: { code: 'HCM' },
-      update: {},
-      create: {
-        name: 'Hồ Chí Minh',
-        code: 'HCM',
-        logo: '/images/regions/hochiminh.svg',
-      },
-    }),
-    prisma.region.upsert({
-      where: { code: 'DN' },
-      update: {},
-      create: {
-        name: 'Đà Nẵng',
-        code: 'DN',
-        logo: '/images/regions/danang.svg',
-      },
-    }),
-    prisma.region.upsert({
-      where: { code: 'VN' },
-      update: {},
-      create: {
-        name: 'Vietnam',
-        code: 'VN',
-        logo: '/images/regions/vietnam.svg',
-      },
-    }),
-    prisma.region.upsert({
-      where: { code: 'SEA' },
-      update: {},
-      create: {
-        name: 'Southeast Asia',
-        code: 'SEA',
-        logo: '/images/regions/sea.svg',
-      },
-    }),
-  ]);
-
-  const [regionHN, regionHCM, regionDN, regionVN] = regions;
-  console.log(`  Created ${regions.length} regions`);
-
   // ─── Organizations ───────────────────────────────────────────────────
-  // Re-fetch admin user for ownerId
   const adminUser = await prisma.user.findUnique({ where: { email: 'admin@onlyquat.com' } });
   if (!adminUser) throw new Error('Admin user not found — run seed again');
 
@@ -508,9 +453,7 @@ async function main() {
           vi: 'Tổ chức esports đa bộ môn lớn nhất Việt Nam, vô địch nhiều giải đấu quốc tế.',
         },
         roles: [OrganizationType.ORGANIZER, OrganizationType.CLUB],
-        mediaLinks: [
-          { url: 'https://www.facebook.com/teamflashvn', description: 'Facebook' },
-        ],
+        mediaLinks: [{ url: 'https://www.facebook.com/teamflashvn', description: 'Facebook' }],
         ownerId: adminUser.id,
         regionId: regionHN.id,
       },
@@ -529,9 +472,7 @@ async function main() {
           vi: 'Đội tuyển LMHT đại diện Việt Nam tại giải đấu quốc tế LCS.',
         },
         roles: [OrganizationType.CLUB],
-        mediaLinks: [
-          { url: 'https://www.facebook.com/saigonbuffalo', description: 'Facebook' },
-        ],
+        mediaLinks: [{ url: 'https://www.facebook.com/saigonbuffalo', description: 'Facebook' }],
         ownerId: adminUser.id,
         regionId: regionHCM.id,
       },

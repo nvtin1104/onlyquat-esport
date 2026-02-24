@@ -57,6 +57,24 @@ enum TeamMemberRole {
   substitute
 }
 
+enum TeamHistoryEventType {
+  NAME_CHANGE
+  LOGO_CHANGE
+  ACHIEVEMENT
+  PLAYER_JOIN
+  PLAYER_LEAVE
+  ORG_CHANGE
+}
+
+enum PlayerHistoryEventType {
+  DISPLAY_NAME_CHANGE
+  TEAM_JOIN
+  TEAM_LEAVE
+  TEAM_TRANSFER
+  ACHIEVEMENT
+  TIER_CHANGE
+}
+
 // ─── Information System ───────────────────────────────────────────────────────
 
 enum OrganizationType {
@@ -237,6 +255,8 @@ model Team {
   matchesAsTeam2  Match[]          @relation("MatchTeam2")
   matchesWon      Match[]          @relation("MatchWinner")
   matchEvents     MatchEvent[]
+  teamHistories   TeamHistory[]
+  playerHistories PlayerHistory[]  @relation("PlayerHistoryTeam")
 
   @@index([organizationId])
   @@index([regionId])
@@ -277,9 +297,11 @@ model Player {
   teamId String?
   team   Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
 
-  teamMembers TeamMember[]
-  ratings     Rating[]
-  matchEvents MatchEvent[]
+  teamMembers     TeamMember[]
+  ratings         Rating[]
+  matchEvents     MatchEvent[]
+  teamHistories   TeamHistory[]   @relation("TeamHistoryPlayer")
+  playerHistories PlayerHistory[]
 
   @@index([gameId, rating(sort: Desc)])
   @@index([tier])
@@ -302,6 +324,40 @@ model TeamMember {
   @@index([teamId])
   @@index([playerId])
   @@map("team_members")
+}
+
+model TeamHistory {
+  id         String               @id @default(uuid())
+  eventType  TeamHistoryEventType
+  metadata   Json                 @default("{}")
+  note       String?
+  happenedAt DateTime             @default(now())
+  createdAt  DateTime             @default(now())
+
+  teamId   String
+  team     Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  playerId String?
+  player   Player? @relation("TeamHistoryPlayer", fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@index([teamId, happenedAt(sort: Desc)])
+  @@map("team_histories")
+}
+
+model PlayerHistory {
+  id         String                 @id @default(uuid())
+  eventType  PlayerHistoryEventType
+  metadata   Json                   @default("{}")
+  note       String?
+  happenedAt DateTime               @default(now())
+  createdAt  DateTime               @default(now())
+
+  playerId String
+  player   Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  teamId   String?
+  team     Team?   @relation("PlayerHistoryTeam", fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@index([playerId, happenedAt(sort: Desc)])
+  @@map("player_histories")
 }
 
 model Rating {
