@@ -38,7 +38,8 @@
       "Bash(done)",
       "Bash(python3:*)",
       "Bash(echo All checks done: $?:*)",
-      "Bash(cd /c/project/onlyquat-esport/serve && pnpm run prisma:migrate 2>&1)"
+      "Bash(cd /c/project/onlyquat-esport/serve && pnpm run prisma:migrate 2>&1)",
+      "Bash(cd \"C:\\\\project\\\\onlyquat-esport\\\\serve\" && npx prisma migrate deploy --config prisma.config.ts 2>&1)"
     ]
   },
   "environment": {
