@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@app/common';
-import { Prisma } from '@app/common/../generated/prisma/client';
+import { Prisma, PlayerHistoryEventType, TeamHistoryEventType } from '@app/common/../generated/prisma/client';
 import { CreatePlayerDto, UpdatePlayerDto } from '../dtos';
 
 const GAME_SELECT = { id: true, name: true, shortName: true, logo: true };
@@ -106,11 +106,120 @@ export class PlayerService {
   }
 
   async update(slug: string, dto: UpdatePlayerDto) {
-    const player = await this.prisma.player.findUnique({ where: { slug } });
+    const player = await this.prisma.player.findUnique({
+      where: { slug },
+      include: { team: { select: TEAM_SELECT } },
+    });
     if (!player) throw new NotFoundException('errors.PLAYER_NOT_FOUND');
 
     const { gameId, teamId, userId, stats, ...rest } = dto;
-    return this.prisma.player.update({
+    const ops: Prisma.PrismaPromise<any>[] = [];
+
+    // Auto-history: displayName change
+    if (rest.displayName !== undefined && rest.displayName !== player.displayName) {
+      ops.push(
+        this.prisma.playerHistory.create({
+          data: {
+            playerId: player.id,
+            eventType: PlayerHistoryEventType.DISPLAY_NAME_CHANGE,
+            metadata: { oldName: player.displayName, newName: rest.displayName } as any,
+            happenedAt: new Date(),
+          },
+        }),
+      );
+    }
+
+    // Auto-history: team transfer
+    const isTeamChange = teamId !== undefined && teamId !== player.teamId;
+    if (isTeamChange) {
+      const now = new Date();
+      const oldTeamId = player.teamId;
+      const newTeamId = teamId ?? null;
+
+      // Close old TeamMember record
+      if (oldTeamId) {
+        ops.push(
+          this.prisma.teamMember.updateMany({
+            where: { playerId: player.id, teamId: oldTeamId, leftAt: null },
+            data: { leftAt: now },
+          }),
+        );
+        // Team history: player left
+        ops.push(
+          this.prisma.teamHistory.create({
+            data: {
+              teamId: oldTeamId,
+              eventType: TeamHistoryEventType.PLAYER_LEAVE,
+              metadata: {
+                playerName: player.displayName,
+                playerSlug: player.slug,
+                role: 'player',
+              } as any,
+              playerId: player.id,
+              happenedAt: now,
+            },
+          }),
+        );
+      }
+
+      // Create new TeamMember record
+      if (newTeamId) {
+        ops.push(
+          this.prisma.teamMember.create({
+            data: {
+              teamId: newTeamId,
+              playerId: player.id,
+              role: 'player',
+              joinedAt: now,
+            },
+          }),
+        );
+        // Team history: player joined
+        ops.push(
+          this.prisma.teamHistory.create({
+            data: {
+              teamId: newTeamId,
+              eventType: TeamHistoryEventType.PLAYER_JOIN,
+              metadata: {
+                playerName: player.displayName,
+                playerSlug: player.slug,
+                role: 'player',
+              } as any,
+              playerId: player.id,
+              happenedAt: now,
+            },
+          }),
+        );
+      }
+
+      // Player history: transfer / join / leave
+      const eventType =
+        oldTeamId && newTeamId
+          ? PlayerHistoryEventType.TEAM_TRANSFER
+          : newTeamId
+            ? PlayerHistoryEventType.TEAM_JOIN
+            : PlayerHistoryEventType.TEAM_LEAVE;
+
+      ops.push(
+        this.prisma.playerHistory.create({
+          data: {
+            playerId: player.id,
+            eventType,
+            metadata: {
+              fromTeamName: player.team?.name ?? null,
+              fromTeamSlug: player.team?.slug ?? null,
+              toTeamId: newTeamId ?? null,
+              role: 'player',
+            } as any,
+            teamId: newTeamId ?? oldTeamId ?? undefined,
+            happenedAt: now,
+          },
+        }),
+      );
+    }
+
+    // Main update
+    const updateOp = this.prisma.player.update({
       where: { slug },
       data: {
         ...rest,
@@ -128,6 +237,12 @@ export class PlayerService {
         team: { select: TEAM_SELECT },
       },
     });
+
+    if (ops.length > 0) {
+      const results = await this.prisma.$transaction([updateOp, ...ops]);
+      return results[0];
+    }
+    return updateOp;
   }
 
   async delete(slug: string) {

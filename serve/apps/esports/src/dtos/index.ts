@@ -9,3 +9,5 @@ export * from './create-team.dto';
 export * from './update-team.dto';
 export * from './create-player.dto';
 export * from './update-player.dto';
+export * from './create-team-history.dto';
+export * from './create-player-history.dto';

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@app/common';
-import { Prisma } from '@app/common/../generated/prisma/client';
+import { Prisma, TeamHistoryEventType } from '@app/common/../generated/prisma/client';
 import type { Team } from '@app/common';
 import { CreateTeamDto, UpdateTeamDto } from '../dtos';
 
@@ -98,8 +98,54 @@ export class TeamService {
   }
 
   async update(id: string, dto: UpdateTeamDto): Promise<Team> {
+    const current = await this.prisma.team.findUnique({ where: { id } });
     const { organizationId, regionId, mediaLinks, ...rest } = dto;
-    return this.prisma.team.update({
+
+    const historyOps: Prisma.PrismaPromise<any>[] = [];
+
+    if (rest.name !== undefined && current && rest.name !== current.name) {
+      historyOps.push(
+        this.prisma.teamHistory.create({
+          data: {
+            teamId: id,
+            eventType: TeamHistoryEventType.NAME_CHANGE,
+            metadata: { oldName: current.name, newName: rest.name } as any,
+            happenedAt: new Date(),
+          },
+        }),
+      );
+    }
+
+    if (rest.logo !== undefined && current && rest.logo !== current.logo) {
+      historyOps.push(
+        this.prisma.teamHistory.create({
+          data: {
+            teamId: id,
+            eventType: TeamHistoryEventType.LOGO_CHANGE,
+            metadata: { oldLogo: current.logo ?? null, newLogo: rest.logo } as any,
+            happenedAt: new Date(),
+          },
+        }),
+      );
+    }
+
+    if (organizationId !== undefined && current && organizationId !== current.organizationId) {
+      historyOps.push(
+        this.prisma.teamHistory.create({
+          data: {
+            teamId: id,
+            eventType: TeamHistoryEventType.ORG_CHANGE,
+            metadata: {
+              oldOrgId: current.organizationId ?? null,
+              newOrgId: organizationId ?? null,
+            } as any,
+            happenedAt: new Date(),
+          },
+        }),
+      );
+    }
+
+    const updateOp = this.prisma.team.update({
       where: { id },
       data: {
         ...rest,
@@ -116,6 +162,12 @@ export class TeamService {
         region: { select: REGION_SELECT },
       },
     });
+
+    if (historyOps.length > 0) {
+      const results = await this.prisma.$transaction([updateOp, ...historyOps]);
+      return results[0] as Team;
+    }
+    return updateOp;
   }
 
   async delete(id: string): Promise<Team> {
