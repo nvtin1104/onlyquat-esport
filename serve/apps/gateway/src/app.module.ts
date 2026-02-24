@@ -17,6 +17,9 @@ import { UsersController } from './users/users.controller';
 import { AdminPermissionsController } from './admin/permissions.controller';
 import { RegionsController } from './regions/regions.controller';
 import { OrganizationsController } from './organizations/organizations.controller';
+import { GamesController } from './games/games.controller';
+import { TeamsController } from './teams/teams.controller';
+import { PlayersController } from './players/players.controller';
 import { UploadsController } from './uploads/uploads.controller';
 import { UploadsService } from './uploads/uploads.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -67,7 +70,7 @@ import { TranslateResponseInterceptor } from './interceptors/translate-response.
       },
     ]),
   ],
-  controllers: [AppController, AuthController, UsersController, AdminPermissionsController, RegionsController, OrganizationsController, UploadsController],
+  controllers: [AppController, AuthController, UsersController, AdminPermissionsController, RegionsController, OrganizationsController, GamesController, TeamsController, PlayersController, UploadsController],
   providers: [
     JwtStrategy,
     PermissionsGuard,

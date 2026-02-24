@@ -75,40 +75,6 @@ export class AppController {
     return firstValueFrom(this.esportsClient.send('matches.updateResult', { id, ...data }));
   }
 
-  // ─── Players ─────────────────────────────────────────────────────────────
-
-  @ApiTags('Players')
-  @Get('players')
-  @ApiOperation({ summary: 'List all players — public' })
-  async getPlayers() {
-    return firstValueFrom(this.esportsClient.send('players.findAll', {}));
-  }
-
-  @ApiTags('Players')
-  @Post('players')
-  @Auth(PERMISSIONS.PLAYER_CREATE)
-  @ApiOperation({ summary: 'Create player — requires player:create' })
-  async createPlayer(@Body() data: any) {
-    return firstValueFrom(this.esportsClient.send('players.create', data));
-  }
-
-  @ApiTags('Players')
-  @Patch('players/:slug')
-  @Auth(PERMISSIONS.PLAYER_UPDATE)
-  @ApiOperation({ summary: 'Update player — requires player:update' })
-  async updatePlayer(@Param('slug') slug: string, @Body() data: any) {
-    return firstValueFrom(this.esportsClient.send('players.update', { slug, ...data }));
-  }
-
-  // ─── Teams ───────────────────────────────────────────────────────────────
-
-  @ApiTags('Teams')
-  @Get('teams')
-  @ApiOperation({ summary: 'List all teams — public' })
-  async getTeams() {
-    return firstValueFrom(this.esportsClient.send('teams.findAll', {}));
-  }
-
   // ─── Ratings ─────────────────────────────────────────────────────────────
 
   @ApiTags('Ratings')
