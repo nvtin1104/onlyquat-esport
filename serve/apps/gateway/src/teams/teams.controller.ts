@@ -72,4 +72,36 @@ export class TeamsController {
   async delete(@Param('id') id: string) {
     return firstValueFrom(this.esportsClient.send('teams.delete', { id }));
   }
+
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Get team history — public' })
+  async getHistory(
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return firstValueFrom(
+      this.esportsClient.send('teams.history.findByTeamId', {
+        teamId: id,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 20,
+      }),
+    );
+  }
+
+  @Post(':id/history')
+  @Auth(PERMISSIONS.TEAM_UPDATE)
+  @ApiOperation({ summary: 'Add team history record — requires team:update' })
+  async addHistory(@Param('id') id: string, @Body() dto: any) {
+    return firstValueFrom(
+      this.esportsClient.send('teams.history.create', { ...dto, teamId: id }),
+    );
+  }
+
+  @Delete(':id/history/:historyId')
+  @Auth(PERMISSIONS.TEAM_UPDATE)
+  @ApiOperation({ summary: 'Delete team history record — requires team:update' })
+  async deleteHistory(@Param('historyId') historyId: string) {
+    return firstValueFrom(this.esportsClient.send('teams.history.delete', { id: historyId }));
+  }
 }

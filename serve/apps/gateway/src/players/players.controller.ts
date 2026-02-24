@@ -78,4 +78,36 @@ export class PlayersController {
   async delete(@Param('slug') slug: string) {
     return firstValueFrom(this.esportsClient.send('players.delete', { slug }));
   }
+
+  @Get(':slug/history')
+  @ApiOperation({ summary: 'Get player history — public' })
+  async getHistory(
+    @Param('slug') slug: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return firstValueFrom(
+      this.esportsClient.send('players.history.findBySlug', {
+        slug,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 20,
+      }),
+    );
+  }
+
+  @Post(':slug/history')
+  @Auth(PERMISSIONS.PLAYER_UPDATE)
+  @ApiOperation({ summary: 'Add player history record — requires player:update' })
+  async addHistory(@Param('slug') slug: string, @Body() dto: any) {
+    return firstValueFrom(
+      this.esportsClient.send('players.history.createBySlug', { ...dto, slug }),
+    );
+  }
+
+  @Delete(':slug/history/:historyId')
+  @Auth(PERMISSIONS.PLAYER_UPDATE)
+  @ApiOperation({ summary: 'Delete player history record — requires player:update' })
+  async deleteHistory(@Param('historyId') historyId: string) {
+    return firstValueFrom(this.esportsClient.send('players.history.delete', { id: historyId }));
+  }
 }
