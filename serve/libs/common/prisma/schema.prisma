@@ -179,6 +179,7 @@ model Organization {
   region   Region? @relation(fields: [regionId], references: [id])
 
   teams            Team[]
+  games            Game[]
   tournaments      Tournament[] @relation("OrgTournaments")
   sponsoredMatches Match[]      @relation("OrgSponsoredMatches")
 
@@ -194,27 +195,33 @@ model Game {
   id        String   @id @default(uuid())
   name      String   @unique
   shortName String
-  iconUrl   String   @default("")
+  logo      String   @default("")
+  website   String?
+  mediaLinks Json    @default("[]")
   roles     String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
   players     Player[]
   tournaments Tournament[]
 
+  @@index([organizationId])
   @@map("games")
 }
 
 model Team {
-  id        String   @id @default(uuid())
-  slug      String   @unique
-  name      String   @unique
-  tag       String?
-  logoUrl   String?
-  regionTag String?  @map("region") // legacy string field — use regionId FK for new code
-  wins      Int      @default(0)
-  losses    Int      @default(0)
-  draws     Int      @default(0)
+  id          String  @id @default(uuid())
+  slug        String  @unique
+  name        String  @unique
+  tag         String?
+  logo        String?
+  website     String?
+  mediaLinks  Json    @default("[]")
+  description String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -243,18 +250,23 @@ model Player {
   realName     String?
   nationality  String?
   imageUrl     String     @default("")
-  bannerUrl    String?
-  role         String?
-  rating       Float      @default(0)
-  aim          Int        @default(0) @db.SmallInt
-  gameIq       Int        @default(0) @db.SmallInt
-  clutch       Int        @default(0) @db.SmallInt
-  teamplay     Int        @default(0) @db.SmallInt
+
+  stats        Json?      @default("{}")
+
+  mechanics    Int        @default(0) @db.SmallInt
+  tactics      Int        @default(0) @db.SmallInt
+  composure    Int        @default(0) @db.SmallInt
+  teamwork     Int        @default(0) @db.SmallInt
   consistency  Int        @default(0) @db.SmallInt
+
+  rating       Float      @default(0)
   totalRatings Int        @default(0)
   tier         PlayerTier @default(F)
   rank         Int        @default(0)
+
   isActive     Boolean    @default(true)
+  isPro        Boolean    @default(true)
+
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
@@ -269,9 +281,8 @@ model Player {
   ratings     Rating[]
   matchEvents MatchEvent[]
 
-  @@index([rating(sort: Desc)])
+  @@index([gameId, rating(sort: Desc)])
   @@index([tier])
-  @@index([gameId])
   @@index([teamId])
   @@map("players")
 }
@@ -296,10 +307,10 @@ model TeamMember {
 model Rating {
   id          String   @id @default(uuid())
   overall     Float
-  aim         Int?     @db.SmallInt
-  gameIq      Int?     @db.SmallInt
-  clutch      Int?     @db.SmallInt
-  teamplay    Int?     @db.SmallInt
+  mechanics   Int?     @db.SmallInt
+  tactics     Int?     @db.SmallInt
+  composure   Int?     @db.SmallInt
+  teamwork    Int?     @db.SmallInt
   consistency Int?     @db.SmallInt
   comment     String   @default("")
   createdAt   DateTime @default(now())

@@ -17,6 +17,13 @@ export const PERMISSIONS = {
   USER_BAN: 'user:ban',
   USER_DELETE: 'user:delete',
 
+  // GAME
+  GAME_VIEW: 'game:view',
+  GAME_CREATE: 'game:create',
+  GAME_UPDATE: 'game:update',
+  GAME_DELETE: 'game:delete',
+  GAME_MANAGE: 'game:manage',
+
   // TOURNAMENT
   TOURNAMENT_VIEW: 'tournament:view',
   TOURNAMENT_CREATE: 'tournament:create',
@@ -100,6 +107,13 @@ export const PERMISSION_METADATA: PermissionDefinition[] = [
   { code: 'user:update-role', module: 'user', action: 'update-role', name: 'Đổi vai trò người dùng', description: 'Thay đổi role của user' },
   { code: 'user:ban', module: 'user', action: 'ban', name: 'Cấm người dùng', description: 'Ban/unban user' },
   { code: 'user:delete', module: 'user', action: 'delete', name: 'Xoá người dùng', description: 'Xoá/vô hiệu hoá tài khoản user' },
+
+  // GAME
+  { code: 'game:view',   module: 'game', action: 'view',   name: 'Xem game',            description: 'Xem danh sách game' },
+  { code: 'game:create', module: 'game', action: 'create', name: 'Tạo game',             description: 'Tạo game mới' },
+  { code: 'game:update', module: 'game', action: 'update', name: 'Sửa game',             description: 'Chỉnh sửa game' },
+  { code: 'game:delete', module: 'game', action: 'delete', name: 'Xoá game',             description: 'Xoá game' },
+  { code: 'game:manage', module: 'game', action: 'manage', name: 'Quản lý game (Full)',  description: 'Toàn quyền game' },
 
   // TOURNAMENT
   { code: 'tournament:view', module: 'tournament', action: 'view', name: 'Xem giải đấu', description: 'Xem danh sách giải đấu' },
